@@ -1,0 +1,179 @@
+/* MainNavigation.module.css */
+.nav {
+    background-color: #333;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+.nav .navToggle {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    border: none;
+    background-color: transparent;
+    color: #fff;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    transition: transform 0.3s ease-in-out;
+}
+
+.nav li {
+    position: relative;
+}
+
+.nav a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.2rem;
+    padding: 10px 20px;
+    transition: color 0.3s ease;
+}
+
+/*.nav a.active {
+    color: #ff7f50;
+}*/
+/* fix active link styling */
+
+.nav a:hover {
+    color: #ff7f50;
+    transform: scale(1.1);
+}
+
+.nav a::before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background-color: #ff7f50;
+    top: 100%;
+    left: 0;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+}
+
+.nav a:hover::before {
+    transform: scaleX(1);
+}
+
+.nav a.active::before {
+    transform: scaleX(1);
+}
+
+.nav ul li {
+    opacity: 0;
+    animation: fadeIn 0.8s ease forwards;
+}
+
+.nav ul li:nth-child(1) {
+    animation-delay: 0.2s;
+}
+
+.nav ul li:nth-child(2) {
+    animation-delay: 0.4s;
+}
+
+.nav ul li:nth-child(3) {
+    animation-delay: 0.6s;
+}
+
+.nav ul li:nth-child(4) {
+    animation-delay: 0.8s;
+}
+
+.nav ul li:nth-child(5) {
+    animation-delay: 1s;
+}
+
+.nav ul li:nth-child(6) {
+    animation-delay: 1.2s;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Media Queries for Responsiveness */
+
+/* Tablet and Mobile view */
+@media (max-width: 768px) {
+    .nav {
+        padding: 25px;
+    }
+
+    .nav ul {
+        flex-direction: column;
+        align-items: flex-start;
+        padding-left: 20px;
+        transform: translateX(-100%);
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-in-out, transform 0.3s ease-in-out;
+    }
+
+    .nav ul.show {
+        transform: translateX(0);
+        max-height: 500px; /* Arbitrary value to accommodate all menu items */
+    }
+
+    .nav li {
+        margin: 10px 0;
+    }
+
+    .navToggle {
+        display: block;
+        position: absolute;
+        top: 10px;
+        right: 20px;
+        cursor: pointer;
+        z-index: 10;
+    }
+
+    .navToggle div {
+        width: 25px;
+        height: 3px;
+        background-color: #fff;
+        margin: 5px 0;
+        transition: 0.3s;
+    }
+
+    .navToggle.active div:nth-child(1) {
+        transform: rotate(45deg) translate(5px, 5px);
+    }
+
+    .navToggle.active div:nth-child(2) {
+        opacity: 0;
+    }
+
+    .navToggle.active div:nth-child(3) {
+        transform: rotate(-45deg) translate(6px, -6px);
+    }
+}
+
+@media (max-width: 480px) {
+    .nav a {
+        font-size: 1rem;
+    }
+
+    .nav ul {
+        padding-left: 15px;
+    }
+}
