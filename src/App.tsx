@@ -16,6 +16,7 @@ import HandleTeamPage from "./pages/HandleTeamPage";
 import PlayerCRUDPage from "./pages/PlayerCRUDPage";
 import CreatePlayerPage from "./pages/CreatePlayerPage";
 import TransferPlayerPage from "./pages/TransferPlayerPage";
+import {loader as startPageLoader} from "./pages/StartPage";
 
 
 function App() {
@@ -79,7 +80,11 @@ function App() {
             errorElement: <ErrorPage/>,
             children: [
                 {index: true, element: <HomePage/>},
-                {path: "start", element: <StartPage/>},
+                {
+                    path: "start",
+                    element: <StartPage/>,
+                    loader: startPageLoader
+                },
                 {path: "game", element: <GamePage/>},
                 {path: "admin", element: <AuthPage/>},
             ]

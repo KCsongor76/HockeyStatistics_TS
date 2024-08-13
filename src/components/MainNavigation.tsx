@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {NavLink} from 'react-router-dom';
+// @ts-ignore
 import styles from './MainNavigation.module.css';
 
 interface MainNavigationProps {
