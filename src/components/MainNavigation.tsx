@@ -28,7 +28,7 @@ const MainNavigation = ({isSignedIn}: MainNavigationProps) => {
                 <li><NavLink to="/start">Start Game</NavLink></li>
                 {isSignedIn && (
                     <>
-                        <li><NavLink to="/games">Previous Games</NavLink></li>
+                        <li><NavLink to="/previous_games">Previous Games</NavLink></li>
                         <li><NavLink to="/handleTeams">Teams</NavLink></li>
                         <li><NavLink to="/handlePlayers">Players</NavLink></li>
                         <li><NavLink to="/">Logout</NavLink></li>

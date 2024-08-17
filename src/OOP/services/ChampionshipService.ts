@@ -1,33 +1,32 @@
-import {FirebaseService} from "../interfaces/FirebaseService";
+import {addDoc, collection, deleteDoc, doc, getDoc, getDocs, updateDoc} from "firebase/firestore";
+import {db} from "../../firebaseConfig";
 import {Championship} from "../classes/Championship";
 
-import {db} from "../../firebaseConfig";
-import {collection, doc, addDoc, deleteDoc, getDocs} from "firebase/firestore";
+export class ChampionshipService {
+    private static collectionRef = collection(db, 'championships');
 
-export class ChampionshipService implements FirebaseService<Championship> {
-    private championshipCollectionRef = collection(db, "championships");
+    /*static async createChampionship(championship: string) {
+        return await addDoc(this.collectionRef, championship);
+    }*/
 
-    async create(item: Championship): Promise<void> {
-        await addDoc(this.championshipCollectionRef, item)
+    static async getChampionship(id: string) {
+        const docRef = doc(this.collectionRef, id);
+        const docSnap = await getDoc(docRef);
+        return docSnap.exists() ? {id: docSnap.id, ...docSnap.data()} : null;
     }
 
-    async read(id: number): Promise<Championship | undefined> {
-        const championships = await this.list()
-        return championships.find(championship => championship.id === id)
+    /*static async updateChampionship(id: string, championship: string) {
+        const docRef = doc(this.collectionRef, id);
+        await updateDoc(docRef, championship);
+    }*/
+
+    static async deleteChampionship(id: string) {
+        const docRef = doc(this.collectionRef, id);
+        await deleteDoc(docRef);
     }
 
-    async update(id: number, item: Championship): Promise<void> {
-        // TODO
-        return Promise.resolve(undefined);
-    }
-
-    async delete(id: number): Promise<void> {
-        const teamDoc = doc(this.championshipCollectionRef, id.toString());
-        await deleteDoc(teamDoc)
-    }
-
-    async list(): Promise<Championship[]> {
-        const data = await getDocs(this.championshipCollectionRef)
-        return data.docs.map(doc => doc.data() as Championship)
+    static async getAllChampionships(): Promise<Championship[]> {
+        const querySnapshot = await getDocs(this.collectionRef);
+        return querySnapshot.docs.map(doc => ({id: doc.id, ...doc.data()} as Championship));
     }
 }

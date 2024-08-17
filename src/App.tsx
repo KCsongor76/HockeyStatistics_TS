@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from "react";
-// @ts-ignore
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
 import "./App.css";
 import RootLayout from "./components/RootLayout";
@@ -17,12 +16,12 @@ import PlayerCRUDPage from "./pages/PlayerCRUDPage";
 import CreatePlayerPage from "./pages/CreatePlayerPage";
 import TransferPlayerPage from "./pages/TransferPlayerPage";
 import {loader as startPageLoader} from "./pages/StartPage";
-
+import {loader as teamCRUDPageLoader} from "./pages/TeamCRUDPage";
 
 function App() {
 
     const [isLoaded, setIsLoaded] = useState<boolean>(false);
-    const [isSignedIn, setIsSignedIn] = useState<boolean>(false);
+    const [isSignedIn, setIsSignedIn] = useState<boolean>(true);
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -41,16 +40,16 @@ function App() {
             errorElement: <ErrorPage/>,
             children: [
                 {index: true, element: <HomePage/>},
-                {path: "start", element: <StartPage/>},
+                {path: "start", element: <StartPage/>, loader: startPageLoader},
                 {path: "game", element: <GamePage/>},
                 {path: "previous_games", element: <PreviousGamesPage/>},
                 {path: "previous_games/:gameId", element: <PreviousGameDetailPage/>},
                 {
                     path: "handleTeams",
                     children: [
-                        {index: true, element: <TeamCRUDPage/>},
-                        {path: "create", element: <CreateTeamPage/>},
-                        {path: ":teamId", element: <HandleTeamPage/>},
+                        {index: true, element: <TeamCRUDPage/>, loader: teamCRUDPageLoader},
+                        {path: "create", element: <CreateTeamPage/>,},
+                        {path: ":teamName", element: <HandleTeamPage/>},
                     ],
                 },
                 {

@@ -6,7 +6,7 @@ import MainNavigation from "./MainNavigation";
 const RootLayout = () => {
     return (
         <>
-            <MainNavigation isSignedIn={false}/>
+            <MainNavigation isSignedIn={true}/>
             <main><Outlet/></main>
         </>
     );

@@ -1,34 +1,32 @@
-import {FirebaseService} from "../interfaces/FirebaseService";
-import {Player} from "../classes/Player";
-import {addDoc, collection, deleteDoc, doc, getDocs} from "firebase/firestore";
+import {addDoc, collection, deleteDoc, doc, getDoc, getDocs, updateDoc} from "firebase/firestore";
 import {db} from "../../firebaseConfig";
+import {PlayerInterface} from "../interfaces/PlayerInterface";
 
-// TODO: collection logic change, adapt to it (teams have players, not separate collections)
-
-export class PlayerService implements FirebaseService<Player> {
-    private playerCollectionRef = collection(db, "players");
-
-    async create(item: Player): Promise<void> {
-        await addDoc(this.playerCollectionRef, item)
+class PlayerService {
+    async addPlayerToTeam(teamId: string, player: PlayerInterface) {
+        const playersCollectionRef = collection(db, `teams/${teamId}/players`);
+        return await addDoc(playersCollectionRef, player);
     }
 
-    async read(id: number): Promise<Player | undefined> {
-        const players = await this.list()
-        return players.find(player => player.id === id)
+    async getPlayer(teamId: string, playerId: string) {
+        const docRef = doc(db, `teams/${teamId}/players`, playerId);
+        const docSnap = await getDoc(docRef);
+        return docSnap.exists() ? {id: docSnap.id, ...docSnap.data()} : null;
     }
 
-    async update(id: number, item: Player): Promise<void> {
-        // TODO
-        return Promise.resolve(undefined);
+    async updatePlayer(teamId: string, playerId: string, player: Partial<PlayerInterface>) {
+        const docRef = doc(db, `teams/${teamId}/players`, playerId);
+        await updateDoc(docRef, player);
     }
 
-    async delete(id: number): Promise<void> {
-        const playerDoc = doc(this.playerCollectionRef, id.toString());
-        await deleteDoc(playerDoc)
+    async deletePlayer(teamId: string, playerId: string) {
+        const docRef = doc(db, `teams/${teamId}/players`, playerId);
+        await deleteDoc(docRef);
     }
 
-    async list(): Promise<Player[]> {
-        const data = await getDocs(this.playerCollectionRef)
-        return data.docs.map(doc => doc.data() as Player)
+    async getPlayersByTeam(teamId: string) {
+        const playersCollectionRef = collection(db, `teams/${teamId}/players`);
+        const querySnapshot = await getDocs(playersCollectionRef);
+        return querySnapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
     }
 }

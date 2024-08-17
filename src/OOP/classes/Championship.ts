@@ -1,13 +1,16 @@
-export class Championship {
-    private readonly _id: number;
-    private _name: string
+import {Team} from "./Team";
 
-    constructor(id: number = 0, name: string = '') {
-        this._id = id;
+export class Championship {
+    private _name: string
+    private readonly _id: string;
+
+
+    constructor(name: string = "", id: string = "") {
         this._name = name;
+        this._id = id;
     }
 
-    get id(): number {
+    get id(): string {
         return this._id;
     }
 

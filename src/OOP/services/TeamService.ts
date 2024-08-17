@@ -1,33 +1,56 @@
-import {FirebaseService} from "../interfaces/FirebaseService";
+import {addDoc, collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, updateDoc, where} from "firebase/firestore";
+import {getDownloadURL, ref, uploadBytes} from "firebase/storage";
+import {db, storage} from "../../firebaseConfig";
 import {Team} from "../classes/Team";
 
-import {db} from "../../firebaseConfig";
-import {collection, doc, addDoc, deleteDoc, getDocs} from "firebase/firestore";
 
-export class TeamService implements FirebaseService<Team> {
-    private teamsCollectionRef = collection(db, "teams");
+export class TeamService {
+    private static collectionRef = collection(db, 'teams');
 
-    async create(team: Team): Promise<void> {
-        await addDoc(this.teamsCollectionRef, team)
+    // TODO: arrow functions
+    static createTeam = async (team: Team) => {
+
+        const docRef = await addDoc(this.collectionRef, {});
+        const teamId = docRef.id;
+        const teamWithId = {
+            ...team.toPlainObject(),
+            id: teamId
+        };
+        await setDoc(docRef, teamWithId);
+
     }
 
-    async read(id: number): Promise<Team | undefined> {
-        const teams = await this.list()
-        return teams.find(team => team.id === id)
+    static async getTeam(id: string) {
+        const docRef = doc(this.collectionRef, id);
+        const docSnap = await getDoc(docRef);
+        return docSnap.exists() ? {id: docSnap.id, ...docSnap.data()} : null;
     }
 
-    async update(id: number, team: Team): Promise<void> {
-        // TODO
-        return Promise.resolve(undefined);
+    static async updateTeam(id: string, team: Partial<Team>) {
+        const docRef = doc(this.collectionRef, id);
+        await updateDoc(docRef, team);
     }
 
-    async delete(id: number): Promise<void> {
-        const teamDoc = doc(this.teamsCollectionRef, id.toString());
-        await deleteDoc(teamDoc)
+    static async deleteTeam(id: string) {
+        const docRef = doc(this.collectionRef, id);
+        await deleteDoc(docRef);
     }
 
-    async list(): Promise<Team[]> {
-        const data = await getDocs(this.teamsCollectionRef)
-        return data.docs.map(doc => doc.data() as Team)
+    static async getAllTeams(): Promise<Team[]> {
+        const querySnapshot = await getDocs(this.collectionRef);
+        return querySnapshot.docs.map(doc => ({id: doc.id, ...doc.data()} as Team));
     }
+
+    static async getTeamsByChampionship(championshipId: string) {
+        const q = query(this.collectionRef, where('championshipId', '==', championshipId));
+        const querySnapshot = await getDocs(q);
+        return querySnapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+    }
+
+    static uploadLogo = async (logo: File) => {
+        const logoRef = ref(storage, `team-logos/${logo.name}`);
+        await uploadBytes(logoRef, logo);
+        return await getDownloadURL(logoRef);
+    };
+
 }

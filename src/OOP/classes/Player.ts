@@ -3,22 +3,16 @@ import {Position} from "../enums/Position";
 
 export class Player {
 
-    private readonly _id: number;
     private readonly _name: string;
     private _position: Position;
     private _jerseyNumber: number;
     private _team: Team;
 
-    constructor(id: number, name: string, position: Position, jerseyNumber: number, team: Team) {
-        this._id = id;
+    constructor(name: string = "", position: Position = Position.GOALIE, jerseyNumber: number = 1, team: Team = new Team()) {
         this._name = name;
         this._position = position;
         this._jerseyNumber = jerseyNumber;
         this._team = team;
-    }
-
-    get id(): number {
-        return this._id;
     }
 
     get name(): string {
