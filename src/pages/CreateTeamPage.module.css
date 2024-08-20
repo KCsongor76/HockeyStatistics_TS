@@ -1,0 +1,106 @@
+/* CreateTeamPage.module.css */
+
+.formContainer {
+    max-width: 600px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f7f7f7;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+}
+
+.formContainer label {
+    font-weight: bold;
+}
+
+.formGroup {
+    margin-bottom: 20px;
+}
+
+.formGroup label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+.formGroup input[type="text"],
+.formGroup input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.colorContainer {
+    display: flex;
+    justify-content: left;
+    gap: 50px;
+    margin-bottom: 20px;
+}
+
+.colorGroup {
+    display: flex;
+    flex-direction: column;
+}
+
+.colorGroup p {
+    display: block;
+}
+
+.colorGroup input {
+    width: 100%;
+}
+
+.formGroup p {
+    margin: 0 0 5px;
+    font-weight: bold;
+}
+
+.championshipContainer {
+    margin-bottom: 20px;
+}
+
+.championshipContainer div {
+    display: flex;
+    align-items: center;
+    margin: 10px 0;
+}
+
+.championshipContainer input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+.buttonGroup {
+    display: flex;
+    justify-content: space-between;
+}
+
+.submitButton,
+.backButton {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.submitButton {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.submitButton:hover {
+    background-color: #45a049;
+}
+
+.backButton {
+    background-color: #f44336;
+    color: white;
+}
+
+.backButton:hover {
+    background-color: #da190b;
+}

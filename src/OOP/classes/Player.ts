@@ -3,20 +3,30 @@ import {Position} from "../enums/Position";
 
 export class Player {
 
-    private readonly _name: string;
+    private readonly _id: string;
+    private _name: string;
     private _position: Position;
     private _jerseyNumber: number;
-    private _team: Team;
+    private _teamId: string;
 
-    constructor(name: string = "", position: Position = Position.GOALIE, jerseyNumber: number = 1, team: Team = new Team()) {
+    constructor(id: string = "", name: string = "", position: Position = Position.GOALIE, jerseyNumber: number = 1, teamId: string = "") {
+        this._id = id;
         this._name = name;
         this._position = position;
         this._jerseyNumber = jerseyNumber;
-        this._team = team;
+        this._teamId = teamId;
+    }
+
+    get id(): string {
+        return this._id;
     }
 
     get name(): string {
         return this._name;
+    }
+
+    set name(value: string) {
+        this._name = value;
     }
 
     get position(): Position {
@@ -35,11 +45,21 @@ export class Player {
         this._jerseyNumber = value;
     }
 
-    get team(): Team {
-        return this._team;
+    get teamId(): string {
+        return this._teamId;
     }
 
-    set team(value: Team) {
-        this._team = value;
+    set teamId(value: string) {
+        this._teamId = value;
+    }
+
+    toPlainObject = () => {
+        return {
+            id: this.id,
+            name: this.name,
+            position: this.position,
+            jerseyNumber: this.jerseyNumber,
+            teamId: this.teamId
+        }
     }
 }

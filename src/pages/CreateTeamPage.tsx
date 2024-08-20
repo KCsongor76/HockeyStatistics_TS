@@ -4,19 +4,17 @@ import {Team} from "../OOP/classes/Team";
 import {useLocation, useNavigate} from "react-router-dom";
 import {TeamColor} from "../OOP/interfaces/TeamColor";
 import {TeamService} from "../OOP/services/TeamService";
+// @ts-ignore
+import styles from './CreateTeamPage.module.css'; // Import the CSS module
 
 const CreateTeamPage = () => {
-
-    const championships = useLocation().state.championships as Championship[]
-
+    const championships = useLocation().state.championships as Championship[];
     const [name, setName] = useState<string>("");
     const [homeColor, setHomeColor] = useState<TeamColor>({primary: "#000000", secondary: "#ffffff"});
     const [awayColor, setAwayColor] = useState<TeamColor>({primary: "#ffffff", secondary: "#000000"});
     const [logo, setLogo] = useState<File | null>(null);
     const [championship, setChampionship] = useState<Championship[]>([]);
-
     const [isLoaded, setIsLoaded] = useState(false);
-
     const navigate = useNavigate();
 
     const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,16 +43,14 @@ const CreateTeamPage = () => {
         setAwayColor({...awayColor, secondary: e.target.value});
     }
 
-    const handleChampionshipChange = (championship: Championship) => {
+    const handleChampionshipChange = (selectedChampionship: Championship) => {
         setChampionship(prevChampionships => {
-            if (prevChampionships.length === 0) {
-                return [championship];
+            if (prevChampionships.find(ch => ch.id === selectedChampionship.id)) {
+                return prevChampionships.filter(ch => ch.id !== selectedChampionship.id) as Championship[];
+            } else {
+                return [...prevChampionships, selectedChampionship] as Championship[];
             }
-            if (prevChampionships.find(ch => ch.id === championship.id)) {
-                return prevChampionships.filter(ch => ch.id !== championship.id);
-            }
-            return [...prevChampionships, championship];
-        })
+        });
     }
 
     const navigateHandler = () => {
@@ -85,12 +81,11 @@ const CreateTeamPage = () => {
             return alert("Please select a championship");
         }
         try {
-            // TODO: this should be an atomic operation
-            const teams = await TeamService.getAllTeams()
+            const teams = await TeamService.getAllTeams();
             const names = teams.map(t => t.name);
             if (names.includes(name)) {
                 alert("Team already exists");
-                return new Error("Team already exists");
+                return;
             }
             const logoURL = await TeamService.uploadLogo(logo);
             const team = new Team("0", name, logoURL, homeColor, awayColor, championship);
@@ -104,6 +99,12 @@ const CreateTeamPage = () => {
             setLogo(null);
             setChampionship([]);
 
+            // Reset the file input
+            const fileInput = document.getElementById("logoInput") as HTMLInputElement;
+            if (fileInput) {
+                fileInput.value = "";
+            }
+
         } catch (error) {
             console.error("Error uploading file:", error);
             alert("Something went wrong");
@@ -114,11 +115,12 @@ const CreateTeamPage = () => {
         if (championships.length > 0) {
             setIsLoaded(true);
         }
-    }, []);
+    }, [championships]);
 
-    return (isLoaded ?
-            <form onSubmit={submitHandler}>
-                <div>
+    return (
+        isLoaded ?
+            <form className={styles.formContainer} onSubmit={submitHandler}>
+                <div className={styles.formGroup}>
                     <label>Team name:</label>
                     <input
                         type="text"
@@ -128,9 +130,10 @@ const CreateTeamPage = () => {
                     />
                 </div>
 
-                <div>
+                <div className={styles.formGroup}>
                     <label>Team logo:</label>
                     <input
+                        id="logoInput"
                         type="file"
                         onChange={handleLogoChange}
                         required
@@ -139,60 +142,76 @@ const CreateTeamPage = () => {
 
                 <div>
                     <label>Home colors:</label>
-                    <p>Primary</p>
-                    <input
-                        type="color"
-                        value={homeColor.primary}
-                        onChange={handleHomePrimaryColorChange}
-                        required
-                    />
-                    <p>Secondary</p>
-                    <input
-                        type="color"
-                        value={homeColor.secondary}
-                        onChange={handleHomeSecondaryColorChange}
-                        required
-                    />
+                    <div className={styles.colorContainer}>
+                        <div className={styles.colorGroup}>
+                            <p>Primary</p>
+                            <input
+                                type="color"
+                                value={homeColor.primary}
+                                onChange={handleHomePrimaryColorChange}
+                                required
+                            />
+                        </div>
+                        <div className={styles.colorGroup}>
+                            <p>Secondary</p>
+                            <input
+                                type="color"
+                                value={homeColor.secondary}
+                                onChange={handleHomeSecondaryColorChange}
+                                required
+                            />
+                        </div>
+                    </div>
                 </div>
 
                 <div>
                     <label>Away colors:</label>
-                    <p>Primary</p>
-                    <input
-                        type="color"
-                        value={awayColor.primary}
-                        onChange={handleAwayPrimaryColorChange}
-                        required
-                    />
-                    <p>Secondary</p>
-                    <input
-                        type="color"
-                        value={awayColor.secondary}
-                        onChange={handleAwaySecondaryColorChange}
-                        required
-                    />
+                    <div className={styles.colorContainer}>
+                        <div className={styles.colorGroup}>
+                            <p>Primary</p>
+                            <input
+                                type="color"
+                                value={awayColor.primary}
+                                onChange={handleAwayPrimaryColorChange}
+                                required
+                            />
+                        </div>
+                        <div className={styles.colorGroup}>
+                            <p>Secondary</p>
+                            <input
+                                type="color"
+                                value={awayColor.secondary}
+                                onChange={handleAwaySecondaryColorChange}
+                                required
+                            />
+                        </div>
+                    </div>
                 </div>
 
-                <div>
+
+                <div className={styles.championshipContainer}>
                     <label>Championship:</label>
-                    {championships && championships.map((championship) => (
-                        <div key={championship.id}>
+                    {championships && championships.map((ch) => (
+                        <div key={ch.id}>
                             <input
                                 type="checkbox"
-                                value={championship.id}
+                                value={ch.id}
                                 onChange={() => {
-                                    handleChampionshipChange(championship);
+                                    handleChampionshipChange(ch);
                                 }}
-                                // TODO: checked
+                                checked={championship.includes(ch)}
                             />
-                            <span>{championship.name}</span>
+                            <span>{ch.name}</span>
                         </div>
                     ))}
                 </div>
 
-                <button type="submit">Create team</button>
-                <button type="button" onClick={navigateHandler}>Go back</button>
-            </form> : <p>Loading...</p>
+                <div className={styles.buttonGroup}>
+                    <button className={styles.submitButton} type="submit">Create team</button>
+                    <button className={styles.backButton} type="button" onClick={navigateHandler}>Go back</button>
+                </div>
+            </form> :
+            <p>Loading...</p>
     );
 };
 

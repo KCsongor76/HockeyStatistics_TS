@@ -4,6 +4,8 @@ import {ChampionshipService} from '../OOP/services/ChampionshipService';
 import {TeamService} from '../OOP/services/TeamService';
 import {Championship} from "../OOP/classes/Championship";
 import {Team} from "../OOP/classes/Team";
+// @ts-ignore
+import styles from './TeamCRUDPage.module.css';  // Import the CSS module
 
 type LoaderData = {
     championships: Championship[];
@@ -25,7 +27,8 @@ const TeamCrudPage = () => {
     };
 
     const viewNavigateHandler = (team: Team) => {
-        navigate(`${team.name}`, {state: {team}});
+        navigate(`${team.id}`, {state: {team}});
+        // TODO: leave the state, do it with params
     };
 
     const deleteHandler = async (team: Team) => {
@@ -46,7 +49,6 @@ const TeamCrudPage = () => {
         }
     };
 
-
     // Handle the selection of a championship
     const handleChampionshipChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         setSelectedChampionship(event.target.value);
@@ -65,13 +67,14 @@ const TeamCrudPage = () => {
     }, [])
 
     return (
-        <>
-            <button onClick={createNavigateHandler}>Create Team</button>
+        <div className={styles.pageContainer}>
+            <button className={styles.createButton} onClick={createNavigateHandler}>Create Team</button>
 
-            <div>
-                <label htmlFor="championship-select">Filter by Championship: </label>
+            <div className={styles.filterContainer}>
+                <label className={styles.filterLabel} htmlFor="championship-select">Filter by Championship: </label>
                 <select
                     id="championship-select"
+                    className={styles.filterSelect}
                     value={selectedChampionship}
                     onChange={handleChampionshipChange}
                 >
@@ -84,10 +87,11 @@ const TeamCrudPage = () => {
                 </select>
             </div>
 
-            <table>
+            <table className={styles.tableContainer}>
                 <thead>
                 <tr>
                     <th>Team Name</th>
+                    <th>Championships</th>
                     <th>View</th>
                     <th>Delete</th>
                 </tr>
@@ -96,17 +100,20 @@ const TeamCrudPage = () => {
                 {filteredTeams.map((team: Team) => (
                     <tr key={team.id}>
                         <td>{team.name}</td>
+                        <td>{team.championships.map((championship: Championship) => championship.name).join(", ")}</td>
                         <td>
-                            <button onClick={() => viewNavigateHandler(team)}>View</button>
+                            <button className={styles.viewButton} onClick={() => viewNavigateHandler(team)}>View
+                            </button>
                         </td>
                         <td>
-                            <button onClick={() => deleteHandler(team)}>Delete</button>
+                            <button className={styles.deleteButton} onClick={() => deleteHandler(team)}>Delete
+                            </button>
                         </td>
                     </tr>
                 ))}
                 </tbody>
             </table>
-        </>
+        </div>
     );
 };
 

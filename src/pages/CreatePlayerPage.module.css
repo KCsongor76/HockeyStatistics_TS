@@ -1,0 +1,67 @@
+/* PlayerForm.module.css */
+
+.formContainer {
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+}
+
+.formGroup {
+    margin-bottom: 15px;
+}
+
+.formContainer label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #333;
+}
+
+.formContainer input[type="text"],
+.formContainer input[type="number"],
+.formContainer select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.formContainer input[type="text"]:focus,
+.formContainer input[type="number"]:focus,
+.formContainer select:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.formContainer button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-right: 10px;
+}
+
+.submitButton {
+    background-color: #28a745;
+    color: white;
+}
+
+.submitButton:hover {
+    background-color: #218838;
+}
+
+.backButton {
+    background-color: #6c757d;
+    color: white;
+}
+
+.backButton:hover {
+    background-color: #5a6268;
+}

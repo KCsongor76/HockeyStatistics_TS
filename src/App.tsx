@@ -17,6 +17,9 @@ import CreatePlayerPage from "./pages/CreatePlayerPage";
 import TransferPlayerPage from "./pages/TransferPlayerPage";
 import {loader as startPageLoader} from "./pages/StartPage";
 import {loader as teamCRUDPageLoader} from "./pages/TeamCRUDPage";
+import {loader as CreatePlayerPageLoader} from "./pages/CreatePlayerPage";
+import {loader as playerCRUDPageLoader} from "./pages/PlayerCRUDPage";
+import HandlePlayerPage from "./pages/HandlePlayerPage";
 
 function App() {
 
@@ -49,15 +52,16 @@ function App() {
                     children: [
                         {index: true, element: <TeamCRUDPage/>, loader: teamCRUDPageLoader},
                         {path: "create", element: <CreateTeamPage/>,},
-                        {path: ":teamName", element: <HandleTeamPage/>},
+                        {path: ":id", element: <HandleTeamPage/>},
                     ],
                 },
                 {
                     path: "handlePlayers",
                     children: [
-                        {index: true, element: <PlayerCRUDPage/>},
-                        {path: "create", element: <CreatePlayerPage/>},
-                        {path: "transfer", element: <TransferPlayerPage/>},
+                        {index: true, element: <PlayerCRUDPage/>, loader: playerCRUDPageLoader},
+                        {path: "create", element: <CreatePlayerPage/>, loader: CreatePlayerPageLoader},
+                        {path: ":id", element: <HandlePlayerPage/>},
+                        {path: "transfer/:id", element: <TransferPlayerPage/>},
                     ],
                 },
             ],
