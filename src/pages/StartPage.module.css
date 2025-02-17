@@ -1,0 +1,68 @@
+/* StartPage.module.css */
+
+.formContainer {
+    max-width: 600px;
+    margin: 20px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 2rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.formGroup {
+    display: flex;
+    flex-direction: column;
+}
+
+.label {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.select,
+.inputColor {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    transition: border-color 0.2s ease-in-out;
+}
+
+.inputColor {
+    padding: 0;
+}
+
+.select:focus,
+.inputColor:focus {
+    border-color: #007bff;
+}
+
+.colorPickerContainer {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.radioContainer {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.radioInput {
+    margin-right: 0.5rem;
+}
+
+.imagePreview {
+    width: 300px;
+    height: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    object-fit: cover;
+}

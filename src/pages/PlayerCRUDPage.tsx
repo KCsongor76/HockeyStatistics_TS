@@ -68,7 +68,7 @@ const PlayerCRUDPage = () => {
                 </tbody>
             </table>
             <button className={styles.createButton} onClick={() => navigate("create")}>Create Player</button>
-            <button className={styles.backButton} onClick={() => navigate("/")}>Go Back</button>
+            {/*<button className={styles.backButton} onClick={() => navigate("/")}>Go Back</button>*/}
         </div>
     );
 };

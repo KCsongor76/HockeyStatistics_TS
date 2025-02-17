@@ -21,7 +21,8 @@ const HandlePlayerPage = () => {
     }
 
     const goBackNavigate = () => {
-        navigate("/handlePlayers");
+        // navigate("/handlePlayers");
+        navigate(-1);
     }
 
     useEffect(() => {

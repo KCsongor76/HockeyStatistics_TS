@@ -27,6 +27,16 @@ const CreatePlayerPage = () => {
     const submitHandler = async (event: React.FormEvent) => {
         event.preventDefault();
 
+        if (!name || !position || !teamId) {
+            alert('Please fill in all required fields.');
+            return;
+        }
+
+        if (jerseyNumber < 1 || jerseyNumber > 99) {
+            alert('Jersey number must be between 1 and 99.');
+            return;
+        }
+
         // Creating the player object
         const newPlayer = new Player("0", name, position, jerseyNumber, teamId);
 

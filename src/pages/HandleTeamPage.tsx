@@ -24,9 +24,34 @@ const HandleTeamPage = () => {
         setName(event.target.value);
     };
 
-    const handleLogoChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        if (event.target.files && event.target.files[0]) {
-            setLogo(event.target.files[0]);
+    const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+
+            // Check file type
+            const allowedTypes = ['image/jpeg', 'image/png'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('Only .jpg and .png formats are allowed.');
+                const fileInput = document.getElementById("logo") as HTMLInputElement;
+                if (fileInput) {
+                    fileInput.value = "";
+                }
+                return;
+            }
+
+            // Check file size (10MB in bytes)
+            const maxSize = 10 * 1024 * 1024; // 10MB
+            if (file.size > maxSize) {
+                alert('File size should not exceed 10MB.');
+                const fileInput = document.getElementById("logo") as HTMLInputElement;
+                if (fileInput) {
+                    fileInput.value = "";
+                }
+                return;
+            }
+
+            // If valid, set the logo
+            setLogo(file);
         }
     };
 
@@ -53,6 +78,11 @@ const HandleTeamPage = () => {
     const handleEdit = () => {
         setIsEditing(true);
     };
+
+    function handleDiscard() {
+        setTeam(initialTeam);
+        setIsEditing(false);
+    }
 
     return (
         <div className={styles.container}>
@@ -85,6 +115,7 @@ const HandleTeamPage = () => {
 
                     <div className={styles.buttonGroup}>
                         <button className={styles.saveButton} onClick={handleSave}>Save Changes</button>
+                        <button className={styles.backButton} onClick={handleDiscard}>Discard Changes</button>
                     </div>
                 </>
             ) : (
@@ -101,6 +132,7 @@ const HandleTeamPage = () => {
                             <th>Name</th>
                             <th>#</th>
                             <th>Position</th>
+                            <th></th>
                         </tr>
                         </thead>
                         <tbody>
@@ -109,6 +141,11 @@ const HandleTeamPage = () => {
                                 <td>{player.name}</td>
                                 <td>{player.jerseyNumber}</td>
                                 <td>{player.position}</td>
+                                <td>
+                                    <button className={styles.editButton}
+                                            onClick={() => navigate(`../../handlePlayers/${player.id}`, {state: {player}})}>View Player
+                                    </button>
+                                </td>
                             </tr>
                         ))}
                         </tbody>

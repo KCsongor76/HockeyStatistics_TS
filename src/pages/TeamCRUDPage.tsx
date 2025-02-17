@@ -5,7 +5,9 @@ import {TeamService} from '../OOP/services/TeamService';
 import {Championship} from "../OOP/classes/Championship";
 import {Team} from "../OOP/classes/Team";
 // @ts-ignore
-import styles from './TeamCRUDPage.module.css';  // Import the CSS module
+import styles from './TeamCRUDPage.module.css';
+import {storage} from "../firebaseConfig";
+import {ref, deleteObject} from "firebase/storage";  // Import the CSS module
 
 type LoaderData = {
     championships: Championship[];
@@ -37,6 +39,19 @@ const TeamCrudPage = () => {
         if (isConfirmed) {
             try {
                 await TeamService.deleteTeam(team.id);
+
+                // Delete team logo from Firebase Storage
+                if (team.logo) {
+                    try {
+                        // Create reference and delete
+                        const storageRef = ref(storage, team.logo);
+                        await deleteObject(storageRef);
+                    } catch (storageError) {
+                        console.error("Error deleting team logo:", storageError);
+                        alert("Team deleted but logo cleanup failed");
+                    }
+                }
+
                 alert("Team deleted successfully");
 
                 // Update the teams state to remove the deleted team

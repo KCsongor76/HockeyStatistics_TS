@@ -3,6 +3,7 @@ import {getDownloadURL, ref, uploadBytes} from "firebase/storage";
 import {db, storage} from "../../firebaseConfig";
 import {Team} from "../classes/Team";
 import {Player} from "../classes/Player";
+import {TeamAlreadyExistsError} from "../errors/TeamAlreadyExistsError";
 
 
 export class TeamService {
@@ -10,6 +11,11 @@ export class TeamService {
 
     // TODO: arrow functions
     static createTeam = async (team: Team) => {
+        const teams = await this.getAllTeams();
+        const names = teams.map(t => t.name);
+        if (names.includes(team.name)) {
+            throw new TeamAlreadyExistsError(`Team "${team.name}" already exists`);
+        }
 
         const docRef = await addDoc(this.collectionRef, {});
         const teamId = docRef.id;
@@ -18,7 +24,6 @@ export class TeamService {
             id: teamId
         };
         await setDoc(docRef, teamWithId);
-
     }
 
     static async getTeamById(id: string): Promise<Team | null> {

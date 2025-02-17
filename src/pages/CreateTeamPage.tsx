@@ -5,7 +5,8 @@ import {useLocation, useNavigate} from "react-router-dom";
 import {TeamColor} from "../OOP/interfaces/TeamColor";
 import {TeamService} from "../OOP/services/TeamService";
 // @ts-ignore
-import styles from './CreateTeamPage.module.css'; // Import the CSS module
+import styles from './CreateTeamPage.module.css';
+import {TeamAlreadyExistsError} from "../OOP/errors/TeamAlreadyExistsError"; // Import the CSS module
 
 const CreateTeamPage = () => {
     const championships = useLocation().state.championships as Championship[];
@@ -23,7 +24,32 @@ const CreateTeamPage = () => {
 
     const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
-            setLogo(e.target.files[0]);
+            const file = e.target.files[0];
+
+            // Check file type
+            const allowedTypes = ['image/jpeg', 'image/png'];
+            if (!allowedTypes.includes(file.type)) {
+                alert('Only .jpg and .png formats are allowed.');
+                const fileInput = document.getElementById("logoInput") as HTMLInputElement;
+                if (fileInput) {
+                    fileInput.value = "";
+                }
+                return;
+            }
+
+            // Check file size (10MB in bytes)
+            const maxSize = 10 * 1024 * 1024; // 10MB
+            if (file.size > maxSize) {
+                alert('File size should not exceed 10MB.');
+                const fileInput = document.getElementById("logoInput") as HTMLInputElement;
+                if (fileInput) {
+                    fileInput.value = "";
+                }
+                return;
+            }
+
+            // If valid, set the logo
+            setLogo(file);
         }
     };
 
@@ -81,15 +107,9 @@ const CreateTeamPage = () => {
             return alert("Please select a championship");
         }
         try {
-            const teams = await TeamService.getAllTeams();
-            const names = teams.map(t => t.name);
-            if (names.includes(name)) {
-                alert("Team already exists");
-                return;
-            }
+            // TODO: should be atomic operation
             const logoURL = await TeamService.uploadLogo(logo);
             const team = new Team("0", name, logoURL, homeColor, awayColor, championship);
-            console.log(team);
             await TeamService.createTeam(team);
 
             alert("Team created successfully!");
@@ -106,6 +126,10 @@ const CreateTeamPage = () => {
             }
 
         } catch (error) {
+            if (error instanceof TeamAlreadyExistsError) {
+                alert(error.message);
+                return;
+            }
             console.error("Error uploading file:", error);
             alert("Something went wrong");
         }
