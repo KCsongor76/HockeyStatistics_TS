@@ -1,4 +1,4 @@
 export enum GameType {
-    REGULAR = "REGULAR",
-    PLAYOFF = "PLAYOFF"
+    REGULAR = "Regular",
+    PLAYOFF = "Playoff",
 }

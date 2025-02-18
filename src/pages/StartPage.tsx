@@ -4,7 +4,7 @@ import {Team} from "../OOP/classes/Team";
 import {GameType} from "../OOP/enums/GameType";
 import {useLoaderData, useNavigate} from "react-router-dom";
 import {TeamColor} from "../OOP/interfaces/TeamColor";
-import {getDownloadURL, getStorage, ref} from "firebase/storage";
+import {getDownloadURL, ref} from "firebase/storage";
 // @ts-ignore
 import styles from './StartPage.module.css';
 import {ChampionshipService} from "../OOP/services/ChampionshipService";
@@ -35,11 +35,6 @@ type LoaderData = {
     };
 };
 
-// TODO: colors should correspond to team colors
-// TODO: image selection: should be able to click the rinkImage also
-// TODO: if championship is "", should be an error
-// TODO: same team error
-
 const StartPage: React.FC = () => {
     const loaderData = useLoaderData() as LoaderData;
 
@@ -47,24 +42,31 @@ const StartPage: React.FC = () => {
     const teams = loaderData?.teams ?? [];
     const rinkImages = loaderData?.rinkImages ?? {};
 
+    // Get teams for the first championship
+    const getInitialTeams = (championship: Championship, allTeams: Team[]) => {
+        const teamsInChampionship = allTeams.filter(team =>
+            team.championships.some(champ => champ.id === championship.id)
+        );
+        return {
+            homeTeam: teamsInChampionship[0],
+            awayTeam: teamsInChampionship[1]
+        };
+    };
+
+    const initialTeams = getInitialTeams(championships[0], teams);
+
     const initialState: FormState = {
-        championship: new Championship(),
-        homeTeam: new Team(),
-        awayTeam: new Team(),
+        championship: championships[0],
+        homeTeam: initialTeams.homeTeam,
+        awayTeam: initialTeams.awayTeam,
         gameType: GameType.REGULAR,
-        homeColor: {
-            primary: '#000000',
-            secondary: '#ffffff',
-        },
-        awayColor: {
-            primary: '#000000',
-            secondary: '#ffffff',
-        },
+        homeColor: teams[0].homeColor,
+        awayColor: teams[1].awayColor,
         imageOption: {
             rinkUp: rinkImages.rinkUp,
             rinkDown: rinkImages.rinkDown,
         },
-        selectedImage: rinkImages.rinkUp,
+        selectedImage: "",
     };
 
     const [formData, setFormData] = useState<FormState>(initialState);
@@ -72,6 +74,14 @@ const StartPage: React.FC = () => {
     const navigate = useNavigate();
 
     const [modalIsOpen, setModalIsOpen] = useState(false);
+
+    // Image click handler for rink selection
+    const handleImageClick = (imageUrl: string) => {
+        setFormData({
+            ...formData,
+            selectedImage: imageUrl,
+        });
+    };
 
     const continueHandler = () => {
         setModalIsOpen(false);
@@ -86,6 +96,24 @@ const StartPage: React.FC = () => {
 
     const submitHandler = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
+
+        console.log(formData);
+
+        if (formData.championship.name == "") {
+            alert("Please select a championship");
+            return;
+        }
+
+        if (formData.homeTeam == formData.awayTeam) {
+            alert("Please select different teams");
+            return;
+        }
+
+        if (formData.selectedImage == "") {
+            alert("Please select an image");
+            return;
+        }
+
         localStorage.setItem("formData", JSON.stringify(formData));
         navigate("/game", {state: {formData}});
     };
@@ -103,24 +131,34 @@ const StartPage: React.FC = () => {
 
     // Update filtered teams when championship changes
     useEffect(() => {
-        const filteredTeams = formData.championship.id !== ""
-            ? teams.filter(team => team.championships.some(champ => champ.id === formData.championship.id))
-            : teams;
+        if (!formData.championship || formData.championship.id === "") {
+            setFilteredTeams(teams);
+            return;
+        }
 
-        /* todo: check this out later
-        const filteredTeams = formData.championship.id !== ""
-            ? teams.filter(team => team.championships.some(champ => champ.equals(formData.championship)))
-            : teams;*/
-
+        const filteredTeams = teams.filter(team =>
+            team.championships.some(champ => champ.id === formData.championship.id)
+        );
 
         setFilteredTeams(filteredTeams);
 
-        // Automatically update the home and away teams to the first teams in the filtered list
-        setFormData({
-            ...formData,
-            homeTeam: filteredTeams[0] ?? new Team(),
-            awayTeam: filteredTeams[1] ?? filteredTeams[0] ?? new Team(),
-        });
+        // Get default teams and their colors
+        const newHomeTeam = filteredTeams[0] ?? new Team();
+        const newAwayTeam = filteredTeams[1] ?? filteredTeams[0] ?? new Team();
+
+        // Only update teams if current teams are not in the filtered list
+        const updateTeams = !filteredTeams.some(team => team.id === formData.homeTeam.id) ||
+            !filteredTeams.some(team => team.id === formData.awayTeam.id);
+
+        if (updateTeams) {
+            setFormData({
+                ...formData,
+                homeTeam: newHomeTeam,
+                awayTeam: newAwayTeam,
+                homeColor: newHomeTeam.homeColor || initialState.homeColor,
+                awayColor: newAwayTeam.awayColor || initialState.awayColor,
+            });
+        }
     }, [formData.championship, teams]);
 
     if (championships.length === 0 || teams.length === 0) {
@@ -166,12 +204,14 @@ const StartPage: React.FC = () => {
                     <label className={styles.label}>Select Home Team</label>
                     <select
                         value={formData.homeTeam.id}
-                        onChange={(event) =>
+                        onChange={(event) => {
+                            const newHomeTeam = filteredTeams.find((t) => t.id === event.target.value) ?? new Team();
                             setFormData({
                                 ...formData,
-                                homeTeam: filteredTeams.find((t) => t.id === event.target.value) ?? new Team(),
-                            })
-                        }
+                                homeTeam: newHomeTeam,
+                                homeColor: newHomeTeam.homeColor || initialState.homeColor,
+                            });
+                        }}
                         className={styles.select}
                     >
                         {filteredTeams.map((team) => (
@@ -186,12 +226,14 @@ const StartPage: React.FC = () => {
                     <label className={styles.label}>Select Away Team</label>
                     <select
                         value={formData.awayTeam.id}
-                        onChange={(event) =>
+                        onChange={(event) => {
+                            const newAwayTeam = filteredTeams.find((t) => t.id === event.target.value) ?? new Team();
                             setFormData({
                                 ...formData,
-                                awayTeam: filteredTeams.find((t) => t.id === event.target.value) ?? new Team(),
-                            })
-                        }
+                                awayTeam: newAwayTeam,
+                                awayColor: newAwayTeam.awayColor || initialState.awayColor,
+                            });
+                        }}
                         className={styles.select}
                     >
                         {filteredTeams.map((team) => (
@@ -285,6 +327,7 @@ const StartPage: React.FC = () => {
                             type="radio"
                             name="imageOption"
                             value={formData.imageOption.rinkDown}
+                            checked={formData.selectedImage === formData.imageOption.rinkDown}
                             onChange={(event) =>
                                 setFormData({
                                     ...formData,
@@ -293,13 +336,19 @@ const StartPage: React.FC = () => {
                             }
                             className={styles.radioInput}
                         />
-                        <img src={formData.imageOption.rinkDown} alt="RinkImage" className={styles.imagePreview}/>
+                        <img
+                            src={formData.imageOption.rinkDown}
+                            alt="RinkImage"
+                            className={`${styles.imagePreview} ${formData.selectedImage === formData.imageOption.rinkDown ? styles.selectedImage : ''}`}
+                            onClick={() => handleImageClick(formData.imageOption.rinkDown)}
+                        />
                     </div>
                     <div className={styles.radioContainer}>
                         <input
                             type="radio"
                             name="imageOption"
                             value={formData.imageOption.rinkUp}
+                            checked={formData.selectedImage === formData.imageOption.rinkUp}
                             onChange={(event) =>
                                 setFormData({
                                     ...formData,
@@ -308,7 +357,12 @@ const StartPage: React.FC = () => {
                             }
                             className={styles.radioInput}
                         />
-                        <img src={formData.imageOption.rinkUp} alt="RinkImage" className={styles.imagePreview}/>
+                        <img
+                            src={formData.imageOption.rinkUp}
+                            alt="RinkImage"
+                            className={`${styles.imagePreview} ${formData.selectedImage === formData.imageOption.rinkUp ? styles.selectedImage : ''}`}
+                            onClick={() => handleImageClick(formData.imageOption.rinkUp)}
+                        />
                     </div>
                 </div>
                 <button type="submit">Start Game</button>

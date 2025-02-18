@@ -3,6 +3,7 @@ import { Player } from './Player';
 import { Championship } from './Championship';
 import { TeamColor } from '../interfaces/TeamColor';
 
+
 describe('Team', () => {
     let team: Team;
     let mockPlayers: Player[];

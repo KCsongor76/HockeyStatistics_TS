@@ -1,4 +1,4 @@
-import {addDoc, collection, deleteDoc, doc, getDoc, getDocs, updateDoc} from "firebase/firestore";
+import {collection, deleteDoc, doc, getDoc, getDocs, updateDoc} from "firebase/firestore";
 import {db} from "../../firebaseConfig";
 import {Championship} from "../classes/Championship";
 

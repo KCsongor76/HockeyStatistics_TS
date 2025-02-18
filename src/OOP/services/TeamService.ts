@@ -79,7 +79,6 @@ export class TeamService {
                 players // Add the players array to the team object
             } as Team;
         }));
-        console.log(teams[2])
         return teams;
     }
 
