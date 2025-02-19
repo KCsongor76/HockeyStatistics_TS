@@ -11,11 +11,16 @@ import {ChampionshipService} from "../OOP/services/ChampionshipService";
 import {TeamService} from "../OOP/services/TeamService";
 import ContinueOrStartOverModal from "../modals/ContinueOrStartOverModal";
 import {storage} from "../firebaseConfig";
+import {Player} from "../OOP/classes/Player";
 
 type FormState = {
     championship: Championship;
     homeTeam: Team;
     awayTeam: Team;
+    homeRoster: Player[],
+    homeRosterOut: Player[],
+    awayRosterOut: Player[],
+    awayRoster: Player[],
     gameType: GameType;
     homeColor: TeamColor;
     awayColor: TeamColor;
@@ -55,10 +60,15 @@ const StartPage: React.FC = () => {
 
     const initialTeams = getInitialTeams(championships[0], teams);
 
+
     const initialState: FormState = {
         championship: championships[0],
         homeTeam: initialTeams.homeTeam,
         awayTeam: initialTeams.awayTeam,
+        homeRoster: [],
+        homeRosterOut: initialTeams.homeTeam.players,
+        awayRoster: [],
+        awayRosterOut: initialTeams.awayTeam.players,
         gameType: GameType.REGULAR,
         homeColor: teams[0].homeColor,
         awayColor: teams[1].awayColor,
@@ -74,6 +84,7 @@ const StartPage: React.FC = () => {
     const navigate = useNavigate();
 
     const [modalIsOpen, setModalIsOpen] = useState(false);
+    const [isDropDownOpen, setIsDropDownOpen] = useState(false);
 
     // Image click handler for rink selection
     const handleImageClick = (imageUrl: string) => {
@@ -157,6 +168,10 @@ const StartPage: React.FC = () => {
                 awayTeam: newAwayTeam,
                 homeColor: newHomeTeam.homeColor || initialState.homeColor,
                 awayColor: newAwayTeam.awayColor || initialState.awayColor,
+                homeRoster: [],
+                homeRosterOut: newHomeTeam.players,
+                awayRoster: [],
+                awayRosterOut: newAwayTeam.players,
             });
         }
     }, [formData.championship, teams]);
@@ -165,6 +180,49 @@ const StartPage: React.FC = () => {
         return <div>Loading...</div>;
     }
 
+    function addPlayerToRosterHandler(player: Player, isHome: boolean) {
+        setFormData(prev => {
+            if (isHome) {
+                const newHomeRosterOut = prev.homeRosterOut.filter(p => p.id !== player.id);
+                const newHomeRoster = [...prev.homeRoster, player];
+                return {
+                    ...prev,
+                    homeRoster: newHomeRoster,
+                    homeRosterOut: newHomeRosterOut
+                };
+            } else {
+                const newAwayRosterOut = prev.awayRosterOut.filter(p => p.id !== player.id);
+                const newAwayRoster = [...prev.awayRoster, player];
+                return {
+                    ...prev,
+                    awayRoster: newAwayRoster,
+                    awayRosterOut: newAwayRosterOut
+                };
+            }
+        });
+    }
+
+    function removePlayerFromRosterHandler(player: Player, isHome: boolean) {
+        setFormData(prev => {
+            if (isHome) {
+                const newHomeRoster = prev.homeRoster.filter(p => p.id !== player.id);
+                const newHomeRosterOut = [...prev.homeRosterOut, player];
+                return {
+                    ...prev,
+                    homeRoster: newHomeRoster,
+                    homeRosterOut: newHomeRosterOut
+                };
+            } else {
+                const newAwayRoster = prev.awayRoster.filter(p => p.id !== player.id);
+                const newAwayRosterOut = [...prev.awayRosterOut, player];
+                return {
+                    ...prev,
+                    awayRoster: newAwayRoster,
+                    awayRosterOut: newAwayRosterOut
+                };
+            }
+        });
+    }
 
     return (
         <>
@@ -210,7 +268,10 @@ const StartPage: React.FC = () => {
                                 ...formData,
                                 homeTeam: newHomeTeam,
                                 homeColor: newHomeTeam.homeColor || initialState.homeColor,
+                                homeRoster: [],
+                                homeRosterOut: newHomeTeam.players,
                             });
+                            setIsDropDownOpen(false);
                         }}
                         className={styles.select}
                     >
@@ -232,7 +293,10 @@ const StartPage: React.FC = () => {
                                 ...formData,
                                 awayTeam: newAwayTeam,
                                 awayColor: newAwayTeam.awayColor || initialState.awayColor,
+                                awayRoster: [],
+                                awayRosterOut: newAwayTeam.players,
                             });
+                            setIsDropDownOpen(false);
                         }}
                         className={styles.select}
                     >
@@ -319,6 +383,132 @@ const StartPage: React.FC = () => {
                         />
                     </div>
                 </div>
+
+                {!isDropDownOpen && <button type="button" onClick={() => {
+                    setIsDropDownOpen(true)
+                    console.log(formData)
+                }}>
+                    Select Rosters
+                </button>}
+
+                {isDropDownOpen && (
+                    <div>
+                        <h3>Home Team Roster</h3>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {formData.homeRosterOut.map((player) => (
+                                <tr key={player.id}>
+                                    <td>{player.jerseyNumber}</td>
+                                    <td>{player.name}</td>
+                                    <td>
+                                        <button
+                                            type="button"
+                                            onClick={() => addPlayerToRosterHandler(player, true)}
+                                        >
+                                            Add
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+
+                        <h4>Selected Home Roster</h4>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {formData.homeRoster.map((player) => (
+                                <tr key={player.id}>
+                                    <td>{player.jerseyNumber}</td>
+                                    <td>{player.name}</td>
+                                    <td>
+                                        <button
+                                            type="button"
+                                            onClick={() => removePlayerFromRosterHandler(player, true)}
+                                        >
+                                            Remove
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+
+                        {/* Away Team Roster Selection */}
+                        <h3>Away Team Roster</h3>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {formData.awayRosterOut.map((player) => (
+                                <tr key={player.id}>
+                                    <td>{player.jerseyNumber}</td>
+                                    <td>{player.name}</td>
+                                    <td>
+                                        <button
+                                            type="button"
+                                            onClick={() => addPlayerToRosterHandler(player, false)}
+                                        >
+                                            Add
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+
+                        <h4>Selected Away Roster</h4>
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {formData.awayRoster.map((player) => (
+                                <tr key={player.id}>
+                                    <td>{player.jerseyNumber}</td>
+                                    <td>{player.name}</td>
+                                    <td>
+                                        <button
+                                            type="button"
+                                            onClick={() => removePlayerFromRosterHandler(player, false)}
+                                        >
+                                            Remove
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+
+                        <button
+                            onClick={() => setIsDropDownOpen(false)}
+                        >
+                            Close Roster Selection
+                        </button>
+                    </div>
+                )}
 
                 <div className={styles.formGroup}>
                     <label className={styles.label}>Select Rink Image:</label>

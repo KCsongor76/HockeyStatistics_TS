@@ -1,5 +1,5 @@
 /* StartPage.module.css */
-
+/*
 .formContainer {
     max-width: 600px;
     margin: 20px auto;
@@ -65,4 +65,217 @@
     border: 1px solid #ddd;
     border-radius: 4px;
     object-fit: cover;
+}
+*/
+
+.formContainer {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 2.5rem;
+    background: linear-gradient(145deg, #ffffff, #f0f4f8);
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.formGroup {
+    margin-bottom: 2rem;
+    transition: all 0.3s ease;
+}
+
+.formGroup:hover {
+    transform: translateY(-2px);
+}
+
+.label {
+    display: block;
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2d3748;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    background-color: white;
+    font-size: 1rem;
+    color: #4a5568;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg width='14' height='14' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M3 5h8L7 9z' fill='%234A5568'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+}
+
+.select:focus {
+    outline: none;
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+}
+
+.colorPickerContainer {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.inputColor {
+    width: 80px;
+    height: 40px;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.inputColor:hover {
+    transform: scale(1.05);
+}
+
+.radioContainer {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background-color: white;
+    border-radius: 12px;
+    border: 2px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.radioContainer:hover {
+    border-color: #4299e1;
+    box-shadow: 0 4px 12px rgba(66, 153, 225, 0.1);
+}
+
+.radioInput {
+    margin-right: 1rem;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+}
+
+.imagePreview {
+    max-width: 200px;
+    height: auto;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.imagePreview:hover {
+    transform: scale(1.02);
+}
+
+.selectedImage {
+    border: 3px solid #4299e1;
+    box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.2);
+}
+
+/* Table Styles */
+table {
+    width: 100%;
+    margin: 1rem 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+th, td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+th {
+    background-color: #f7fafc;
+    font-weight: 600;
+    color: #2d3748;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    letter-spacing: 0.05em;
+}
+
+tr:last-child td {
+    border-bottom: none;
+}
+
+tr:hover td {
+    background-color: #f7fafc;
+}
+
+/* Button Styles */
+button {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    background-color: #4299e1;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0.5rem;
+}
+
+button:hover {
+    background-color: #3182ce;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(66, 153, 225, 0.2);
+}
+
+button[type="button"] {
+    background-color: #718096;
+}
+
+button[type="button"]:hover {
+    background-color: #4a5568;
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .formContainer {
+        margin: 1rem;
+        padding: 1.5rem;
+    }
+
+    .colorPickerContainer {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .imagePreview {
+        max-width: 150px;
+    }
+
+    table {
+        font-size: 0.875rem;
+    }
+
+    th, td {
+        padding: 0.75rem;
+    }
 }
