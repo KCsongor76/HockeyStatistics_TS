@@ -68,6 +68,7 @@
 }
 */
 
+
 .formContainer {
     max-width: 900px;
     margin: 2rem auto;
@@ -179,7 +180,6 @@
     box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.2);
 }
 
-/* Table Styles */
 table {
     width: 100%;
     margin: 1rem 0;
@@ -214,8 +214,8 @@ tr:hover td {
     background-color: #f7fafc;
 }
 
-/* Button Styles */
-button {
+
+.rosterButton {
     padding: 0.75rem 1.5rem;
     border: none;
     border-radius: 8px;
@@ -229,21 +229,21 @@ button {
     margin: 0.5rem;
 }
 
-button:hover {
+.rosterButton:hover {
     background-color: #3182ce;
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(66, 153, 225, 0.2);
 }
 
-button[type="button"] {
+.rosterButton[type="button"] {
     background-color: #718096;
 }
 
-button[type="button"]:hover {
+.rosterButton[type="button"]:hover {
     background-color: #4a5568;
 }
 
-/* Animation */
+
 @keyframes fadeIn {
     from {
         opacity: 0;
@@ -255,7 +255,6 @@ button[type="button"]:hover {
     }
 }
 
-/* Responsive Design */
 @media (max-width: 768px) {
     .formContainer {
         margin: 1rem;

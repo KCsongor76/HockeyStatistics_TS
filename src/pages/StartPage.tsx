@@ -384,12 +384,15 @@ const StartPage: React.FC = () => {
                     </div>
                 </div>
 
-                {!isDropDownOpen && <button type="button" onClick={() => {
-                    setIsDropDownOpen(true)
-                    console.log(formData)
-                }}>
-                    Select Rosters
-                </button>}
+                {!isDropDownOpen &&
+                    <button
+                        className={styles.rosterButton}
+                        type="button"
+                        onClick={() => {
+                            setIsDropDownOpen(true)
+                        }}>
+                        Select Rosters
+                    </button>}
 
                 {isDropDownOpen && (
                     <div>
@@ -409,6 +412,7 @@ const StartPage: React.FC = () => {
                                     <td>{player.name}</td>
                                     <td>
                                         <button
+                                            className={styles.rosterButton}
                                             type="button"
                                             onClick={() => addPlayerToRosterHandler(player, true)}
                                         >
@@ -436,6 +440,7 @@ const StartPage: React.FC = () => {
                                     <td>{player.name}</td>
                                     <td>
                                         <button
+                                            className={styles.rosterButton}
                                             type="button"
                                             onClick={() => removePlayerFromRosterHandler(player, true)}
                                         >
@@ -464,6 +469,7 @@ const StartPage: React.FC = () => {
                                     <td>{player.name}</td>
                                     <td>
                                         <button
+                                            className={styles.rosterButton}
                                             type="button"
                                             onClick={() => addPlayerToRosterHandler(player, false)}
                                         >
@@ -491,6 +497,7 @@ const StartPage: React.FC = () => {
                                     <td>{player.name}</td>
                                     <td>
                                         <button
+                                            className={styles.rosterButton}
                                             type="button"
                                             onClick={() => removePlayerFromRosterHandler(player, false)}
                                         >
@@ -503,6 +510,8 @@ const StartPage: React.FC = () => {
                         </table>
 
                         <button
+                            className={styles.rosterButton}
+                            type="button"
                             onClick={() => setIsDropDownOpen(false)}
                         >
                             Close Roster Selection
