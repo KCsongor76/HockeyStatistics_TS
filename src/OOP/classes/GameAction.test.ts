@@ -1,14 +1,15 @@
-import { GameAction } from './GameAction';
-import { Team } from './Team';
-import { Player } from './Player';
-import { GameType } from '../enums/GameType';
-import { RegularPeriod, PlayoffPeriod } from '../enums/Period';
+import {GameAction} from './GameAction';
+import {Team} from './Team';
+import {Player} from './Player';
+import {GameType} from '../enums/GameType';
+import {RegularPeriod, PlayoffPeriod} from '../enums/Period';
+import {ActionType} from "../enums/ActionType";
 
 describe('GameAction', () => {
     const team = new Team('t1', 'Team A');
     const player = new Player('p1', 'Player 1');
     const period = RegularPeriod.FIRST;
-    const type = GameType.REGULAR;
+    const type = ActionType.SHOT;
 
     it('should initialize all properties correctly', () => {
         const action = new GameAction(team, period, 15.3, type, player, 50, 75);

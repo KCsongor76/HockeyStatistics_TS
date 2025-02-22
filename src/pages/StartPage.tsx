@@ -397,20 +397,20 @@ const StartPage: React.FC = () => {
                 {isDropDownOpen && (
                     <div>
                         <h3>Home Team Roster</h3>
-                        <table>
+                        <table className={styles.table}>
                             <thead>
-                            <tr>
-                                <th>#</th>
-                                <th>Name</th>
-                                <th></th>
+                            <tr className={styles.tr}>
+                                <th className={styles.th}>#</th>
+                                <th className={styles.th}>Name</th>
+                                <th className={styles.th}></th>
                             </tr>
                             </thead>
                             <tbody>
                             {formData.homeRosterOut.map((player) => (
-                                <tr key={player.id}>
-                                    <td>{player.jerseyNumber}</td>
-                                    <td>{player.name}</td>
-                                    <td>
+                                <tr key={player.id} className={styles.tr}>
+                                    <td className={styles.td}>{player.jerseyNumber}</td>
+                                    <td className={styles.td}>{player.name}</td>
+                                    <td className={styles.td}>
                                         <button
                                             className={styles.rosterButton}
                                             type="button"

@@ -180,7 +180,7 @@
     box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.2);
 }
 
-table {
+.table {
     width: 100%;
     margin: 1rem 0;
     border-collapse: separate;
@@ -191,13 +191,13 @@ table {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 }
 
-th, td {
+.th, .td {
     padding: 1rem;
     text-align: left;
     border-bottom: 1px solid #e2e8f0;
 }
 
-th {
+.th {
     background-color: #f7fafc;
     font-weight: 600;
     color: #2d3748;
@@ -206,11 +206,11 @@ th {
     letter-spacing: 0.05em;
 }
 
-tr:last-child td {
+.tr:last-child td {
     border-bottom: none;
 }
 
-tr:hover td {
+.tr:hover td {
     background-color: #f7fafc;
 }
 
@@ -270,11 +270,11 @@ tr:hover td {
         max-width: 150px;
     }
 
-    table {
+    .table {
         font-size: 0.875rem;
     }
 
-    th, td {
+    .th, .td {
         padding: 0.75rem;
     }
 }

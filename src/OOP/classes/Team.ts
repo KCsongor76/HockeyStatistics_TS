@@ -1,6 +1,7 @@
 import {Player} from "./Player";
 import {Championship} from "./Championship";
 import {TeamColor} from "../interfaces/TeamColor";
+import {TeamInterface} from "../interfaces/TeamInterface";
 
 export class Team {
     private readonly _id: string
@@ -87,5 +88,16 @@ export class Team {
             awayColor: this.awayColor,
             championships: this.championships //.map(ch => ch.id), // assuming you just need the championship IDs
         };
+    }
+
+    static fromInterface(team: TeamInterface): Team {
+        return new Team(
+            team.id,
+            team.name,
+            team.logo,
+            team.homeColor,
+            team.awayColor,
+            team.championships
+        );
     }
 }

@@ -1,0 +1,85 @@
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px;
+}
+
+.filterSection {
+    margin-bottom: 24px;
+}
+
+.filterGroup {
+    margin-bottom: 16px;
+}
+
+.filterTitle {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.buttonGroup {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.button {
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    background-color: #e5e5e5;
+    transition: all 0.2s ease;
+}
+
+.button:hover {
+    background-color: #d1d1d1;
+}
+
+.buttonActive {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.buttonActive:hover {
+    background-color: #2563eb;
+}
+
+.periodButton {
+    padding: 4px 12px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    background-color: #e5e5e5;
+    transition: all 0.2s ease;
+}
+
+.periodButton:hover {
+    background-color: #d1d1d1;
+}
+
+.periodButtonActive {
+    background-color: #22c55e;
+    color: white;
+}
+
+.periodButtonActive:hover {
+    background-color: #16a34a;
+}
+
+.gameVisualization {
+    position: relative;
+    width: 100%;
+}
+
+.gameImage {
+    width: 100%;
+    display: block;
+}
+
+.actionIcon {
+    position: absolute;
+    transform: translate(-50%, -50%);
+}
