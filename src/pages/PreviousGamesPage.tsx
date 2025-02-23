@@ -1,13 +1,13 @@
 import React from 'react';
 import {useNavigate} from "react-router-dom";
-import {Game} from "../OOP/classes/Game";
 
 // @ts-ignore
 import styles from './PreviousGamesPage.module.css';
+import {IGame} from "../OOP/interfaces/IGame";
 
 const PreviousGamesPage = () => {
     const raw = localStorage.getItem("gameData")
-    const games: Game[] = JSON.parse(raw || '[]');
+    const games: IGame[] = JSON.parse(raw || '[]');
 
     const navigate = useNavigate();
 
@@ -30,16 +30,16 @@ const PreviousGamesPage = () => {
                     </thead>
 
                     <tbody>
-                    {games.map((game: Game, index: number) =>
+                    {games.map((game: IGame, index: number) =>
                         <tr className={styles.tr} key={index}>
-                            <td className={styles.td}><img className={styles.teamLogo} src={game._teams.home.logo}
-                                                           alt={game._teams.home.name}/></td>
-                            <td className={styles.td}>{game._teams.home.name}</td>
-                            <td className={styles.td}>{game._timestamp}</td>
-                            <td className={`${styles.td} ${styles.scoreCell}`}>{game._score.home._goals} - {game._score.away._goals}</td>
-                            <td className={styles.td}>{game._teams.away.name}</td>
-                            <td className={styles.td}><img className={styles.teamLogo} src={game._teams.away.logo}
-                                                           alt={game._teams.away.name}/></td>
+                            <td className={styles.td}><img className={styles.teamLogo} src={game.teams.home.logo}
+                                                           alt={game.teams.home.name}/></td>
+                            <td className={styles.td}>{game.teams.home.name}</td>
+                            <td className={styles.td}>{game.timestamp}</td>
+                            <td className={`${styles.td} ${styles.scoreCell}`}>{game.score.home.goals} - {game.score.away.goals}</td>
+                            <td className={styles.td}>{game.teams.away.name}</td>
+                            <td className={styles.td}><img className={styles.teamLogo} src={game.teams.away.logo}
+                                                           alt={game.teams.away.name}/></td>
                             <td className={styles.td}>
                                 <button className={styles.viewButton} onClick={() => {
                                     navigate(`${index}`, {state: game});

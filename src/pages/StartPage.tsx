@@ -3,7 +3,7 @@ import {Championship} from "../OOP/classes/Championship";
 import {Team} from "../OOP/classes/Team";
 import {GameType} from "../OOP/enums/GameType";
 import {useLoaderData, useNavigate} from "react-router-dom";
-import {TeamColor} from "../OOP/interfaces/TeamColor";
+import {ITeamColor} from "../OOP/interfaces/ITeamColor";
 import {getDownloadURL, ref} from "firebase/storage";
 // @ts-ignore
 import styles from './StartPage.module.css';
@@ -22,8 +22,8 @@ type FormState = {
     awayRosterOut: Player[],
     awayRoster: Player[],
     gameType: GameType;
-    homeColor: TeamColor;
-    awayColor: TeamColor;
+    homeColor: ITeamColor;
+    awayColor: ITeamColor;
     imageOption: {
         rinkUp: string;
         rinkDown: string;

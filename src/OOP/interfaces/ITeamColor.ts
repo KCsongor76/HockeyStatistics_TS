@@ -1,4 +1,4 @@
-export interface TeamColor {
+export interface ITeamColor {
     primary: string;
     secondary: string;
 }

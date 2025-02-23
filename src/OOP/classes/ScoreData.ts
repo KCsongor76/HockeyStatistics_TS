@@ -1,4 +1,4 @@
-import {ScoreDataInterface} from "../interfaces/ScoreDataInterface";
+import {IScoreData} from "../interfaces/IScoreData";
 
 export class ScoreData {
     private _goals: number;
@@ -35,7 +35,7 @@ export class ScoreData {
         this._turnovers = value;
     }
 
-    static fromInterface(score: ScoreDataInterface): ScoreData {
+    /*static fromInterface(score: IScoreData): ScoreData {
         return new ScoreData(score.goals, score.shots, score.turnovers);
-    }
+    }*/
 }

@@ -1,4 +1,4 @@
-export interface ScoreDataInterface{
+export interface IScoreData {
     goals: number;
     shots: number;
     turnovers: number;

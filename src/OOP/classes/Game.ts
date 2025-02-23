@@ -1,9 +1,9 @@
-import {GameInterface} from "../interfaces/GameInterface";
+import {IGame} from "../interfaces/IGame";
 import {Team} from "./Team";
 import {ScoreData} from "./ScoreData";
 import {GameAction} from "./GameAction";
-import {TeamInterface} from "../interfaces/TeamInterface";
-import {GameActionInterface} from "../interfaces/GameActionInterface";
+import {ITeam} from "../interfaces/ITeam";
+import {IGameAction} from "../interfaces/IGameAction";
 
 export class Game {
     private _id: string = "";
@@ -64,20 +64,20 @@ export class Game {
         return this._selectedImage;
     }
 
-    static fromInterface(game: GameInterface): Game {
+    /*static fromInterface(game: IGame): Game {
         return new Game(
-            game._id,
-            game._timestamp,
-            game._actions.map((action: GameAction) => GameAction.fromInterface(action as unknown as GameActionInterface)),
+            game.id,
+            game.timestamp,
+            game.actions.map((action: IGameAction) => GameAction.fromInterface(action as unknown as IGameAction)),
             {
-                home: Team.fromInterface(game._teams.home as TeamInterface),
-                away: Team.fromInterface(game._teams.away as TeamInterface)
+                home: Team.fromInterface(game.teams.home as ITeam),
+                away: Team.fromInterface(game.teams.away as ITeam)
             },
             {
-                home: ScoreData.fromInterface(game._score.home),
-                away: ScoreData.fromInterface(game._score.away)
+                home: ScoreData.fromInterface(game.score.home),
+                away: ScoreData.fromInterface(game.score.away)
             },
-            game._selectedImage
+            game.selectedImage
         );
-    }
+    }*/
 }

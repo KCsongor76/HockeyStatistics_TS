@@ -1,22 +1,23 @@
 import React, {useEffect, useRef, useState} from 'react';
-import {Championship} from "../OOP/classes/Championship";
-import {Team} from "../OOP/classes/Team";
 import {GameType} from "../OOP/enums/GameType";
-import {TeamColor} from "../OOP/interfaces/TeamColor";
+import {ITeamColor} from "../OOP/interfaces/ITeamColor";
 import {useLocation} from "react-router-dom";
-import {GameAction} from "../OOP/classes/GameAction";
 import {ActionType} from "../OOP/enums/ActionType";
 import Icon from "../components/Icon";
-import {ScoreData} from "../OOP/classes/ScoreData";
-import {Game} from "../OOP/classes/Game";
+import {IChampionship} from "../OOP/interfaces/IChampionship";
+import {ITeam} from "../OOP/interfaces/ITeam";
+import {IScoreData} from "../OOP/interfaces/IScoreData";
+import {IGameAction} from "../OOP/interfaces/IGameAction";
+import {IPlayer} from "../OOP/interfaces/IPlayer";
+import {IGame} from "../OOP/interfaces/IGame";
 
 type FormData = {
-    championship: Championship;
-    homeTeam: Team;
-    awayTeam: Team;
+    championship: IChampionship;
+    homeTeam: ITeam;
+    awayTeam: ITeam;
     gameType: GameType;
-    homeColor: TeamColor;
-    awayColor: TeamColor;
+    homeColor: ITeamColor;
+    awayColor: ITeamColor;
     imageOption: {
         rinkUp: string;
         rinkDown: string;
@@ -28,13 +29,13 @@ type FormData = {
 const GamePage = () => {
     // Add these new state variables
     const [selectedPosition, setSelectedPosition] = useState<{ x: number, y: number } | null>(null);
-    const [selectedAction, setSelectedAction] = useState<{ type: ActionType, team: Team } | null>(null);
+    const [selectedAction, setSelectedAction] = useState<{ type: ActionType, team: ITeam } | null>(null);
     const [period, setPeriod] = useState(1);
     const [time, setTime] = useState(5); // 20:00 in seconds TODO: back to 1200
     const [isTimerRunning, setIsTimerRunning] = useState(false);
-    const [homeScore, setHomeScore] = useState(new ScoreData(0, 0, 0));
-    const [awayScore, setAwayScore] = useState(new ScoreData(0, 0, 0));
-    const [actions, setActions] = useState<GameAction[]>([]);
+    const [homeScore, setHomeScore] = useState<IScoreData>({goals: 0, shots: 0, turnovers: 0});
+    const [awayScore, setAwayScore] = useState<IScoreData>({goals: 0, shots: 0, turnovers: 0});
+    const [actions, setActions] = useState<IGameAction[]>([]);
 
 // Add modal content
     const ActionSelectorModal = () => (
@@ -94,65 +95,66 @@ const GamePage = () => {
                     <button
                         key={player.id}
                         onClick={() => {
-                            const newAction = new GameAction(
-                                selectedAction.team,
+                            const newAction: IGameAction = {
+                                type: selectedAction?.type,
+                                team: selectedAction?.team,
                                 period,
                                 time,
-                                selectedAction.type,
-                                player,
-                                selectedPosition!.x,
-                                selectedPosition!.y
-                            );
+                                player: player as unknown as IPlayer,
+                                x: selectedPosition!.x,
+                                y: selectedPosition!.y
+                            };
+
                             setActions([...actions, newAction]);
                             setSelectedAction(null);
                             setSelectedPosition(null);
 
                             if (selectedAction.type === ActionType.GOAL) {
                                 if (selectedAction.team === formData.homeTeam) {
-                                    const newHomeScore = new ScoreData(
-                                        homeScore.goals + 1,
-                                        homeScore.shots + 1,
-                                        homeScore.turnovers,
-                                    )
+                                    const newHomeScore: IScoreData = {
+                                        goals: homeScore.goals + 1,
+                                        shots: homeScore.shots + 1,
+                                        turnovers: homeScore.turnovers,
+                                    }
                                     setHomeScore(newHomeScore)
                                 } else {
-                                    const newAwayScore = new ScoreData(
-                                        awayScore.goals + 1,
-                                        awayScore.shots + 1,
-                                        awayScore.turnovers,
-                                    )
+                                    const newAwayScore: IScoreData = {
+                                        goals: awayScore.goals + 1,
+                                        shots: awayScore.shots + 1,
+                                        turnovers: awayScore.turnovers,
+                                    }
                                     setAwayScore(newAwayScore)
                                 }
                             } else if (selectedAction.type === ActionType.SHOT) {
                                 if (selectedAction.team === formData.homeTeam) {
-                                    const newHomeScore = new ScoreData(
-                                        homeScore.goals,
-                                        homeScore.shots + 1,
-                                        homeScore.turnovers,
-                                    )
+                                    const newHomeScore: IScoreData = {
+                                        goals: homeScore.goals,
+                                        shots: homeScore.shots + 1,
+                                        turnovers: homeScore.turnovers,
+                                    }
                                     setHomeScore(newHomeScore)
                                 } else {
-                                    const newAwayScore = new ScoreData(
-                                        awayScore.goals,
-                                        awayScore.shots + 1,
-                                        awayScore.turnovers,
-                                    )
+                                    const newAwayScore: IScoreData = {
+                                        goals: awayScore.goals,
+                                        shots: awayScore.shots + 1,
+                                        turnovers: awayScore.turnovers,
+                                    }
                                     setAwayScore(newAwayScore)
                                 }
                             } else if (selectedAction.type === ActionType.TURNOVER) {
                                 if (selectedAction.team === formData.homeTeam) {
-                                    const newHomeScore = new ScoreData(
-                                        homeScore.goals,
-                                        homeScore.shots,
-                                        homeScore.turnovers + 1,
-                                    )
+                                    const newHomeScore: IScoreData = {
+                                        goals: homeScore.goals,
+                                        shots: homeScore.shots,
+                                        turnovers: homeScore.turnovers + 1,
+                                    }
                                     setHomeScore(newHomeScore)
                                 } else {
-                                    const newAwayScore = new ScoreData(
-                                        awayScore.goals,
-                                        awayScore.shots,
-                                        awayScore.turnovers + 1,
-                                    )
+                                    const newAwayScore: IScoreData = {
+                                        goals: awayScore.goals,
+                                        shots: awayScore.shots,
+                                        turnovers: awayScore.turnovers + 1,
+                                    }
                                     setAwayScore(newAwayScore)
                                 }
                             }
@@ -199,10 +201,10 @@ const GamePage = () => {
         }
     };
 
-    const saveGameRecord = (game: Game): void => {
+    const saveGameRecord = (game: IGame): void => {
         // Get existing games from localStorage
         const existingGamesRaw = localStorage.getItem('gameData');
-        let games: Game[] = [];
+        let games: IGame[] = [];
 
         if (existingGamesRaw) {
             try {
@@ -231,7 +233,14 @@ const GamePage = () => {
         const score = {home: homeScore, away: awayScore};
         const teams = {home: formData.homeTeam, away: formData.awayTeam};
 
-        const game = new Game("", timestamp, actions, teams, score, formData.selectedImage);
+        const game: IGame = {
+            id: "",
+            timestamp: timestamp,
+            actions: actions,
+            teams: teams,
+            score: score,
+            selectedImage: formData.selectedImage
+        };
         saveGameRecord(game);
     }
 
@@ -281,9 +290,6 @@ const GamePage = () => {
                             left: `${action.x * 100}%`,
                             top: `${action.y * 100}%`,
                             transform: 'translate(-50%, -50%)',
-                        }}
-                        onClick={() => {
-                            // TODO: Show action details modal
                         }}
                     >
                         <Icon

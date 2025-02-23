@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {Championship} from "../OOP/classes/Championship";
 import {Team} from "../OOP/classes/Team";
 import {useLocation, useNavigate} from "react-router-dom";
-import {TeamColor} from "../OOP/interfaces/TeamColor";
+import {ITeamColor} from "../OOP/interfaces/ITeamColor";
 import {TeamService} from "../OOP/services/TeamService";
 // @ts-ignore
 import styles from './CreateTeamPage.module.css';
@@ -11,8 +11,8 @@ import {TeamAlreadyExistsError} from "../OOP/errors/TeamAlreadyExistsError"; // 
 const CreateTeamPage = () => {
     const championships = useLocation().state.championships as Championship[];
     const [name, setName] = useState<string>("");
-    const [homeColor, setHomeColor] = useState<TeamColor>({primary: "#000000", secondary: "#ffffff"});
-    const [awayColor, setAwayColor] = useState<TeamColor>({primary: "#ffffff", secondary: "#000000"});
+    const [homeColor, setHomeColor] = useState<ITeamColor>({primary: "#000000", secondary: "#ffffff"});
+    const [awayColor, setAwayColor] = useState<ITeamColor>({primary: "#ffffff", secondary: "#000000"});
     const [logo, setLogo] = useState<File | null>(null);
     const [championship, setChampionship] = useState<Championship[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);

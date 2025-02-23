@@ -1,21 +1,21 @@
 import {Player} from "./Player";
 import {Championship} from "./Championship";
-import {TeamColor} from "../interfaces/TeamColor";
-import {TeamInterface} from "../interfaces/TeamInterface";
+import {ITeamColor} from "../interfaces/ITeamColor";
+import {ITeam} from "../interfaces/ITeam";
 
 export class Team {
     private readonly _id: string
     private _name: string
     private _logo: string;
-    private _homeColor: TeamColor;
-    private _awayColor: TeamColor;
+    private _homeColor: ITeamColor;
+    private _awayColor: ITeamColor;
     private _championships: Championship[]
     private _players: Player[] = []
 
-    constructor(id: string = "", name: string = "", logo: string = "", homeColor: TeamColor = {
+    constructor(id: string = "", name: string = "", logo: string = "", homeColor: ITeamColor = {
         primary: "",
         secondary: ""
-    }, awayColor: TeamColor = {
+    }, awayColor: ITeamColor = {
         primary: "",
         secondary: ""
     }, championships: Championship[] = [], players: Player[] = []) {
@@ -48,19 +48,19 @@ export class Team {
         this._logo = value;
     }
 
-    get homeColor(): TeamColor {
+    get homeColor(): ITeamColor {
         return this._homeColor;
     }
 
-    set homeColor(value: TeamColor) {
+    set homeColor(value: ITeamColor) {
         this._homeColor = value;
     }
 
-    get awayColor(): TeamColor {
+    get awayColor(): ITeamColor {
         return this._awayColor;
     }
 
-    set awayColor(value: TeamColor) {
+    set awayColor(value: ITeamColor) {
         this._awayColor = value;
     }
 
@@ -90,7 +90,7 @@ export class Team {
         };
     }
 
-    static fromInterface(team: TeamInterface): Team {
+    /*static fromInterface(team: ITeam): Team {
         return new Team(
             team.id,
             team.name,
@@ -99,5 +99,5 @@ export class Team {
             team.awayColor,
             team.championships
         );
-    }
+    }*/
 }

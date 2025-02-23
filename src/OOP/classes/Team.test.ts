@@ -1,15 +1,15 @@
 import { Team } from './Team';
 import { Player } from './Player';
 import { Championship } from './Championship';
-import { TeamColor } from '../interfaces/TeamColor';
+import { ITeamColor } from '../interfaces/ITeamColor';
 
 
 describe('Team', () => {
     let team: Team;
     let mockPlayers: Player[];
     let mockChampionships: Championship[];
-    let mockHomeColor: TeamColor;
-    let mockAwayColor: TeamColor;
+    let mockHomeColor: ITeamColor;
+    let mockAwayColor: ITeamColor;
 
     beforeEach(() => {
         mockPlayers = [new Player(), new Player()];

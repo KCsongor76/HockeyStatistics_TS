@@ -1,13 +1,13 @@
-import {TeamColor} from "./TeamColor";
+import {ITeamColor} from "./ITeamColor";
 import {Championship} from "../classes/Championship";
 import {Player} from "../classes/Player";
 
-export interface TeamInterface {
+export interface ITeam {
     id: string
     name: string
     logo: string
-    homeColor: TeamColor
-    awayColor: TeamColor
+    homeColor: ITeamColor
+    awayColor: ITeamColor
     championships: Championship[]
     players: Player[]
 }

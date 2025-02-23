@@ -2,7 +2,7 @@ import {Team} from "./Team";
 import {Player} from "./Player";
 import {PlayoffPeriod, RegularPeriod} from "../enums/Period";
 import {ActionType} from "../enums/ActionType";
-import {GameActionInterface} from "../interfaces/GameActionInterface";
+import {IGameAction} from "../interfaces/IGameAction";
 
 export class GameAction {
     private _team: Team;
@@ -41,7 +41,7 @@ export class GameAction {
         return this._team;
     }
 
-    static fromInterface(action: GameActionInterface) {
+    /*static fromInterface(action: IGameAction) {
         return new GameAction(action.team, action.period, action.time, action.type, action.player, action.x, action.y);
-    }
+    }*/
 }
