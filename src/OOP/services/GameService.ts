@@ -1,3 +1,35 @@
-export class GameService {
+import {addDoc, collection, deleteDoc, doc, getDoc, getDocs, setDoc} from "firebase/firestore";
+import {db} from "../../firebaseConfig";
+import {IGame} from "../interfaces/IGame";
 
+export class GameService {
+    private static collectionRef = collection(db, 'games');
+
+    static saveGame = async (game: IGame) => {
+        const docRef = await addDoc(this.collectionRef, {});
+        const gameId = docRef.id;
+        const gameWithId = {
+            ...game,
+            id: gameId
+        };
+        await setDoc(docRef, gameWithId);
+        return gameWithId as IGame;
+    }
+
+    static getGame = async (game: IGame) => {
+        const docRef = doc(this.collectionRef, game.id);
+        const docSnap = await getDoc(docRef);
+        return docSnap.exists() ? {id: docSnap.id, ...docSnap.data()} as IGame : null;
+    }
+
+    static getAllGames = async () => {
+        const querySnapshot = await getDocs(this.collectionRef);
+        return querySnapshot.docs.map(doc => ({id: doc.id, ...doc.data()} as IGame));
+    }
+
+    static deleteGame = async (game: IGame) => {
+        const id = game.id;
+        const docRef = doc(this.collectionRef, id);
+        await deleteDoc(docRef);
+    }
 }

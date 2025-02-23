@@ -10,6 +10,7 @@ import {IScoreData} from "../OOP/interfaces/IScoreData";
 import {IGameAction} from "../OOP/interfaces/IGameAction";
 import {IPlayer} from "../OOP/interfaces/IPlayer";
 import {IGame} from "../OOP/interfaces/IGame";
+import {GameService} from "../OOP/services/GameService";
 
 type FormData = {
     championship: IChampionship;
@@ -201,9 +202,9 @@ const GamePage = () => {
         }
     };
 
-    const saveGameRecord = (game: IGame): void => {
+    const saveGameRecord = async (game: IGame): Promise<void> => {
         // Get existing games from localStorage
-        const existingGamesRaw = localStorage.getItem('gameData');
+        /*const existingGamesRaw = localStorage.getItem('gameData');
         let games: IGame[] = [];
 
         if (existingGamesRaw) {
@@ -225,7 +226,12 @@ const GamePage = () => {
 
         // Save back to localStorage
         localStorage.setItem('gameData', JSON.stringify(games));
-        console.log(games)
+        console.log(games)*/
+        try {
+            const newGame = await GameService.saveGame(game)
+        } catch (e) {
+            console.log(e)
+        }
     }
 
     const submitGameHandler = (): void => {
