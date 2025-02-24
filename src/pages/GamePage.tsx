@@ -8,9 +8,12 @@ import {IChampionship} from "../OOP/interfaces/IChampionship";
 import {ITeam} from "../OOP/interfaces/ITeam";
 import {IScoreData} from "../OOP/interfaces/IScoreData";
 import {IGameAction} from "../OOP/interfaces/IGameAction";
-import {IPlayer} from "../OOP/interfaces/IPlayer";
 import {IGame} from "../OOP/interfaces/IGame";
 import {GameService} from "../OOP/services/GameService";
+// @ts-ignore
+import styles from './GamePage.module.css';
+import ActionSelectorModal from "../modals/ActionSelectorModal";
+import PlayerSelectorModal from "../modals/PlayerSelectorModal";
 
 type FormData = {
     championship: IChampionship;
@@ -38,141 +41,43 @@ const GamePage = () => {
     const [awayScore, setAwayScore] = useState<IScoreData>({goals: 0, shots: 0, turnovers: 0});
     const [actions, setActions] = useState<IGameAction[]>([]);
 
-// Add modal content
-    const ActionSelectorModal = () => (
-        <div style={{
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            backgroundColor: 'white',
-            padding: '20px',
-            borderRadius: '8px',
-            zIndex: 1000
-        }}>
-            <div style={{display: 'flex', flexDirection: 'column', gap: '10px'}}>
-                {/* Home Team Actions */}
-                <div style={{display: 'flex', gap: '10px'}}>
-                    {Object.values(ActionType).map((action) => (
-                        <Icon
-                            key={`home-${action}`}
-                            type={action}
-                            teamType="HOME"
-                            teamColors={formData.homeColor}
-                            onClick={() => setSelectedAction({type: action, team: formData.homeTeam})}
-                        />
-                    ))}
-                </div>
-                {/* Away Team Actions */}
-                <div style={{display: 'flex', gap: '10px'}}>
-                    {Object.values(ActionType).map((action) => (
-                        <Icon
-                            key={`away-${action}`}
-                            type={action}
-                            teamType="AWAY"
-                            teamColors={formData.awayColor}
-                            onClick={() => setSelectedAction({type: action, team: formData.awayTeam})}
-                        />
-                    ))}
-                </div>
-            </div>
-        </div>
-    );
-
-    const PlayerSelectorModal = () => (
-        <div style={{
-            position: 'fixed',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            backgroundColor: 'white',
-            padding: '20px',
-            borderRadius: '8px',
-            zIndex: 1000
-        }}>
-            <h3>Select Player</h3>
-            <div style={{display: 'flex', flexDirection: 'column', gap: '5px'}}>
-                {selectedAction?.team.players.map((player) => (
-                    <button
-                        key={player.id}
-                        onClick={() => {
-                            const newAction: IGameAction = {
-                                type: selectedAction?.type,
-                                team: selectedAction?.team,
-                                period,
-                                time,
-                                player: player as unknown as IPlayer,
-                                x: selectedPosition!.x,
-                                y: selectedPosition!.y
-                            };
-
-                            setActions([...actions, newAction]);
-                            setSelectedAction(null);
-                            setSelectedPosition(null);
-
-                            if (selectedAction.type === ActionType.GOAL) {
-                                if (selectedAction.team === formData.homeTeam) {
-                                    const newHomeScore: IScoreData = {
-                                        goals: homeScore.goals + 1,
-                                        shots: homeScore.shots + 1,
-                                        turnovers: homeScore.turnovers,
-                                    }
-                                    setHomeScore(newHomeScore)
-                                } else {
-                                    const newAwayScore: IScoreData = {
-                                        goals: awayScore.goals + 1,
-                                        shots: awayScore.shots + 1,
-                                        turnovers: awayScore.turnovers,
-                                    }
-                                    setAwayScore(newAwayScore)
-                                }
-                            } else if (selectedAction.type === ActionType.SHOT) {
-                                if (selectedAction.team === formData.homeTeam) {
-                                    const newHomeScore: IScoreData = {
-                                        goals: homeScore.goals,
-                                        shots: homeScore.shots + 1,
-                                        turnovers: homeScore.turnovers,
-                                    }
-                                    setHomeScore(newHomeScore)
-                                } else {
-                                    const newAwayScore: IScoreData = {
-                                        goals: awayScore.goals,
-                                        shots: awayScore.shots + 1,
-                                        turnovers: awayScore.turnovers,
-                                    }
-                                    setAwayScore(newAwayScore)
-                                }
-                            } else if (selectedAction.type === ActionType.TURNOVER) {
-                                if (selectedAction.team === formData.homeTeam) {
-                                    const newHomeScore: IScoreData = {
-                                        goals: homeScore.goals,
-                                        shots: homeScore.shots,
-                                        turnovers: homeScore.turnovers + 1,
-                                    }
-                                    setHomeScore(newHomeScore)
-                                } else {
-                                    const newAwayScore: IScoreData = {
-                                        goals: awayScore.goals,
-                                        shots: awayScore.shots,
-                                        turnovers: awayScore.turnovers + 1,
-                                    }
-                                    setAwayScore(newAwayScore)
-                                }
-                            }
-                        }}
-                    >
-                        {player.name} (#{player.jerseyNumber})
-                    </button>
-                ))}
-            </div>
-        </div>
-    );
-
 
     const formData = useLocation().state.formData as FormData;
     const [showDetails, setShowDetails] = useState(true);
     const pressTimer = useRef<number | null>(null);
     const [isLongPress, setIsLongPress] = useState(false); // To track if it's a long press
+
+    const handleScoreUpdate = (team: ITeam, actionType: ActionType, currentScore: IScoreData): IScoreData => {
+        const newScore = {...currentScore};
+
+        switch (actionType) {
+            case ActionType.GOAL:
+                newScore.goals += 1;
+                newScore.shots += 1;
+                break;
+            case ActionType.SHOT:
+                newScore.shots += 1;
+                break;
+            case ActionType.TURNOVER:
+                newScore.turnovers += 1;
+                break;
+        }
+
+        return newScore;
+    };
+
+    const handleActionComplete = (newAction: IGameAction) => {
+        setActions([...actions, newAction]);
+
+        if (newAction.team === formData.homeTeam) {
+            setHomeScore(current => handleScoreUpdate(newAction.team, newAction.type, current));
+        } else {
+            setAwayScore(current => handleScoreUpdate(newAction.team, newAction.type, current));
+        }
+
+        setSelectedAction(null);
+        setSelectedPosition(null);
+    };
 
     const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
         if (isLongPress) return;
@@ -203,38 +108,16 @@ const GamePage = () => {
     };
 
     const saveGameRecord = async (game: IGame): Promise<void> => {
-        // Get existing games from localStorage
-        /*const existingGamesRaw = localStorage.getItem('gameData');
-        let games: IGame[] = [];
-
-        if (existingGamesRaw) {
-            try {
-                games = JSON.parse(existingGamesRaw);
-                // Ensure games is an array
-                if (!Array.isArray(games)) {
-                    games = [games];
-                }
-            } catch (e) {
-                // If parsing fails, start with empty array
-                console.warn('Failed to parse existing games, starting fresh');
-                games = [];
-            }
-        }
-
-        // Add new game record
-        games.push(game);
-
-        // Save back to localStorage
-        localStorage.setItem('gameData', JSON.stringify(games));
-        console.log(games)*/
         try {
-            const newGame = await GameService.saveGame(game)
+            await GameService.saveGame(game)
+            alert("Game saved successfully.")
         } catch (e) {
             console.log(e)
+            alert("Failed to save the game. Please try again.")
         }
     }
 
-    const submitGameHandler = (): void => {
+    const submitGameHandler = async (): Promise<void> => {
         const timestamp = new Date().toISOString();
         const score = {home: homeScore, away: awayScore};
         const teams = {home: formData.homeTeam, away: formData.awayTeam};
@@ -247,7 +130,8 @@ const GamePage = () => {
             score: score,
             selectedImage: formData.selectedImage
         };
-        saveGameRecord(game);
+
+        await saveGameRecord(game);
     }
 
     const formatTime = (seconds: number) => {
@@ -266,16 +150,27 @@ const GamePage = () => {
         return () => clearInterval(interval);
     }, [isTimerRunning, time]);
 
-    console.log(actions);
-
-    const raw = localStorage.getItem("gameData")
-    const data = JSON.parse(raw || '[]');
-    console.log(data)
-
     return (
         <>
-            {selectedPosition && !selectedAction && <ActionSelectorModal/>}
-            {selectedAction && <PlayerSelectorModal/>}
+            {selectedPosition && !selectedAction && (
+                <ActionSelectorModal
+                    homeTeam={formData.homeTeam}
+                    awayTeam={formData.awayTeam}
+                    homeColor={formData.homeColor}
+                    awayColor={formData.awayColor}
+                    onActionSelect={setSelectedAction}
+                />
+            )}
+            {selectedAction && (
+                <PlayerSelectorModal
+                    selectedAction={selectedAction}
+                    selectedPosition={selectedPosition}
+                    period={period}
+                    time={time}
+                    onActionComplete={handleActionComplete}
+                    // onScoreUpdate={handleScoreUpdate}
+                />
+            )}
             <div
                 style={{width: '100%', position: 'relative'}}
                 onClick={handleClick}
