@@ -1,0 +1,30 @@
+.rootLayout {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+.mainContent {
+    width: 100%;
+    max-width: 100%;
+    padding: 16px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+}
+
+/* Ensure consistent box-sizing across all elements */
+* {
+    box-sizing: border-box;
+}
+
+/* Fix for potential body/html default margins causing scroll */
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    overflow-x: hidden;
+}

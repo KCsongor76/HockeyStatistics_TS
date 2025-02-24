@@ -4,7 +4,7 @@ import {ITeam} from "../OOP/interfaces/ITeam";
 import {ITeamColor} from "../OOP/interfaces/ITeamColor";
 import Icon from "../components/Icon";
 // @ts-ignore
-import styles from '../pages/GamePage.module.css';
+import styles from './ActionSelectorModal.module.css';
 
 interface ActionSelectorModalProps {
     homeTeam: ITeam;

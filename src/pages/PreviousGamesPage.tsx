@@ -10,6 +10,15 @@ const PreviousGamesPage = () => {
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
 
+    const formatTime = (timestamp: string) => {
+        const date = new Date(timestamp);
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const day = date.getDate().toString().padStart(2, '0');
+
+        return `${year}-${month}-${day}`;
+    }
+
     useEffect(() => {
         const fetchGames = async () => {
             try {
@@ -58,7 +67,7 @@ const PreviousGamesPage = () => {
                                 <img className={styles.teamLogo} src={game.teams.home.logo} alt={game.teams.home.name}/>
                             </td>
                             <td className={styles.td}>{game.teams.home.name}</td>
-                            <td className={styles.td}>{game.timestamp}</td>
+                            <td className={styles.td}>{formatTime(game.timestamp)}</td>
                             <td className={`${styles.td} ${styles.scoreCell}`}>
                                 {game.score.home.goals} - {game.score.away.goals}
                             </td>

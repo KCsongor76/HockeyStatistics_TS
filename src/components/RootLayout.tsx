@@ -1,14 +1,17 @@
 import React from 'react';
-// @ts-ignore
-import {Outlet} from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import MainNavigation from "./MainNavigation";
+// @ts-ignore
+import styles from './RootLayout.module.css';
 
 const RootLayout = () => {
     return (
-        <>
+        <div className={styles.rootLayout}>
             <MainNavigation isSignedIn={true}/>
-            <main><Outlet/></main>
-        </>
+            <main className={styles.mainContent}>
+                <Outlet/>
+            </main>
+        </div>
     );
 };
 

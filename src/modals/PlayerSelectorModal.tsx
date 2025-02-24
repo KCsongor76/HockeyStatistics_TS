@@ -4,7 +4,7 @@ import {ITeam} from "../OOP/interfaces/ITeam";
 import {IPlayer} from "../OOP/interfaces/IPlayer";
 import {IGameAction} from "../OOP/interfaces/IGameAction";
 // @ts-ignore
-import styles from '../pages/GamePage.module.css';
+import styles from './PlayerSelectorModal.module.css';
 
 interface PlayerSelectorModalProps {
     selectedAction: { type: ActionType; team: ITeam } | null;

@@ -10,10 +10,10 @@ import {IScoreData} from "../OOP/interfaces/IScoreData";
 import {IGameAction} from "../OOP/interfaces/IGameAction";
 import {IGame} from "../OOP/interfaces/IGame";
 import {GameService} from "../OOP/services/GameService";
-// @ts-ignore
-import styles from './GamePage.module.css';
 import ActionSelectorModal from "../modals/ActionSelectorModal";
 import PlayerSelectorModal from "../modals/PlayerSelectorModal";
+// @ts-ignore
+import styles from './GamePage.module.css';
 
 type FormData = {
     championship: IChampionship;
@@ -171,94 +171,147 @@ const GamePage = () => {
                     // onScoreUpdate={handleScoreUpdate}
                 />
             )}
-            <div
-                style={{width: '100%', position: 'relative'}}
-                onClick={handleClick}
-            >
-                <img
-                    src={formData.selectedImage}
-                    alt="gamePage"
-                    style={{width: '100%', display: 'block', cursor: 'pointer'}}
-                    onMouseDown={handleMouseDown}
-                    onMouseUp={handleMouseUp}
-                    onMouseLeave={handleMouseUp} // Handle the case when the mouse leaves the image
-                />
-                {showDetails && actions.map((action, index) => (
-                    <div
-                        key={index}
-                        style={{
-                            position: 'absolute',
-                            left: `${action.x * 100}%`,
-                            top: `${action.y * 100}%`,
-                            transform: 'translate(-50%, -50%)',
-                        }}
-                    >
-                        <Icon
-                            type={action.type}
-                            teamType={action.team === formData.homeTeam ? 'HOME' : 'AWAY'}
-                            teamColors={action.team === formData.homeTeam ? formData.homeColor : formData.awayColor}
-                            size={30}
-                        />
+            <div className={styles.gameContainer}>
+                <div
+                    className={styles.fieldContainer}
+                    onClick={handleClick}
+                >
+                    <img
+                        src={formData.selectedImage}
+                        alt="gamePage"
+                        className={styles.fieldImage}
+                        onMouseDown={handleMouseDown}
+                        onMouseUp={handleMouseUp}
+                        onMouseLeave={handleMouseUp} // Handle the case when the mouse leaves the image
+                    />
+                    {showDetails && actions.map((action, index) => (
+                        <div
+                            key={index}
+                            className={styles.actionIcon}
+                            style={{
+                                left: `${action.x * 100}%`,
+                                top: `${action.y * 100}%`,
+                            }}
+                        >
+                            <Icon
+                                type={action.type}
+                                teamType={action.team === formData.homeTeam ? 'HOME' : 'AWAY'}
+                                teamColors={action.team === formData.homeTeam ? formData.homeColor : formData.awayColor}
+                                size={30}
+                            />
+                        </div>
+                    ))}
+                </div>
+                {showDetails ? (
+                    <div className={styles.statsContainer}>
+                        <div className={styles.teamInfo}>
+                            <img src={formData.homeTeam.logo} alt={formData.homeTeam.name} className={styles.teamLogo} />
+                            <div className={styles.teamStats}>
+                                <p className={styles.statItem}>Shots: {homeScore.shots}</p>
+                                <p className={styles.statItem}>Turnovers: {homeScore.turnovers}</p>
+                            </div>
+                        </div>
+
+                        <div className={styles.gameControls}>
+                            <p className={styles.periodDisplay}>Period: {period}</p>
+                            <p className={styles.timeDisplay}>{formatTime(time)}</p>
+                            <p className={styles.scoreDisplay}>{homeScore.goals} - {awayScore.goals}</p>
+
+                            <div className={styles.buttonContainer}>
+                                {isTimerRunning ? (
+                                    <button
+                                        className={`${styles.button} ${styles.secondaryButton}`}
+                                        onClick={() => setIsTimerRunning(false)}
+                                    >
+                                        Stop Time
+                                    </button>
+                                ) : (
+                                    time > 0 &&
+                                    <button
+                                        className={`${styles.button} ${styles.primaryButton}`}
+                                        onClick={() => setIsTimerRunning(true)}
+                                    >
+                                        Start Time
+                                    </button>
+                                )}
+
+                                {!isTimerRunning && time === 0 && period < 3 && (
+                                    <button
+                                        className={`${styles.button} ${styles.primaryButton}`}
+                                        onClick={() => {
+                                            setPeriod(p => p + 1);
+                                            setTime(formData.gameType === GameType.REGULAR ? 5 : 5); // TODO: back to 1200
+                                        }}
+                                    >
+                                        Next Period
+                                    </button>
+                                )}
+
+                                <button
+                                    className={`${styles.button} ${styles.successButton}`}
+                                    onClick={submitGameHandler}
+                                >
+                                    End Game
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className={styles.teamInfo}>
+                            <img src={formData.awayTeam.logo} alt={formData.awayTeam.name} className={styles.teamLogo} />
+                            <div className={styles.teamStats}>
+                                <p className={styles.statItem}>Shots: {awayScore.shots}</p>
+                                <p className={styles.statItem}>Turnovers: {awayScore.turnovers}</p>
+                            </div>
+                        </div>
                     </div>
-                ))}
+                ) : (
+                    <div className={styles.compactControls}>
+                        <div className={styles.compactStats}>
+                            <p className={styles.compactPeriod}>Period: {period}</p>
+                            <p className={styles.compactTime}>{formatTime(time)}</p>
+                            <p className={styles.compactScore}>{homeScore.goals} - {awayScore.goals}</p>
+                        </div>
+
+                        <div className={styles.buttonContainer}>
+                            {isTimerRunning ? (
+                                <button
+                                    className={`${styles.button} ${styles.secondaryButton}`}
+                                    onClick={() => setIsTimerRunning(false)}
+                                >
+                                    Stop Time
+                                </button>
+                            ) : (
+                                time > 0 &&
+                                <button
+                                    className={`${styles.button} ${styles.primaryButton}`}
+                                    onClick={() => setIsTimerRunning(true)}
+                                >
+                                    Start Time
+                                </button>
+                            )}
+
+                            {!isTimerRunning && time === 0 && period < 3 && (
+                                <button
+                                    className={`${styles.button} ${styles.primaryButton}`}
+                                    onClick={() => {
+                                        setPeriod(p => p + 1);
+                                        setTime(formData.gameType === GameType.REGULAR ? 5 : 5); // TODO: back to 1200
+                                    }}
+                                >
+                                    Next Period
+                                </button>
+                            )}
+
+                            <button
+                                className={`${styles.button} ${styles.successButton}`}
+                                onClick={submitGameHandler}
+                            >
+                                End Game
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
-            {showDetails ? (
-                <div>
-                    <img src={formData.homeTeam.logo} alt={formData.homeTeam.name}/>
-                    <div>
-                        <p>Shots: {homeScore.shots}</p>
-                        <p>Turnovers: {homeScore.turnovers}</p>
-                    </div>
-
-                    <div>
-                        <p>Period: {period}</p>
-                        <p>Time: {formatTime(time)}</p>
-                        <p>Score: {homeScore.goals} - {awayScore.goals}</p>
-
-                        {isTimerRunning ? (
-                            <button onClick={() => setIsTimerRunning(false)}>Stop Time</button>
-                        ) : (
-                            time > 0 && <button onClick={() => setIsTimerRunning(true)}>Start Time</button>
-                        )}
-
-                        {!isTimerRunning && time === 0 && period < 3 && (
-                            <button onClick={() => {
-                                setPeriod(p => p + 1);
-                                setTime(formData.gameType === GameType.REGULAR ? 5 : 5); // TODO: back to 1200
-                            }}>Next Period</button>
-                        )}
-
-                        <button onClick={submitGameHandler}>End Game</button>
-                    </div>
-
-                    <div>
-                        <p>Shots: {awayScore.shots}</p>
-                        <p>Turnovers: {awayScore.turnovers}</p>
-                    </div>
-                    <img src={formData.awayTeam.logo} alt={formData.awayTeam.name}/>
-                </div>
-            ) : (
-                <div>
-                    <p>Period: {period}</p>
-                    <p>Time: {formatTime(time)}</p>
-                    <p>Score: {homeScore.goals} - {awayScore.goals}</p>
-
-                    {isTimerRunning ? (
-                        <button onClick={() => setIsTimerRunning(false)}>Stop Time</button>
-                    ) : (
-                        time > 0 && <button onClick={() => setIsTimerRunning(true)}>Start Time</button>
-                    )}
-
-                    {!isTimerRunning && time === 0 && period < 3 && (
-                        <button onClick={() => {
-                            setPeriod(p => p + 1);
-                            setTime(formData.gameType === GameType.REGULAR ? 5 : 5); // TODO: back to 1200
-                        }}>Next Period</button>
-                    )}
-
-                    <button onClick={submitGameHandler}>End Game</button>
-                </div>
-            )}
         </>
     );
 };
