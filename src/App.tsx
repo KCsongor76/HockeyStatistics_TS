@@ -22,7 +22,6 @@ import {loader as playerCRUDPageLoader} from "./pages/PlayerCRUDPage";
 import HandlePlayerPage from "./pages/HandlePlayerPage";
 
 function App() {
-
     const [isLoaded, setIsLoaded] = useState<boolean>(false);
     const [isSignedIn, setIsSignedIn] = useState<boolean>(true);
 
@@ -85,8 +84,7 @@ function App() {
                 {index: true, element: <HomePage/>},
                 {
                     path: "start",
-                    element: <StartPage/>,
-                    loader: startPageLoader
+                    element: <StartPage/>, loader: startPageLoader
                 },
                 {path: "game", element: <GamePage/>},
                 {path: "admin", element: <AuthPage/>},
