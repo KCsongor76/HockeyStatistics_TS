@@ -1,0 +1,49 @@
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modalContent {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    min-width: 300px;
+}
+
+.modalTitle {
+    margin-top: 0;
+    color: #333;
+}
+
+.detailItem {
+    margin: 10px 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+.detailItem label {
+    font-weight: bold;
+    margin-right: 15px;
+}
+
+.closeButton {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    float: right;
+}
+
+.closeButton:hover {
+    background-color: #0056b3;
+}

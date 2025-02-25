@@ -14,6 +14,7 @@ import ActionSelectorModal from "../modals/ActionSelectorModal";
 import PlayerSelectorModal from "../modals/PlayerSelectorModal";
 // @ts-ignore
 import styles from './GamePage.module.css';
+import IconDataModal from "../modals/IconDataModal";
 
 type FormData = {
     championship: IChampionship;
@@ -34,6 +35,7 @@ const GamePage = () => {
     // Add these new state variables
     const [selectedPosition, setSelectedPosition] = useState<{ x: number, y: number } | null>(null);
     const [selectedAction, setSelectedAction] = useState<{ type: ActionType, team: ITeam } | null>(null);
+    const [selectedActionDetails, setSelectedActionDetails] = useState<IGameAction | null>(null);
     const [period, setPeriod] = useState(1);
     const [time, setTime] = useState(5); // 20:00 in seconds TODO: back to 1200
     const [isTimerRunning, setIsTimerRunning] = useState(false);
@@ -87,6 +89,10 @@ const GamePage = () => {
         const y = (e.clientY - rect.top) / rect.height;
 
         setSelectedPosition({x, y});
+    };
+
+    const handleIconClick = (action: IGameAction) => {
+        setSelectedActionDetails(action);
     };
 
     const handleMouseDown = () => {
@@ -171,6 +177,12 @@ const GamePage = () => {
                     // onScoreUpdate={handleScoreUpdate}
                 />
             )}
+            {selectedActionDetails && (
+                <IconDataModal
+                    action={selectedActionDetails}
+                    onClose={() => setSelectedActionDetails(null)}
+                />
+            )}
             <div className={styles.gameContainer}>
                 <div
                     className={styles.fieldContainer}
@@ -198,6 +210,7 @@ const GamePage = () => {
                                 teamType={action.team === formData.homeTeam ? 'HOME' : 'AWAY'}
                                 teamColors={action.team === formData.homeTeam ? formData.homeColor : formData.awayColor}
                                 size={30}
+                                onClick={() => handleIconClick(action)}
                             />
                         </div>
                     ))}
@@ -205,7 +218,7 @@ const GamePage = () => {
                 {showDetails ? (
                     <div className={styles.statsContainer}>
                         <div className={styles.teamInfo}>
-                            <img src={formData.homeTeam.logo} alt={formData.homeTeam.name} className={styles.teamLogo} />
+                            <img src={formData.homeTeam.logo} alt={formData.homeTeam.name} className={styles.teamLogo}/>
                             <div className={styles.teamStats}>
                                 <p className={styles.statItem}>Shots: {homeScore.shots}</p>
                                 <p className={styles.statItem}>Turnovers: {homeScore.turnovers}</p>
@@ -257,7 +270,7 @@ const GamePage = () => {
                         </div>
 
                         <div className={styles.teamInfo}>
-                            <img src={formData.awayTeam.logo} alt={formData.awayTeam.name} className={styles.teamLogo} />
+                            <img src={formData.awayTeam.logo} alt={formData.awayTeam.name} className={styles.teamLogo}/>
                             <div className={styles.teamStats}>
                                 <p className={styles.statItem}>Shots: {awayScore.shots}</p>
                                 <p className={styles.statItem}>Turnovers: {awayScore.turnovers}</p>
