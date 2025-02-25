@@ -9,7 +9,7 @@ interface IconProps {
         secondary: string;
     };
     size?: number;
-    onClick?: () => void;
+    onClick?: (e: React.MouseEvent<Element, MouseEvent>) => void;
 }
 
 const Icon = ({type, teamType, teamColors, size = 50, onClick}: IconProps) => {

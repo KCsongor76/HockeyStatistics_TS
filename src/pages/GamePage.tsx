@@ -48,6 +48,7 @@ const GamePage = () => {
     const [showDetails, setShowDetails] = useState(true);
     const pressTimer = useRef<number | null>(null);
     const [isLongPress, setIsLongPress] = useState(false); // To track if it's a long press
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleScoreUpdate = (team: ITeam, actionType: ActionType, currentScore: IScoreData): IScoreData => {
         const newScore = {...currentScore};
@@ -79,20 +80,36 @@ const GamePage = () => {
 
         setSelectedAction(null);
         setSelectedPosition(null);
+        setIsModalOpen(false);
     };
 
     const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-        if (isLongPress) return;
+        // Check if the click target is or contains an icon
+        if (isLongPress || isModalOpen || (e.target as Element).closest('.actionIcon')) return;
 
         const rect = e.currentTarget.getBoundingClientRect();
         const x = (e.clientX - rect.left) / rect.width;
         const y = (e.clientY - rect.top) / rect.height;
 
         setSelectedPosition({x, y});
+        setIsModalOpen(true);
     };
 
-    const handleIconClick = (action: IGameAction) => {
+    const handleIconClick = (action: IGameAction, e: React.MouseEvent) => {
+        e.stopPropagation(); // Prevent the event from bubbling up
         setSelectedActionDetails(action);
+        setIsModalOpen(true);
+    };
+
+    const handleCancelAction = () => {
+        setSelectedPosition(null);
+        setSelectedAction(null);
+        setIsModalOpen(false);
+    };
+
+    const handleCloseIconData = () => {
+        setSelectedActionDetails(null);
+        setIsModalOpen(false);
     };
 
     const handleMouseDown = () => {
@@ -156,6 +173,7 @@ const GamePage = () => {
         return () => clearInterval(interval);
     }, [isTimerRunning, time]);
 
+    // @ts-ignore
     return (
         <>
             {selectedPosition && !selectedAction && (
@@ -165,6 +183,7 @@ const GamePage = () => {
                     homeColor={formData.homeColor}
                     awayColor={formData.awayColor}
                     onActionSelect={setSelectedAction}
+                    onCancel={handleCancelAction}
                 />
             )}
             {selectedAction && (
@@ -174,13 +193,13 @@ const GamePage = () => {
                     period={period}
                     time={time}
                     onActionComplete={handleActionComplete}
-                    // onScoreUpdate={handleScoreUpdate}
+                    onCancel={handleCancelAction}
                 />
             )}
             {selectedActionDetails && (
                 <IconDataModal
                     action={selectedActionDetails}
-                    onClose={() => setSelectedActionDetails(null)}
+                    onClose={handleCloseIconData}
                 />
             )}
             <div className={styles.gameContainer}>
@@ -210,7 +229,7 @@ const GamePage = () => {
                                 teamType={action.team === formData.homeTeam ? 'HOME' : 'AWAY'}
                                 teamColors={action.team === formData.homeTeam ? formData.homeColor : formData.awayColor}
                                 size={30}
-                                onClick={() => handleIconClick(action)}
+                                onClick={(e: React.MouseEvent<Element, MouseEvent>) => handleIconClick(action, e)}
                             />
                         </div>
                     ))}

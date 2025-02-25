@@ -12,6 +12,7 @@ interface PlayerSelectorModalProps {
     period: number;
     time: number;
     onActionComplete: (newAction: IGameAction) => void;
+    onCancel: () => void;
 }
 
 const PlayerSelectorModal: React.FC<PlayerSelectorModalProps> = ({
@@ -19,17 +20,19 @@ const PlayerSelectorModal: React.FC<PlayerSelectorModalProps> = ({
                                                                      selectedPosition,
                                                                      period,
                                                                      time,
-                                                                     onActionComplete
+                                                                     onActionComplete,
+                                                                     onCancel
                                                                  }) => {
     if (!selectedAction || !selectedPosition) return null;
 
     return (
-        <div className={styles.modalOverlay}>
-            <h3>Select Player</h3>
+        <div className={styles.modalOverlay} onClick={(e) => e.stopPropagation()}>
             <div className={styles.playerModalContent}>
+                <h3>Select Player</h3>
                 {selectedAction.team.players.map((player) => (
                     <button
                         key={player.id}
+                        className={styles.playerButton}
                         onClick={() => {
                             const newAction: IGameAction = {
                                 type: selectedAction.type,
@@ -46,6 +49,9 @@ const PlayerSelectorModal: React.FC<PlayerSelectorModalProps> = ({
                         {player.name} (#{player.jerseyNumber})
                     </button>
                 ))}
+                <button className={styles.cancelButton} onClick={onCancel}>
+                    Cancel
+                </button>
             </div>
         </div>
     );

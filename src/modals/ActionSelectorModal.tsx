@@ -12,6 +12,7 @@ interface ActionSelectorModalProps {
     homeColor: ITeamColor;
     awayColor: ITeamColor;
     onActionSelect: (action: { type: ActionType, team: ITeam }) => void;
+    onCancel: () => void;
 }
 
 const ActionSelectorModal: React.FC<ActionSelectorModalProps> = ({
@@ -19,11 +20,14 @@ const ActionSelectorModal: React.FC<ActionSelectorModalProps> = ({
                                                                      awayTeam,
                                                                      homeColor,
                                                                      awayColor,
-                                                                     onActionSelect
+                                                                     onActionSelect,
+                                                                     onCancel
                                                                  }) => {
     return (
-        <div className={styles.modalOverlay}>
+        <div className={styles.modalOverlay} onClick={(e) => e.stopPropagation()}>
             <div className={styles.actionModalContent}>
+                <h3>Select Action</h3>
+
                 {/* Home Team Actions */}
                 <div className={styles.teamActions}>
                     {Object.values(ActionType).map((action) => (
@@ -48,6 +52,10 @@ const ActionSelectorModal: React.FC<ActionSelectorModalProps> = ({
                         />
                     ))}
                 </div>
+
+                <button className={styles.cancelButton} onClick={onCancel}>
+                    Cancel
+                </button>
             </div>
         </div>
     );
