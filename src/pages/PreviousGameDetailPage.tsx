@@ -7,6 +7,7 @@ import {RegularPeriod, PlayoffPeriod} from "../OOP/enums/Period";
 import styles from './PreviousGameDetailPage.module.css';
 import {IGame} from "../OOP/interfaces/IGame";
 import {IGameAction} from "../OOP/interfaces/IGameAction";
+import IconDataModal from "../modals/IconDataModal";
 
 
 const PreviousGameDetailPage = () => {
@@ -31,6 +32,8 @@ const PreviousGameDetailPage = () => {
         return teamFilter && periodFilter && typeFilter;
     });
 
+    const [selectedActionDetails, setSelectedActionDetails] = useState<IGameAction | null>(null);
+
     const togglePeriod = (period: RegularPeriod | PlayoffPeriod) => {
         const newPeriods = new Set(selectedPeriods);
         if (newPeriods.has(period)) {
@@ -51,8 +54,22 @@ const PreviousGameDetailPage = () => {
         setSelectedActionTypes(newTypes);
     };
 
+    const handleIconClick = (action: IGameAction) => {
+        setSelectedActionDetails(action);
+    };
+
+    const handleCloseIconData = () => {
+        setSelectedActionDetails(null);
+    };
+
     return (
         <div className={styles.container}>
+            {selectedActionDetails && (
+                <IconDataModal
+                    action={selectedActionDetails}
+                    onClose={handleCloseIconData}
+                />
+            )}
             <div className={styles.filterSection}>
                 {/* Team View Selection */}
                 <div className={styles.filterGroup}>
@@ -137,6 +154,7 @@ const PreviousGameDetailPage = () => {
                             teamType={action.team.id === gameData.teams.home.id ? 'HOME' : 'AWAY'}
                             teamColors={action.team.id === gameData.teams.home.id ? gameData.teams.home.homeColor : gameData.teams.away.homeColor}
                             size={30}
+                            onClick={() => handleIconClick(action)}
                         />
                     </div>
                 ))}
