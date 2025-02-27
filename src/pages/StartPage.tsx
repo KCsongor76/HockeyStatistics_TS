@@ -13,8 +13,6 @@ import {storage} from "../firebaseConfig";
 import {IPlayer} from "../OOP/interfaces/IPlayer";
 import {ITeam} from "../OOP/interfaces/ITeam";
 
-// todo: css - wider
-// todo: css - buttons - also, green/red - roster buttons
 // todo: implement start over/continue logic
 
 type FormState = {
@@ -99,25 +97,35 @@ const StartPage: React.FC = () => {
     const submitHandler = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
-        console.log(formData);
-
+        // Existing validation
         if (formData.championship.name == "") {
             alert("Please select a championship");
             return;
         }
 
-        if (formData.homeTeam == formData.awayTeam) {
+        if (formData.homeTeam.id === formData.awayTeam.id) {
             alert("Please select different teams");
             return;
         }
 
-        if (formData.selectedImage == "") {
+        if (formData.selectedImage === "") {
             alert("Please select an image");
             return;
         }
 
+        // New roster validation
+        if (formData.homeRoster.length === 0) {
+            alert("Please add at least one player to the home team roster");
+            return;
+        }
+
+        if (formData.awayRoster.length === 0) {
+            alert("Please add at least one player to the away team roster");
+            return;
+        }
+
         localStorage.setItem("formData", JSON.stringify(formData));
-        navigate("/game", {state: {formData}});
+        navigate("/game", { state: { formData } });
     };
 
     const navigateHandler = () => {
@@ -395,7 +403,7 @@ const StartPage: React.FC = () => {
                                 <td className={styles.td}>{player.name}</td>
                                 <td className={styles.td}>
                                     <button
-                                        className={styles.rosterButton}
+                                        className={`${styles.rosterButton} ${styles.addButton}`}
                                         type="button"
                                         onClick={() => addPlayerToRosterHandler(player, true)}
                                     >
@@ -423,7 +431,7 @@ const StartPage: React.FC = () => {
                                 <td className={styles.td}>{player.name}</td>
                                 <td className={styles.td}>
                                     <button
-                                        className={styles.rosterButton}
+                                        className={`${styles.rosterButton} ${styles.removeButton}`}
                                         type="button"
                                         onClick={() => removePlayerFromRosterHandler(player, true)}
                                     >
@@ -452,7 +460,7 @@ const StartPage: React.FC = () => {
                                 <td className={styles.td}>{player.name}</td>
                                 <td className={styles.td}>
                                     <button
-                                        className={styles.rosterButton}
+                                        className={`${styles.rosterButton} ${styles.addButton}`}
                                         type="button"
                                         onClick={() => addPlayerToRosterHandler(player, false)}
                                     >
@@ -480,7 +488,7 @@ const StartPage: React.FC = () => {
                                 <td className={styles.td}>{player.name}</td>
                                 <td className={styles.td}>
                                     <button
-                                        className={styles.rosterButton}
+                                        className={`${styles.rosterButton} ${styles.removeButton}`}
                                         type="button"
                                         onClick={() => removePlayerFromRosterHandler(player, false)}
                                     >
