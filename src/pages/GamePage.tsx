@@ -1,7 +1,8 @@
 import React, {useEffect, useRef, useState} from 'react';
 import {GameType} from "../OOP/enums/GameType";
+import {RegularPeriod, PlayoffPeriod} from "../OOP/enums/Period";
 import {ITeamColor} from "../OOP/interfaces/ITeamColor";
-import {useLocation} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import {ActionType} from "../OOP/enums/ActionType";
 import Icon from "../components/Icon";
 import {IChampionship} from "../OOP/interfaces/IChampionship";
@@ -16,9 +17,6 @@ import PlayerSelectorModal from "../modals/PlayerSelectorModal";
 import styles from './GamePage.module.css';
 import IconDataModal from "../modals/IconDataModal";
 import {IPlayer} from "../OOP/interfaces/IPlayer";
-
-// todo: implement time handlers: ot, so, OT1 ...
-// todo: if routing gets fired, ask before, might be a misclick
 
 type FormData = {
     championship: IChampionship;
@@ -42,17 +40,21 @@ interface ITeamRoster extends ITeam {
     roster: IPlayer[]
 }
 
+// todo: if ot goal, stop clock, hide start/stop time button
+
 const GamePage = () => {
-    // Add these new state variables
+    const navigate = useNavigate();
     const [selectedPosition, setSelectedPosition] = useState<{ x: number, y: number } | null>(null);
     const [selectedAction, setSelectedAction] = useState<{ type: ActionType, team: ITeamRoster } | null>(null);
     const [selectedActionDetails, setSelectedActionDetails] = useState<IGameAction | null>(null);
     const [period, setPeriod] = useState(1);
-    const [time, setTime] = useState(5); // 20:00 in seconds TODO: back to 1200
+    const [time, setTime] = useState(5); // 20:00 in seconds // todo: back to 1200
     const [isTimerRunning, setIsTimerRunning] = useState(false);
     const [homeScore, setHomeScore] = useState<IScoreData>({goals: 0, shots: 0, turnovers: 0});
     const [awayScore, setAwayScore] = useState<IScoreData>({goals: 0, shots: 0, turnovers: 0});
     const [actions, setActions] = useState<IGameAction[]>([]);
+    const [periodLabel, setPeriodLabel] = useState<string>("1st");
+    const [isGameOver, setIsGameOver] = useState<boolean>(false);
 
     const fieldImageRef = useRef<HTMLImageElement>(null);
     const [iconSize, setIconSize] = useState(30);
@@ -64,6 +66,7 @@ const GamePage = () => {
     const pressTimer = useRef<number | null>(null);
     const [isLongPress, setIsLongPress] = useState(false); // To track if it's a long press
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
     const updateIconSize = () => {
         if (fieldImageRef.current) {
@@ -81,6 +84,12 @@ const GamePage = () => {
             case ActionType.GOAL:
                 newScore.goals += 1;
                 newScore.shots += 1;
+
+                // If in OT and a goal is scored, end the game
+                if (periodLabel.includes("OT")) {
+                    setIsTimerRunning(false); // Stop the clock
+                    setIsGameOver(true); // Mark game as over
+                }
                 break;
             case ActionType.SHOT:
                 newScore.shots += 1;
@@ -93,8 +102,10 @@ const GamePage = () => {
         return newScore;
     };
 
+
     const handleActionComplete = (newAction: IGameAction) => {
-        setActions([...actions, newAction]);
+        setActions(prevActions => [...prevActions, newAction]);
+        setHasUnsavedChanges(true);
 
         if (newAction.team.id === formData.homeTeam.id) { // todo: .equals
             setHomeScore(current => handleScoreUpdate(newAction.team, newAction.type, current));
@@ -160,7 +171,7 @@ const GamePage = () => {
         clearPressTimer();
     };
 
-// Add new touch handlers
+    // Add new touch handlers
     const handleTouchStart = (e: React.TouchEvent) => {
         e.preventDefault(); // Prevent default touch behavior (context menu)
         startPressTimer();
@@ -173,10 +184,10 @@ const GamePage = () => {
     const saveGameRecord = async (game: IGame): Promise<void> => {
         try {
             // do you really want to save the game?
-
             if (window.confirm("Are you sure you want to save this game?")) {
                 await GameService.saveGame(game)
                 alert("Game saved successfully.")
+                setHasUnsavedChanges(false);
             } else {
                 alert("Game saving aborted.")
             }
@@ -212,12 +223,106 @@ const GamePage = () => {
         return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     };
 
+    // Updated time handlers for regular/playoff periods
+    const getPeriodByNumber = (num: number): string => {
+        if (formData.gameType === GameType.REGULAR) {
+            switch (num) {
+                case RegularPeriod.FIRST:
+                    return "1st";
+                case RegularPeriod.SECOND:
+                    return "2nd";
+                case RegularPeriod.THIRD:
+                    return "3rd";
+                case RegularPeriod.OT:
+                    return "OT";
+                case RegularPeriod.SO:
+                    return "SO";
+                default:
+                    return `${num}`;
+            }
+        } else { // PLAYOFF
+            switch (num) {
+                case PlayoffPeriod.FIRST:
+                    return "1st";
+                case PlayoffPeriod.SECOND:
+                    return "2nd";
+                case PlayoffPeriod.THIRD:
+                    return "3rd";
+                case PlayoffPeriod.OT1:
+                    return "OT1";
+                case PlayoffPeriod.OT2:
+                    return "OT2";
+                case PlayoffPeriod.OT3:
+                    return "OT3";
+                case PlayoffPeriod.OT4:
+                    return "OT4";
+                case PlayoffPeriod.OT5:
+                    return "OT5";
+                default:
+                    return `${num}`;
+            }
+        }
+    };
+
+    const handleNextPeriod = () => {
+        // First check if the game is tied - only then should we go to OT
+        const isTied = homeScore.goals === awayScore.goals;
+
+        if (formData.gameType === GameType.REGULAR) {
+            if (period === RegularPeriod.THIRD && isTied) {
+                // Move to OT
+                setPeriod(RegularPeriod.OT);
+                setPeriodLabel("OT");
+                setTime(5); // 5 minutes for OT
+            } else if (period === RegularPeriod.OT && isTied) {
+                // Move to Shootout
+                setPeriod(RegularPeriod.SO);
+                setPeriodLabel("SO");
+                setTime(0); // No timer for shootout
+                setIsGameOver(true);
+            } else if (period < RegularPeriod.THIRD) {
+                // Regular period progression
+                setPeriod(prev => prev + 1);
+                setPeriodLabel(getPeriodByNumber(period + 1));
+                setTime(5); // 20 minutes // todo: back to 1200
+            } else {
+                // Game is over
+                setIsGameOver(true);
+            }
+        } else { // PLAYOFF
+            if (period === PlayoffPeriod.THIRD && isTied) {
+                // Move to first OT
+                setPeriod(PlayoffPeriod.OT1);
+                setPeriodLabel("OT1");
+                setTime(5); // 20 minutes for playoff OT
+            } else if (period >= PlayoffPeriod.OT1 && period < PlayoffPeriod.OT5 && isTied) {
+                // Move to next OT
+                setPeriod(prev => prev + 1);
+                setPeriodLabel(getPeriodByNumber(period + 1));
+                setTime(5); // 20 minutes for each playoff OT
+            } else if (period === PlayoffPeriod.OT5 && isTied) {
+                // End after 5 OTs (rarely happens)
+                setIsGameOver(true);
+            } else if (period < PlayoffPeriod.THIRD) {
+                // Regular period progression
+                setPeriod(prev => prev + 1);
+                setPeriodLabel(getPeriodByNumber(period + 1));
+                setTime(5); // 20 minutes
+            } else {
+                // Game is over
+                setIsGameOver(true);
+            }
+        }
+    };
+
     useEffect(() => {
         let interval: NodeJS.Timeout;
         if (isTimerRunning && time > 0) {
             interval = setInterval(() => {
                 setTime((prev) => prev - 1);
             }, 1000);
+        } else if (time === 0 && isTimerRunning) {
+            setIsTimerRunning(false);
         }
         return () => clearInterval(interval);
     }, [isTimerRunning, time]);
@@ -230,14 +335,62 @@ const GamePage = () => {
         };
 
         window.addEventListener('resize', handleResize);
+        setPeriodLabel(getPeriodByNumber(period));
 
         return () => {
             window.removeEventListener('resize', handleResize);
         };
     }, []);
 
-    console.log(formData);
-    console.log(actions);
+    // Route confirmation for unsaved changes
+    useEffect(() => {
+        // Block navigation if there are unsaved changes
+        if (hasUnsavedChanges) {
+            const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+                e.preventDefault();
+                e.returnValue = "You have unsaved changes. Are you sure you want to leave?";
+                return e.returnValue;
+            };
+
+            window.addEventListener('beforeunload', handleBeforeUnload);
+            return () => {
+                window.removeEventListener('beforeunload', handleBeforeUnload);
+            };
+        }
+    }, [hasUnsavedChanges]);
+
+    // Custom navigation handler to show confirmation
+    const navigateWithConfirmation = (path: string) => {
+        if (hasUnsavedChanges) {
+            if (window.confirm("You have unsaved game data. Are you sure you want to navigate away?")) {
+                navigate(path);
+            }
+        } else {
+            navigate(path);
+        }
+    };
+
+    // Override React Router navigation
+    useEffect(() => {
+        const handleClick = (e: MouseEvent) => {
+            // Check if the click was on an anchor tag
+            const target = e.target as HTMLElement;
+            const anchor = target.closest('a');
+
+            if (anchor && anchor.getAttribute('href')?.startsWith('/')) {
+                e.preventDefault();
+                const href = anchor.getAttribute('href') || '/';
+                navigateWithConfirmation(href);
+            }
+        };
+
+        document.addEventListener('click', handleClick);
+        return () => {
+            document.removeEventListener('click', handleClick);
+        };
+    }, [hasUnsavedChanges, navigate]);
+
+    console.log("hasUnsavedChanges:", hasUnsavedChanges)
 
     return (
         <>
@@ -318,35 +471,35 @@ const GamePage = () => {
                     </div>
 
                     <div className={styles.gameControls}>
-                        <p className={styles.periodDisplay}>Period: {period}</p>
+                        <p className={styles.periodDisplay}>Period: {periodLabel}</p>
                         <p className={styles.timeDisplay}>{formatTime(time)}</p>
                         <p className={styles.scoreDisplay}>{homeScore.goals} - {awayScore.goals}</p>
 
                         <div className={styles.buttonContainer}>
-                            {isTimerRunning ? (
-                                <button
-                                    className={`${styles.button} ${styles.secondaryButton}`}
-                                    onClick={() => setIsTimerRunning(false)}
-                                >
-                                    Stop Time
-                                </button>
-                            ) : (
-                                time > 0 &&
-                                <button
-                                    className={`${styles.button} ${styles.primaryButton}`}
-                                    onClick={() => setIsTimerRunning(true)}
-                                >
-                                    Start Time
-                                </button>
+                            {!isGameOver && (
+                                isTimerRunning ? (
+                                    <button
+                                        className={`${styles.button} ${styles.secondaryButton}`}
+                                        onClick={() => setIsTimerRunning(false)}
+                                    >
+                                        Stop Time
+                                    </button>
+                                ) : (
+                                    time > 0 &&
+                                    <button
+                                        className={`${styles.button} ${styles.primaryButton}`}
+                                        onClick={() => setIsTimerRunning(true)}
+                                    >
+                                        Start Time
+                                    </button>
+                                )
                             )}
 
-                            {!isTimerRunning && time === 0 && period < 3 && (
+
+                            {!isTimerRunning && time === 0 && !isGameOver && (
                                 <button
                                     className={`${styles.button} ${styles.primaryButton}`}
-                                    onClick={() => {
-                                        setPeriod(p => p + 1);
-                                        setTime(formData.gameType === GameType.REGULAR ? 5 : 5); // TODO: back to 1200
-                                    }}
+                                    onClick={handleNextPeriod}
                                 >
                                     Next Period
                                 </button>
