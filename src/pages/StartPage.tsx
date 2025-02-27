@@ -10,16 +10,21 @@ import styles from './StartPage.module.css';
 import {ChampionshipService} from "../OOP/services/ChampionshipService";
 import {TeamService} from "../OOP/services/TeamService";
 import {storage} from "../firebaseConfig";
-import {Player} from "../OOP/classes/Player";
+import {IPlayer} from "../OOP/interfaces/IPlayer";
+import {ITeam} from "../OOP/interfaces/ITeam";
+
+// todo: css - wider
+// todo: css - buttons - also, green/red - roster buttons
+// todo: implement start over/continue logic
 
 type FormState = {
     championship: Championship;
-    homeTeam: Team;
-    awayTeam: Team;
-    homeRoster: Player[],
-    homeRosterOut: Player[],
-    awayRosterOut: Player[],
-    awayRoster: Player[],
+    homeTeam: ITeam;
+    awayTeam: ITeam;
+    homeRoster: IPlayer[],
+    homeRosterOut: IPlayer[],
+    awayRosterOut: IPlayer[],
+    awayRoster: IPlayer[],
     gameType: GameType;
     homeColor: ITeamColor;
     awayColor: ITeamColor;
@@ -32,7 +37,7 @@ type FormState = {
 
 type LoaderData = {
     championships: Championship[];
-    teams: Team[];
+    teams: ITeam[];
     rinkImages: {
         rinkUp: string;
         rinkDown: string;
@@ -47,13 +52,13 @@ const StartPage: React.FC = () => {
     const rinkImages = loaderData?.rinkImages ?? {};
 
     // Get teams for the first championship
-    const getInitialTeams = (championship: Championship, allTeams: Team[]) => {
+    const getInitialTeams = (championship: Championship, allTeams: ITeam[]) => {
         const teamsInChampionship = allTeams.filter(team =>
             team.championships.some(champ => champ.id === championship.id)
         );
         return {
-            homeTeam: teamsInChampionship[0],
-            awayTeam: teamsInChampionship[1]
+            homeTeam: teamsInChampionship[0] as ITeam,
+            awayTeam: teamsInChampionship[1] as ITeam
         };
     };
 
@@ -79,7 +84,7 @@ const StartPage: React.FC = () => {
     };
 
     const [formData, setFormData] = useState<FormState>(initialState);
-    const [filteredTeams, setFilteredTeams] = useState<Team[]>(teams);
+    const [filteredTeams, setFilteredTeams] = useState<ITeam[]>(teams);
     const navigate = useNavigate();
     const [isDropDownOpen, setIsDropDownOpen] = useState(false);
 
@@ -166,7 +171,7 @@ const StartPage: React.FC = () => {
         return <div>Loading...</div>;
     }
 
-    function addPlayerToRosterHandler(player: Player, isHome: boolean) {
+    function addPlayerToRosterHandler(player: IPlayer, isHome: boolean) {
         setFormData(prev => {
             if (isHome) {
                 const newHomeRosterOut = prev.homeRosterOut.filter(p => p.id !== player.id);
@@ -188,7 +193,7 @@ const StartPage: React.FC = () => {
         });
     }
 
-    function removePlayerFromRosterHandler(player: Player, isHome: boolean) {
+    function removePlayerFromRosterHandler(player: IPlayer, isHome: boolean) {
         setFormData(prev => {
             if (isHome) {
                 const newHomeRoster = prev.homeRoster.filter(p => p.id !== player.id);
@@ -244,10 +249,10 @@ const StartPage: React.FC = () => {
                         const newHomeTeam = filteredTeams.find((t) => t.id === event.target.value) ?? new Team();
                         setFormData({
                             ...formData,
-                            homeTeam: newHomeTeam,
+                            homeTeam: newHomeTeam as ITeam,
                             homeColor: newHomeTeam.homeColor || initialState.homeColor,
                             homeRoster: [],
-                            homeRosterOut: newHomeTeam.players,
+                            homeRosterOut: newHomeTeam.players as IPlayer[],
                         });
                         setIsDropDownOpen(false);
                     }}
@@ -269,10 +274,10 @@ const StartPage: React.FC = () => {
                         const newAwayTeam = filteredTeams.find((t) => t.id === event.target.value) ?? new Team();
                         setFormData({
                             ...formData,
-                            awayTeam: newAwayTeam,
+                            awayTeam: newAwayTeam as ITeam,
                             awayColor: newAwayTeam.awayColor || initialState.awayColor,
                             awayRoster: [],
-                            awayRosterOut: newAwayTeam.players,
+                            awayRosterOut: newAwayTeam.players as IPlayer[],
                         });
                         setIsDropDownOpen(false);
                     }}
@@ -403,20 +408,20 @@ const StartPage: React.FC = () => {
                     </table>
 
                     <h4>Selected Home Roster</h4>
-                    <table>
+                    <table className={styles.table}>
                         <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th></th>
+                        <tr className={styles.tr}>
+                            <th className={styles.th}>#</th>
+                            <th className={styles.th}>Name</th>
+                            <th className={styles.th}></th>
                         </tr>
                         </thead>
                         <tbody>
                         {formData.homeRoster.map((player) => (
-                            <tr key={player.id}>
-                                <td>{player.jerseyNumber}</td>
-                                <td>{player.name}</td>
-                                <td>
+                            <tr key={player.id} className={styles.tr}>
+                                <td className={styles.td}>{player.jerseyNumber}</td>
+                                <td className={styles.td}>{player.name}</td>
+                                <td className={styles.td}>
                                     <button
                                         className={styles.rosterButton}
                                         type="button"
@@ -432,20 +437,20 @@ const StartPage: React.FC = () => {
 
                     {/* Away Team Roster Selection */}
                     <h3>Away Team Roster</h3>
-                    <table>
+                    <table className={styles.table}>
                         <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th></th>
+                        <tr className={styles.tr}>
+                            <th className={styles.th}>#</th>
+                            <th className={styles.th}>Name</th>
+                            <th className={styles.th}></th>
                         </tr>
                         </thead>
                         <tbody>
                         {formData.awayRosterOut.map((player) => (
-                            <tr key={player.id}>
-                                <td>{player.jerseyNumber}</td>
-                                <td>{player.name}</td>
-                                <td>
+                            <tr key={player.id} className={styles.tr}>
+                                <td className={styles.td}>{player.jerseyNumber}</td>
+                                <td className={styles.td}>{player.name}</td>
+                                <td className={styles.td}>
                                     <button
                                         className={styles.rosterButton}
                                         type="button"
@@ -460,20 +465,20 @@ const StartPage: React.FC = () => {
                     </table>
 
                     <h4>Selected Away Roster</h4>
-                    <table>
+                    <table className={styles.table}>
                         <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th></th>
+                        <tr className={styles.tr}>
+                            <th className={styles.th}>#</th>
+                            <th className={styles.th}>Name</th>
+                            <th className={styles.th}></th>
                         </tr>
                         </thead>
                         <tbody>
                         {formData.awayRoster.map((player) => (
-                            <tr key={player.id}>
-                                <td>{player.jerseyNumber}</td>
-                                <td>{player.name}</td>
-                                <td>
+                            <tr key={player.id} className={styles.tr}>
+                                <td className={styles.td}>{player.jerseyNumber}</td>
+                                <td className={styles.td}>{player.name}</td>
+                                <td className={styles.td}>
                                     <button
                                         className={styles.rosterButton}
                                         type="button"
@@ -499,7 +504,10 @@ const StartPage: React.FC = () => {
 
             <div className={styles.formGroup}>
                 <label className={styles.label}>Select Rink Image:</label>
-                <div className={styles.radioContainer}>
+                <div
+                    className={styles.radioContainer}
+                    onClick={() => handleImageClick(formData.imageOption.rinkDown)}
+                >
                     <input
                         type="radio"
                         name="imageOption"
@@ -517,10 +525,13 @@ const StartPage: React.FC = () => {
                         src={formData.imageOption.rinkDown}
                         alt="RinkImage"
                         className={`${styles.imagePreview} ${formData.selectedImage === formData.imageOption.rinkDown ? styles.selectedImage : ''}`}
-                        onClick={() => handleImageClick(formData.imageOption.rinkDown)}
+                        //onClick={() => handleImageClick(formData.imageOption.rinkDown)}
                     />
                 </div>
-                <div className={styles.radioContainer}>
+                <div
+                    className={styles.radioContainer}
+                    onClick={() => handleImageClick(formData.imageOption.rinkUp)}
+                >
                     <input
                         type="radio"
                         name="imageOption"
@@ -538,14 +549,21 @@ const StartPage: React.FC = () => {
                         src={formData.imageOption.rinkUp}
                         alt="RinkImage"
                         className={`${styles.imagePreview} ${formData.selectedImage === formData.imageOption.rinkUp ? styles.selectedImage : ''}`}
-                        onClick={() => handleImageClick(formData.imageOption.rinkUp)}
+                        //onClick={() => handleImageClick(formData.imageOption.rinkUp)}
                     />
                 </div>
             </div>
-            <button type="submit">Start Game</button>
-            <button type="button" onClick={navigateHandler}>Go Back</button>
+            <button
+                type="submit"
+                className={styles.rosterButton}
+            >Start Game
+            </button>
+            <button
+                type="button"
+                className={styles.rosterButton}
+                onClick={navigateHandler}>Go Back
+            </button>
         </form>
-
     );
 };
 

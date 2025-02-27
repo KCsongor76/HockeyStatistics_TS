@@ -1,6 +1,6 @@
 import {IGameAction} from "./IGameAction";
 import {IScoreData} from "./IScoreData";
-import {ITeam} from "./ITeam";
+import ITeamRoster from "./ITeamRoster";
 
 export interface IGame {
     id: string;
@@ -8,10 +8,8 @@ export interface IGame {
     timestamp: string;
     score: { home: IScoreData; away: IScoreData };
     teams: {
-        // home: ReturnType<Team['toPlainObject']>;
-        // away: ReturnType<Team['toPlainObject']>;
-        home: ITeam,
-        away: ITeam
+        home: ITeamRoster,
+        away: ITeamRoster
     };
     selectedImage: string;
 }

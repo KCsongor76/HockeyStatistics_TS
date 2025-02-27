@@ -7,6 +7,8 @@ import {TeamService} from "../OOP/services/TeamService";
 // @ts-ignore
 import styles from './HandlePlayerPage.module.css';  // Import the CSS module
 
+// todo: add data, games when he played
+
 const HandlePlayerPage = () => {
     const {id: playerId} = useParams<{ id: string }>();
     const [player, setPlayer] = useState<Player | null>(null);

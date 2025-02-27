@@ -9,6 +9,9 @@ import {IGame} from "../OOP/interfaces/IGame";
 import {IGameAction} from "../OOP/interfaces/IGameAction";
 import IconDataModal from "../modals/IconDataModal";
 
+// todo: css - middle, rink, max width
+// todo: delete handler?
+// todo: filter by players, return statistics like - team/player stats, best stats
 
 const PreviousGameDetailPage = () => {
     const location = useLocation();

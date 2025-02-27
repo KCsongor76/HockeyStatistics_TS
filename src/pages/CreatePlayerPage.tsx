@@ -8,6 +8,8 @@ import {Player} from "../OOP/classes/Player";
 // @ts-ignore
 import styles from './CreatePlayerPage.module.css';
 
+// todo: wider, buttons in middle
+
 const CreatePlayerPage = () => {
     const loaderData = useLoaderData() as Team[];
     const teams = loaderData ?? [];

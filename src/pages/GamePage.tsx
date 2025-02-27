@@ -15,11 +15,24 @@ import PlayerSelectorModal from "../modals/PlayerSelectorModal";
 // @ts-ignore
 import styles from './GamePage.module.css';
 import IconDataModal from "../modals/IconDataModal";
+import {IPlayer} from "../OOP/interfaces/IPlayer";
+
+// todo: longpress, don't remove logos?
+// todo: team colors check
+// todo: implement time handlers: ot, so, OT1 ...
+// todo: end game: do you really want to conclude the game?
+// todo: if routing gets fired, ask before, might be a misclick
+// todo: implement start over/continue logic
+// todo: rink image max width
 
 type FormData = {
     championship: IChampionship;
     homeTeam: ITeam;
     awayTeam: ITeam;
+    homeRoster: IPlayer[],
+    homeRosterOut: IPlayer[],
+    awayRosterOut: IPlayer[],
+    awayRoster: IPlayer[],
     gameType: GameType;
     homeColor: ITeamColor;
     awayColor: ITeamColor;
@@ -30,11 +43,14 @@ type FormData = {
     selectedImage: string;
 };
 
+interface ITeamRoster extends ITeam {
+    roster: IPlayer[]
+}
 
 const GamePage = () => {
     // Add these new state variables
     const [selectedPosition, setSelectedPosition] = useState<{ x: number, y: number } | null>(null);
-    const [selectedAction, setSelectedAction] = useState<{ type: ActionType, team: ITeam } | null>(null);
+    const [selectedAction, setSelectedAction] = useState<{ type: ActionType, team: ITeamRoster } | null>(null);
     const [selectedActionDetails, setSelectedActionDetails] = useState<IGameAction | null>(null);
     const [period, setPeriod] = useState(1);
     const [time, setTime] = useState(5); // 20:00 in seconds TODO: back to 1200
@@ -45,6 +61,8 @@ const GamePage = () => {
 
 
     const formData = useLocation().state.formData as FormData;
+    const homeRoster = formData.homeRoster as IPlayer[];
+    const awayRoster = formData.awayRoster as IPlayer[];
     const [showDetails, setShowDetails] = useState(true);
     const pressTimer = useRef<number | null>(null);
     const [isLongPress, setIsLongPress] = useState(false); // To track if it's a long press
@@ -143,7 +161,10 @@ const GamePage = () => {
     const submitGameHandler = async (): Promise<void> => {
         const timestamp = new Date().toISOString();
         const score = {home: homeScore, away: awayScore};
-        const teams = {home: formData.homeTeam, away: formData.awayTeam};
+        const teams = {
+            home: {...formData.homeTeam, roster: homeRoster} as ITeamRoster,
+            away: {...formData.awayTeam, roster: awayRoster} as ITeamRoster
+        };
 
         const game: IGame = {
             id: "",
@@ -173,13 +194,17 @@ const GamePage = () => {
         return () => clearInterval(interval);
     }, [isTimerRunning, time]);
 
-    // @ts-ignore
+    console.log(formData);
+    console.log(actions);
+
     return (
         <>
             {selectedPosition && !selectedAction && (
                 <ActionSelectorModal
                     homeTeam={formData.homeTeam}
+                    homeRoster={formData.homeRoster}
                     awayTeam={formData.awayTeam}
+                    awayRoster={formData.awayRoster}
                     homeColor={formData.homeColor}
                     awayColor={formData.awayColor}
                     onActionSelect={setSelectedAction}
@@ -227,7 +252,7 @@ const GamePage = () => {
                             <Icon
                                 type={action.type}
                                 teamType={action.team === formData.homeTeam ? 'HOME' : 'AWAY'}
-                                teamColors={action.team === formData.homeTeam ? formData.homeColor : formData.awayColor}
+                                teamColors={action.team.id === formData.homeTeam.id ? formData.homeColor : formData.awayColor /*TODO: oop - .equals method*/}
                                 size={30}
                                 onClick={(e: React.MouseEvent<Element, MouseEvent>) => handleIconClick(action, e)}
                             />

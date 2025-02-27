@@ -4,4 +4,5 @@ export interface IPlayer {
     number: number
     position: string
     teamId: string
+    jerseyNumber: number
 }

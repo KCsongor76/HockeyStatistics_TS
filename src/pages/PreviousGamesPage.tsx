@@ -5,6 +5,12 @@ import styles from './PreviousGamesPage.module.css';
 import {IGame} from "../OOP/interfaces/IGame";
 import {GameService} from "../OOP/services/GameService";
 
+// todo: maybe table isn't the best option... <li>?
+// todo: delete: are you sure you want to delete this game?
+// todo: maybe move delete inside li, like inside the detailed page
+// todo: add filtering: championship/home team/away team/season ...
+// todo: add sorting
+
 const PreviousGamesPage = () => {
     const [games, setGames] = useState<IGame[]>([]);
     const [loading, setLoading] = useState(true);

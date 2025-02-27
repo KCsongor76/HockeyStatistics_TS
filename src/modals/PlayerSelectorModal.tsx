@@ -7,12 +7,16 @@ import {IGameAction} from "../OOP/interfaces/IGameAction";
 import styles from './PlayerSelectorModal.module.css';
 
 interface PlayerSelectorModalProps {
-    selectedAction: { type: ActionType; team: ITeam } | null;
+    selectedAction: { type: ActionType; team: ITeamRoster } | null;
     selectedPosition: { x: number; y: number } | null;
     period: number;
     time: number;
     onActionComplete: (newAction: IGameAction) => void;
     onCancel: () => void;
+}
+
+interface ITeamRoster extends ITeam {
+    roster: IPlayer[]
 }
 
 const PlayerSelectorModal: React.FC<PlayerSelectorModalProps> = ({
@@ -29,7 +33,7 @@ const PlayerSelectorModal: React.FC<PlayerSelectorModalProps> = ({
         <div className={styles.modalOverlay} onClick={(e) => e.stopPropagation()}>
             <div className={styles.playerModalContent}>
                 <h3>Select Player</h3>
-                {selectedAction.team.players.map((player) => (
+                {selectedAction.team.roster.map((player) => (
                     <button
                         key={player.id}
                         className={styles.playerButton}

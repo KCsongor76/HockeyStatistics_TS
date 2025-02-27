@@ -8,6 +8,8 @@ import {TeamService} from "../OOP/services/TeamService";
 import styles from './CreateTeamPage.module.css';
 import {TeamAlreadyExistsError} from "../OOP/errors/TeamAlreadyExistsError"; // Import the CSS module
 
+// todo: color styling, unify form with StartPage
+
 const CreateTeamPage = () => {
     const championships = useLocation().state.championships as Championship[];
     const [name, setName] = useState<string>("");

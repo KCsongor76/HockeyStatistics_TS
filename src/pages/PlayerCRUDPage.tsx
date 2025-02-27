@@ -6,6 +6,13 @@ import {TeamService} from "../OOP/services/TeamService";
 // @ts-ignore
 import styles from './PlayerCRUDPage.module.css';
 
+// todo: pagination, filtering?
+// todo: table css not good. maybe <li>?
+// todo: delete handler?
+// todo: filter by team, position?
+// todo: create player button - middle
+// todo: too slow
+
 const PlayerCRUDPage = () => {
     const loaderData = useLoaderData() as { player: Player, teamName: string }[] ?? [];
     const navigate = useNavigate();

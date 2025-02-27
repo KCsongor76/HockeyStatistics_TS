@@ -5,6 +5,9 @@ import {TeamService} from "../OOP/services/TeamService";
 // @ts-ignore
 import styles from './HandleTeamPage.module.css';
 
+// todo: buttons in middle
+// todo: show games in which they played
+
 const HandleTeamPage = () => {
     const location = useLocation();
     const initialTeam = location.state.team as Team;

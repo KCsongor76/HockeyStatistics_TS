@@ -14,6 +14,10 @@ type LoaderData = {
     teams: Team[];
 };
 
+// todo: delete - do you wanna delete the team?
+// todo: create team button - middle
+// todo: too slow
+
 const TeamCrudPage = () => {
     const loaderData = useLoaderData() as LoaderData;
 
