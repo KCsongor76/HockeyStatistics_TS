@@ -12,98 +12,97 @@
     text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
 }
 
-.tableContainer {
-    overflow-x: auto;
+.controlsContainer {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.selectFilter {
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: 1px solid #c3cfe2;
+    background: white;
+}
+
+.searchInput {
+    padding: 0.5rem;
+    border-radius: 8px;
+    border: 1px solid #c3cfe2;
+    min-width: 200px;
+}
+
+.listContainer {
     background: white;
     border-radius: 15px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     padding: 1rem;
 }
 
-.table {
-    width: 100%;
-    border-collapse: collapse;
-    min-width: 800px;
+.list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
-.th {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 1.2rem;
-    text-align: center;
-    position: sticky;
-    top: 0;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-}
-
-.tr {
+.listItem {
+    padding: 1.5rem;
+    border-bottom: 1px solid #e9ecef;
+    cursor: pointer;
     transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
 }
 
-.tr:nth-child (even) {
+.listItem:hover {
     background-color: #f8f9fa;
-}
-
-.tr:hover {
-    background-color: #f1f3f5;
     transform: translateX(5px);
 }
 
-.td {
-    padding: 1rem;
-    text-align: center;
-    vertical-align: middle;
-    border-bottom: 1px solid #e9ecef;
+.gameContent {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex-grow: 1;
+    flex-wrap: wrap;
+}
+
+.teamSection {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-width: 200px;
 }
 
 .teamLogo {
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid white;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.scoreCell {
+.scoreSection {
     font-weight: 700;
     font-size: 1.2rem;
     color: #2c3e50;
+    min-width: 80px;
 }
 
-.viewButton {
-    background: #4a90e2;
-    color: white;
-    border: none;
-    padding: 0.6rem 1.2rem;
-    border-radius: 25px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 600;
+.dateSection {
+    min-width: 120px;
+    color: #6c757d;
 }
 
-.viewButton:hover {
-    background: #357abd;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
-}
+@media (max-width: 768px) {
+    .gameContent {
+        gap: 1rem;
+    }
 
-.deleteButton {
-    background: #e74c3c;
-    color: white;
-    border: none;
-    padding: 0.6rem 1.2rem;
-    border-radius: 25px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 600;
+    .teamSection {
+        min-width: auto;
+    }
 }
-
-.deleteButton:hover {
-    background: #c0392b;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
-}
-

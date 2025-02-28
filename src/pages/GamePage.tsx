@@ -40,8 +40,6 @@ interface ITeamRoster extends ITeam {
     roster: IPlayer[]
 }
 
-// todo: if ot goal, stop clock, hide start/stop time button
-
 const GamePage = () => {
     const navigate = useNavigate();
     const [selectedPosition, setSelectedPosition] = useState<{ x: number, y: number } | null>(null);
@@ -211,7 +209,8 @@ const GamePage = () => {
             actions: actions,
             teams: teams,
             score: score,
-            selectedImage: formData.selectedImage
+            selectedImage: formData.selectedImage,
+            championship: formData.championship
         };
 
         await saveGameRecord(game);

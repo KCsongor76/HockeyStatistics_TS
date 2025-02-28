@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {useLocation} from "react-router-dom";
+import {useLocation, useNavigate} from "react-router-dom";
 import Icon from "../components/Icon";
 import {ActionType} from "../OOP/enums/ActionType";
 import {RegularPeriod, PlayoffPeriod} from "../OOP/enums/Period";
@@ -8,14 +8,14 @@ import styles from './PreviousGameDetailPage.module.css';
 import {IGame} from "../OOP/interfaces/IGame";
 import {IGameAction} from "../OOP/interfaces/IGameAction";
 import IconDataModal from "../modals/IconDataModal";
-
-// todo: css - middle, rink, max width
-// todo: delete handler?
-// todo: filter by players, return statistics like - team/player stats, best stats
+import {GameService} from "../OOP/services/GameService";
+import {IPlayer} from "../OOP/interfaces/IPlayer";
 
 const PreviousGameDetailPage = () => {
     const location = useLocation();
     const gameData = location.state as IGame;
+    const navigate = useNavigate();
+
     console.log(gameData);
 
     const [selectedTeamView, setSelectedTeamView] = useState<'all' | 'home' | 'away'>('all');
@@ -24,6 +24,9 @@ const PreviousGameDetailPage = () => {
     const [selectedActionTypes, setSelectedActionTypes] = useState<Set<ActionType>>(new Set(Object.values(ActionType)));
     const availablePeriods = Array.from(new Set(gameData.actions.map(action => action.period)));
     const availableActionTypes = Array.from(new Set(gameData.actions.map(action => action.type)));
+
+    const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
+
     const filteredActions = gameData.actions.filter(action => {
         const teamFilter = selectedTeamView === 'all' ||
             (selectedTeamView === 'home' && action.team.id === gameData.teams.home.id) ||
@@ -32,8 +35,10 @@ const PreviousGameDetailPage = () => {
         const periodFilter = selectedPeriods.has(action.period);
         const typeFilter = selectedActionTypes.has(action.type);
 
-        return teamFilter && periodFilter && typeFilter;
+        const playerFilter = !selectedPlayer || action.player.id === selectedPlayer;
+        return teamFilter && periodFilter && typeFilter && playerFilter;
     });
+
 
     const [selectedActionDetails, setSelectedActionDetails] = useState<IGameAction | null>(null);
 
@@ -64,6 +69,56 @@ const PreviousGameDetailPage = () => {
     const handleCloseIconData = () => {
         setSelectedActionDetails(null);
     };
+
+    const getPlayerStats = (players: IPlayer[], teamId: string) => {
+        return players.map(player => {
+            const playerActions = gameData.actions.filter(a =>
+                a.player.id === player.id && a.team.id === teamId
+            );
+
+            return {
+                ...player,
+                goals: playerActions.filter(a => a.type === ActionType.GOAL).length,
+                shots: playerActions.filter(a => a.type === ActionType.SHOT).length,
+                turnovers: playerActions.filter(a => a.type === ActionType.TURNOVER).length
+            };
+        });
+    };
+
+    const getDisplayPlayers = () => {
+        if (selectedTeamView === 'home') {
+            return {
+                roster: gameData.teams.home.roster,
+                nonRoster: gameData.teams.home.players.filter(p => !gameData.teams.home.roster.some(r => r.id === p.id))
+            };
+
+        }
+        if (selectedTeamView === 'away') {
+            return {
+                roster: gameData.teams.away.roster,
+                nonRoster: gameData.teams.away.players.filter(p => !gameData.teams.away.roster.some(r => r.id === p.id))
+            };
+        }
+        return {
+            roster: [...gameData.teams.home.roster, ...gameData.teams.away.roster],
+            nonRoster: [...gameData.teams.home.players, ...gameData.teams.away.players].filter(p => !gameData.teams.home.roster.some(r => r.id === p.id) && !gameData.teams.away.roster.some(r => r.id === p.id))
+        };
+    };
+
+    const {roster, nonRoster} = getDisplayPlayers();
+    const uniqueNonRoster = Array.from(new Map(nonRoster.map(p => [p.id, p])).values());
+
+    const deleteHandler = async (game: IGame) => {
+        const isConfirmed = window.confirm("Are you sure you want to delete this game?");
+        if (isConfirmed) {
+            try {
+                await GameService.deleteGame(game);
+                navigate('/previous_games');
+            } catch (error) {
+                console.error("Error deleting action:", error);
+            }
+        }
+    }
 
     return (
         <div className={styles.container}>
@@ -162,6 +217,72 @@ const PreviousGameDetailPage = () => {
                     </div>
                 ))}
             </div>
+
+            <div className={styles.container}>
+                <div className={styles.filterGroup}>
+                    {selectedPlayer && (
+                        <button
+                            className={styles.filterButton}
+                            onClick={() => setSelectedPlayer(null)}
+                        >
+                            Clear Player Filter
+                        </button>
+                    )}
+                    <h3 className={styles.filterTitle}>Player Statistics</h3>
+                    <table className={styles.statsTable}>
+                        <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Number</th>
+                            <th>Position</th>
+                            <th>Goals</th>
+                            <th>Shots</th>
+                            <th>Turnovers</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {getPlayerStats(roster, selectedTeamView === 'all' ? '' :
+                            selectedTeamView === 'home' ? gameData.teams.home.id : gameData.teams.away.id)
+                            .map((player) => (
+                                <tr
+                                    key={player.id}
+                                    className={styles.playerRow}
+                                    onClick={() => setSelectedPlayer(player.id)}
+                                >
+                                    <td>{player.name}</td>
+                                    <td>{player.jerseyNumber}</td>
+                                    <td>{player.position}</td>
+                                    <td>{player.goals}</td>
+                                    <td>{player.shots}</td>
+                                    <td>{player.turnovers}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+
+                    {uniqueNonRoster.length > 0 && (
+                        <>
+                            <h4>Non-Roster Players</h4>
+                            <ul>
+                                {uniqueNonRoster.map(player => (
+                                    <li key={player.id}>
+                                        {player.name} (#{player.jerseyNumber})
+                                    </li>
+                                ))}
+                            </ul>
+                        </>
+                    )}
+                </div>
+            </div>
+
+            <button onClick={async () => {
+                await deleteHandler(gameData)
+            }}>Delete Game
+            </button>
+            <button onClick={() => {
+                navigate("/previous_games")
+            }}>Go Back
+            </button>
         </div>
     );
 };

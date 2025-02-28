@@ -4,25 +4,30 @@ import {useNavigate} from "react-router-dom";
 import styles from './PreviousGamesPage.module.css';
 import {IGame} from "../OOP/interfaces/IGame";
 import {GameService} from "../OOP/services/GameService";
-
-// todo: maybe table isn't the best option... <li>?
-// todo: delete: are you sure you want to delete this game?
-// todo: maybe move delete inside li, like inside the detailed page
-// todo: add filtering: championship/home team/away team/season ...
-// todo: add sorting
+import {ChampionshipService} from "../OOP/services/ChampionshipService";
+import {Championship} from "../OOP/classes/Championship";
+import {TeamService} from "../OOP/services/TeamService";
+import {ITeam} from "../OOP/interfaces/ITeam";
 
 const PreviousGamesPage = () => {
     const [games, setGames] = useState<IGame[]>([]);
+    const [championships, setChampionships] = useState<Championship[]>([]);
+    const [teams, setTeams] = useState<ITeam[]>([]);
     const [loading, setLoading] = useState(true);
+    const [filterType, setFilterType] = useState('all');
+    const [filterValue, setFilterValue] = useState('');
+    const [sortOrder, setSortOrder] = useState('newest');
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [currentPage, setCurrentPage] = useState(1);
     const navigate = useNavigate();
 
     const formatTime = (timestamp: string) => {
         const date = new Date(timestamp);
-        const year = date.getFullYear();
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const day = date.getDate().toString().padStart(2, '0');
-
-        return `${year}-${month}-${day}`;
+        return date.toLocaleDateString('en-CA', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        });
     }
 
     useEffect(() => {
@@ -37,8 +42,58 @@ const PreviousGamesPage = () => {
             }
         };
 
+        const fetchChampionships = async () => {
+            try {
+                const championships = await ChampionshipService.getAllChampionships();
+                setChampionships(championships);
+            } catch (error) {
+                console.error("Error fetching championships:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        const fetchTeams = async () => {
+            try {
+                const teams = await TeamService.getAllTeams() as unknown as ITeam[];
+                setTeams(teams);
+            } catch (error) {
+                console.error("Error fetching teams:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchChampionships();
+        fetchTeams();
         fetchGames();
     }, []);
+
+    const filteredGames = games.filter(game => {
+        if (!filterValue) return true;
+
+        switch (filterType) {
+            case 'home':
+                return game.teams.home.id === filterValue;
+            case 'away':
+                return game.teams.away.id === filterValue;
+            case 'championship':
+                return game.championship.id === filterValue;
+            default:
+                return true;
+        }
+    });
+
+    const sortedGames = [...filteredGames].sort((a, b) => {
+        const dateA = new Date(a.timestamp).getTime();
+        const dateB = new Date(b.timestamp).getTime();
+        return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+    });
+
+    const indexOfLastGame = currentPage * itemsPerPage;
+    const indexOfFirstGame = indexOfLastGame - itemsPerPage;
+    const currentGames = sortedGames.slice(indexOfFirstGame, indexOfLastGame);
+    const totalPages = Math.ceil(sortedGames.length / itemsPerPage);
 
     if (loading) {
         return <div className={styles.container}>Loading...</div>;
@@ -51,61 +106,133 @@ const PreviousGamesPage = () => {
     return (
         <div className={styles.container}>
             <h1 className={styles.header}>Previous Games</h1>
-            <div className={styles.tableContainer}>
-                <table className={styles.table}>
-                    <thead>
-                    <tr>
-                        <th className={styles.th}>Home Team Logo</th>
-                        <th className={styles.th}>Home Team</th>
-                        <th className={styles.th}>Time</th>
-                        <th className={styles.th}>Score</th>
-                        <th className={styles.th}>Away Team</th>
-                        <th className={styles.th}>Away Team Logo</th>
-                        <th className={styles.th}>View</th>
-                        <th className={styles.th}>Delete</th>
-                    </tr>
-                    </thead>
 
-                    <tbody>
-                    {games.map((game: IGame, index: number) => (
-                        <tr className={styles.tr} key={game.id || index}>
-                            <td className={styles.td}>
-                                <img className={styles.teamLogo} src={game.teams.home.logo} alt={game.teams.home.name}/>
-                            </td>
-                            <td className={styles.td}>{game.teams.home.name}</td>
-                            <td className={styles.td}>{formatTime(game.timestamp)}</td>
-                            <td className={`${styles.td} ${styles.scoreCell}`}>
-                                {game.score.home.goals} - {game.score.away.goals}
-                            </td>
-                            <td className={styles.td}>{game.teams.away.name}</td>
-                            <td className={styles.td}>
-                                <img className={styles.teamLogo} src={game.teams.away.logo} alt={game.teams.away.name}/>
-                            </td>
-                            <td className={styles.td}>
-                                <button
-                                    className={styles.viewButton}
-                                    onClick={() => navigate(`${game.id}`, {state: game})}
-                                >
-                                    View
-                                </button>
-                            </td>
-                            <td className={styles.td}>
-                                <button className={styles.deleteButton} onClick={async () => {
-                                    try {
-                                        await GameService.deleteGame(game)
-                                        alert("Game deleted successfully.")
-                                        setGames(games.filter((g: IGame) => g.id !== game.id))
-                                    } catch (e) {
-                                        console.log(e)
-                                        alert("Failed to delete the game. Please try again.")
-                                    }
-                                }}>Delete
-                                </button>
-                            </td>
-                        </tr>
+            <div className={styles.controlsContainer}>
+                <select
+                    className={styles.selectFilter}
+                    value={filterType}
+                    onChange={(e) => {
+                        setFilterType(e.target.value);
+                        setFilterValue('');
+                    }}
+                >
+                    <option value="all">All Games</option>
+                    <option value="home">Home Team</option>
+                    <option value="away">Away Team</option>
+                    <option value="championship">Championship</option>
+                </select>
+
+                {filterType !== 'all' && (
+                    filterType === 'championship' ? (
+                        <select
+                            className={styles.selectFilter}
+                            value={filterValue}
+                            onChange={(e) => setFilterValue(e.target.value)}
+                        >
+                            <option value="">Select Championship...</option>
+                            {championships.map(championship => (
+                                <option key={championship.id} value={championship.id}>
+                                    {championship.name}
+                                </option>
+                            ))}
+                        </select>
+                    ) : (
+                        <select
+                            className={styles.selectFilter}
+                            value={filterValue}
+                            onChange={(e) => setFilterValue(e.target.value)}
+                        >
+                            <option value="">Select Team...</option>
+                            {teams.map(team => (
+                                <option key={team.id} value={team.id}>
+                                    {team.name}
+                                </option>
+                            ))}
+                        </select>
+                    )
+                )}
+
+                <select
+                    className={styles.selectFilter}
+                    value={sortOrder}
+                    onChange={(e) => setSortOrder(e.target.value)}
+                >
+                    <option value="newest">Newest First</option>
+                    <option value="oldest">Oldest First</option>
+                </select>
+
+                <select
+                    className={styles.selectFilter}
+                    value={itemsPerPage}
+                    onChange={(e) => {
+                        setItemsPerPage(Number(e.target.value));
+                        setCurrentPage(1);
+                    }}
+                >
+                    <option value={10}>10 per page</option>
+                    <option value={25}>25 per page</option>
+                    <option value={50}>50 per page</option>
+                    <option value={75}>75 per page</option>
+                    <option value={100}>100 per page</option>
+                </select>
+            </div>
+
+            <div className={styles.listContainer}>
+                <ul className={styles.list}>
+                    {currentGames.map((game: IGame, index: number) => (
+                        <li
+                            className={styles.listItem}
+                            key={game.id || index}
+                            onClick={() => navigate(`${game.id}`, {state: game})}
+                        >
+                            <div className={styles.gameContent}>
+                                <div className={styles.teamSection}>
+                                    <img className={styles.teamLogo}
+                                         src={game.teams.home.logo}
+                                         alt={game.teams.home.name}/>
+                                    <span>{game.teams.home.name}</span>
+                                </div>
+
+                                <div className={styles.scoreSection}>
+                                    {game.score.home.goals} - {game.score.away.goals}
+                                </div>
+
+                                <div className={styles.teamSection}>
+                                    <img className={styles.teamLogo}
+                                         src={game.teams.away.logo}
+                                         alt={game.teams.away.name}/>
+                                    <span>{game.teams.away.name}</span>
+                                </div>
+
+                                <div className={styles.dateSection}>
+                                    {formatTime(game.timestamp)}
+                                </div>
+                            </div>
+                        </li>
                     ))}
-                    </tbody>
-                </table>
+                </ul>
+            </div>
+
+            <div style={{
+                display: 'flex',
+                gap: '1rem',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginTop: '1rem'
+            }}>
+                <button
+                    onClick={() => setCurrentPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                >
+                    Previous
+                </button>
+                <span>Page {currentPage} of {totalPages}</span>
+                <button
+                    onClick={() => setCurrentPage(currentPage + 1)}
+                    disabled={currentPage >= totalPages}
+                >
+                    Next
+                </button>
             </div>
         </div>
     );
