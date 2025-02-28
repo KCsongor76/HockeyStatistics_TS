@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {useLocation, useNavigate} from "react-router-dom";
 import Icon from "../components/Icon";
 import {ActionType} from "../OOP/enums/ActionType";
@@ -16,6 +16,10 @@ const PreviousGameDetailPage = () => {
     const gameData = location.state as IGame;
     const navigate = useNavigate();
 
+    const fieldImageRef = useRef<HTMLImageElement>(null);
+    const [iconSize, setIconSize] = useState(30);
+
+
     console.log(gameData);
 
     const [selectedTeamView, setSelectedTeamView] = useState<'all' | 'home' | 'away'>('all');
@@ -24,7 +28,8 @@ const PreviousGameDetailPage = () => {
     const [selectedActionTypes, setSelectedActionTypes] = useState<Set<ActionType>>(new Set(Object.values(ActionType)));
     const availablePeriods = Array.from(new Set(gameData.actions.map(action => action.period)));
     const availableActionTypes = Array.from(new Set(gameData.actions.map(action => action.type)));
-
+    const [sortBy, setSortBy] = useState<keyof IPlayer>('name');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
 
     const filteredActions = gameData.actions.filter(action => {
@@ -41,6 +46,24 @@ const PreviousGameDetailPage = () => {
 
 
     const [selectedActionDetails, setSelectedActionDetails] = useState<IGameAction | null>(null);
+
+    const updateIconSize = () => {
+        if (fieldImageRef.current) {
+            const imageWidth = fieldImageRef.current.offsetWidth;
+            // Calculate icon size as a percentage of image width (3% in this example)
+            const newSize = Math.max(Math.floor(imageWidth * 0.03), 20);
+            setIconSize(newSize);
+        }
+    };
+
+    const handleSort = (column: keyof IPlayer) => {
+        if (sortBy === column) {
+            setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortBy(column);
+            setSortOrder('asc');
+        }
+    };
 
     const togglePeriod = (period: RegularPeriod | PlayoffPeriod) => {
         const newPeriods = new Set(selectedPeriods);
@@ -73,7 +96,8 @@ const PreviousGameDetailPage = () => {
     const getPlayerStats = (players: IPlayer[], teamId: string) => {
         return players.map(player => {
             const playerActions = gameData.actions.filter(a =>
-                a.player.id === player.id && a.team.id === teamId
+                a.player.id === player.id &&
+                (teamId ? a.team.id === teamId : true) // Only filter by team if teamId is provided
             );
 
             return {
@@ -119,6 +143,40 @@ const PreviousGameDetailPage = () => {
             }
         }
     }
+
+    const sortedPlayers = getPlayerStats(roster, selectedTeamView === 'all' ? '' :
+        selectedTeamView === 'home' ? gameData.teams.home.id : gameData.teams.away.id)
+        .sort((a, b) => {
+            let compareValue = 0;
+
+            if (sortBy === 'name' || sortBy === 'position') {
+                compareValue = a.name.localeCompare(b.name);
+            } else {
+                const aValue = a[sortBy as keyof typeof a];
+                const bValue = b[sortBy as keyof typeof b];
+
+                if (typeof aValue === 'number' && typeof bValue === 'number') {
+                    compareValue = aValue - bValue;
+                }
+            }
+
+            return sortOrder === 'asc' ? compareValue : -compareValue;
+        });
+
+    useEffect(() => {
+        updateIconSize();
+
+        const handleResize = () => {
+            updateIconSize();
+        };
+
+        window.addEventListener('resize', handleResize);
+        // setPeriodLabel(getPeriodByNumber(period));
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
     return (
         <div className={styles.container}>
@@ -194,6 +252,7 @@ const PreviousGameDetailPage = () => {
             {/* Game Visualization */}
             <div className={styles.gameVisualization}>
                 <img
+                    ref={fieldImageRef}
                     src={gameData.selectedImage}
                     alt="gamePage"
                     className={styles.gameImage}
@@ -211,7 +270,7 @@ const PreviousGameDetailPage = () => {
                             type={action.type}
                             teamType={action.team.id === gameData.teams.home.id ? 'HOME' : 'AWAY'}
                             teamColors={action.team.id === gameData.teams.home.id ? gameData.teams.home.homeColor : gameData.teams.away.homeColor}
-                            size={30}
+                            size={iconSize}
                             onClick={() => handleIconClick(action)}
                         />
                     </div>
@@ -232,40 +291,47 @@ const PreviousGameDetailPage = () => {
                     <table className={styles.statsTable}>
                         <thead>
                         <tr>
-                            <th>Name</th>
-                            <th>Number</th>
-                            <th>Position</th>
-                            <th>Goals</th>
-                            <th>Shots</th>
-                            <th>Turnovers</th>
+                            {['name', 'jerseyNumber', 'position', 'goals', 'shots', 'turnovers'].map((col) => (
+                                <th
+                                    key={col}
+                                    onClick={() => handleSort(col as keyof IPlayer)}
+                                >
+                                    {col === 'jerseyNumber' ? 'Number' :
+                                        col === 'name' ? 'Name' :
+                                            col[0].toUpperCase() + col.slice(1)}
+                                    {sortBy === col && (
+                                        <span className={styles.sortIndicator}>
+                        {sortOrder === 'asc' ? '↑' : '↓'}
+                    </span>
+                                    )}
+                                </th>
+                            ))}
                         </tr>
                         </thead>
                         <tbody>
-                        {getPlayerStats(roster, selectedTeamView === 'all' ? '' :
-                            selectedTeamView === 'home' ? gameData.teams.home.id : gameData.teams.away.id)
-                            .map((player) => (
-                                <tr
-                                    key={player.id}
-                                    className={styles.playerRow}
-                                    onClick={() => setSelectedPlayer(player.id)}
-                                >
-                                    <td>{player.name}</td>
-                                    <td>{player.jerseyNumber}</td>
-                                    <td>{player.position}</td>
-                                    <td>{player.goals}</td>
-                                    <td>{player.shots}</td>
-                                    <td>{player.turnovers}</td>
-                                </tr>
-                            ))}
+                        {sortedPlayers.map((player) => (
+                            <tr
+                                key={player.id}
+                                className={`${styles.playerRow} ${selectedPlayer === player.id ? styles.selectedRow : ''}`}
+                                onClick={() => setSelectedPlayer(player.id)}
+                            >
+                                <td>{player.name}</td>
+                                <td>{player.jerseyNumber}</td>
+                                <td>{player.position}</td>
+                                <td>{player.goals}</td>
+                                <td>{player.shots}</td>
+                                <td>{player.turnovers}</td>
+                            </tr>
+                        ))}
                         </tbody>
                     </table>
 
                     {uniqueNonRoster.length > 0 && (
                         <>
-                            <h4>Non-Roster Players</h4>
-                            <ul>
+                            <h4 className={styles.nonRosterTitle}>Non-Roster Players</h4>
+                            <ul className={styles.nonRosterList}>
                                 {uniqueNonRoster.map(player => (
-                                    <li key={player.id}>
+                                    <li className={styles.nonRosterItem} key={player.id}>
                                         {player.name} (#{player.jerseyNumber})
                                     </li>
                                 ))}
@@ -275,13 +341,21 @@ const PreviousGameDetailPage = () => {
                 </div>
             </div>
 
-            <button onClick={async () => {
-                await deleteHandler(gameData)
-            }}>Delete Game
+            <button
+                className={styles.deleteButton}
+                onClick={async () => {
+                    await deleteHandler(gameData)
+                }}
+            >
+                Delete Game
             </button>
-            <button onClick={() => {
-                navigate("/previous_games")
-            }}>Go Back
+            <button
+                className={styles.button}
+                onClick={() => {
+                    navigate("/previous_games")
+                }}
+            >
+                Go Back
             </button>
         </div>
     );
