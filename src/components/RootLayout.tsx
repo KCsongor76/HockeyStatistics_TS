@@ -4,10 +4,14 @@ import MainNavigation from "./MainNavigation";
 // @ts-ignore
 import styles from './RootLayout.module.css';
 
-const RootLayout = () => {
+interface RootLayoutProps {
+    isSignedIn: boolean;
+}
+
+const RootLayout = ({ isSignedIn }: RootLayoutProps) => {
     return (
         <div className={styles.rootLayout}>
-            <MainNavigation isSignedIn={true}/>
+            <MainNavigation isSignedIn={isSignedIn}/>
             <main className={styles.mainContent}>
                 <Outlet/>
             </main>

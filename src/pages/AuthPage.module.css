@@ -1,0 +1,50 @@
+/* AuthPage.module.css */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    /*min-height: 75vh;*/
+    /*background-color: #f0f2f5;*/
+}
+
+.card {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    width: 90%;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.title {
+    color: #1a73e8;
+    margin-bottom: 2rem;
+}
+
+.button {
+    background-color: #1a73e8;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 auto;
+    transition: background-color 0.3s;
+}
+
+.button:hover {
+    background-color: #1557b0;
+}
+
+.error {
+    color: #dc3545;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}

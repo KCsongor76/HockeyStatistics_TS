@@ -1,27 +1,23 @@
 import React from 'react';
 // @ts-ignore
-import Modal from 'react-modal';
-
-Modal.setAppElement("#root");
+import styles from './ContinueOrStartOverModal.module.css';
 
 interface ContinueOrStartOverModalProps {
-    isOpen: boolean;
-    onRequestClose: () => void;
     onContinue: () => void;
     onStartOver: () => void;
 }
 
-const ContinueOrStartOverModal = ({isOpen, onRequestClose, onContinue, onStartOver}: ContinueOrStartOverModalProps) => {
-
+const ContinueOrStartOverModal: React.FC<ContinueOrStartOverModalProps> = ({ onContinue, onStartOver }) => {
     return (
-        <Modal isOpen={isOpen} onRequestClose={onRequestClose}>
-            <h2>Continue or start over?</h2>
-            <p>
-                Are you sure you want to continue with the current game?
-            </p>
-            <button onClick={onContinue}>Continue</button>
-            <button onClick={onStartOver}>Start over</button>
-        </Modal>
+        <div className={styles.modalOverlay}>
+            <div className={styles.modalContent}>
+                <h3>Do you want to start a new game or continue with the previous one?</h3>
+                <div className={styles.buttonGroup}>
+                    <button className={styles.continueButton} onClick={onContinue}>Continue</button>
+                    <button className={styles.startOverButton} onClick={onStartOver}>Start Over</button>
+                </div>
+            </div>
+        </div>
     );
 };
 

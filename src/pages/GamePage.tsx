@@ -40,24 +40,33 @@ interface ITeamRoster extends ITeam {
     roster: IPlayer[]
 }
 
+// todo: implement start over/continue logic
+// todo: add dynamic PreviousGameDetailPage view, like mid-game, you can see the game stats by teams/players -
+//  - like click on a button, and it shows an exact same page, as PreviousGameDetailPage, but it gets a button, which navigates back
+//  - to the game page, and it shows the stats for the game normally, and for eg. if the time is not stopped, it runs normally,
+//  - even if you are at the other page via the button
+
 const GamePage = () => {
     const navigate = useNavigate();
+
+    const location = useLocation();
+    const savedGameState = location.state?.savedGameState;
+
     const [selectedPosition, setSelectedPosition] = useState<{ x: number, y: number } | null>(null);
     const [selectedAction, setSelectedAction] = useState<{ type: ActionType, team: ITeamRoster } | null>(null);
     const [selectedActionDetails, setSelectedActionDetails] = useState<IGameAction | null>(null);
-    const [period, setPeriod] = useState(1);
-    const [time, setTime] = useState(5); // 20:00 in seconds // todo: back to 1200
-    const [isTimerRunning, setIsTimerRunning] = useState(false);
-    const [homeScore, setHomeScore] = useState<IScoreData>({goals: 0, shots: 0, turnovers: 0});
-    const [awayScore, setAwayScore] = useState<IScoreData>({goals: 0, shots: 0, turnovers: 0});
-    const [actions, setActions] = useState<IGameAction[]>([]);
-    const [periodLabel, setPeriodLabel] = useState<string>("1st");
-    const [isGameOver, setIsGameOver] = useState<boolean>(false);
-
+    const [period, setPeriod] = useState(savedGameState?.period || 1);
+    const [time, setTime] = useState(savedGameState?.time || 1200);
+    const [isTimerRunning, setIsTimerRunning] = useState(savedGameState?.isTimerRunning || false);
+    const [homeScore, setHomeScore] = useState(savedGameState?.homeScore || {goals: 0, shots: 0, turnovers: 0});
+    const [awayScore, setAwayScore] = useState(savedGameState?.awayScore || {goals: 0, shots: 0, turnovers: 0});
+    const [actions, setActions] = useState(savedGameState?.actions || []);
+    const [periodLabel, setPeriodLabel] = useState(savedGameState?.periodLabel || "1st");
+    const [isGameOver, setIsGameOver] = useState(savedGameState?.isGameOver || false);
     const fieldImageRef = useRef<HTMLImageElement>(null);
     const [iconSize, setIconSize] = useState(30);
 
-    const formData = useLocation().state.formData as FormData;
+    const formData = savedGameState ? savedGameState.formData : location.state.formData as FormData;
     const homeRoster = formData.homeRoster as IPlayer[];
     const awayRoster = formData.awayRoster as IPlayer[];
     const [showDetails, setShowDetails] = useState(true);
@@ -102,13 +111,13 @@ const GamePage = () => {
 
 
     const handleActionComplete = (newAction: IGameAction) => {
-        setActions(prevActions => [...prevActions, newAction]);
+        setActions((prevActions: any) => [...prevActions, newAction]);
         setHasUnsavedChanges(true);
 
         if (newAction.team.id === formData.homeTeam.id) { // todo: .equals
-            setHomeScore(current => handleScoreUpdate(newAction.team, newAction.type, current));
+            setHomeScore((current: IScoreData) => handleScoreUpdate(newAction.team, newAction.type, current));
         } else {
-            setAwayScore(current => handleScoreUpdate(newAction.team, newAction.type, current));
+            setAwayScore((current: IScoreData) => handleScoreUpdate(newAction.team, newAction.type, current));
         }
 
         setSelectedAction(null);
@@ -199,8 +208,8 @@ const GamePage = () => {
         const timestamp = new Date().toISOString();
         const score = {home: homeScore, away: awayScore};
         const teams = {
-            home: {...formData.homeTeam, roster: homeRoster} as ITeamRoster,
-            away: {...formData.awayTeam, roster: awayRoster} as ITeamRoster
+            home: {...formData.homeTeam, roster: formData.homeRoster} as ITeamRoster,
+            away: {...formData.awayTeam, roster: formData.awayRoster} as ITeamRoster
         };
 
         const game: IGame = {
@@ -213,8 +222,20 @@ const GamePage = () => {
             championship: formData.championship
         };
 
-        await saveGameRecord(game);
-    }
+        try {
+            if (window.confirm("Are you sure you want to save this game?")) {
+                await GameService.saveGame(game);
+                alert("Game saved successfully.");
+                localStorage.removeItem('unfinishedGame'); // Remove from localStorage
+                setHasUnsavedChanges(false);
+            } else {
+                alert("Game saving aborted.");
+            }
+        } catch (e) {
+            console.error(e);
+            alert("Failed to save the game. Please try again.");
+        }
+    };
 
     const formatTime = (seconds: number) => {
         const minutes = Math.floor(seconds / 60);
@@ -281,7 +302,7 @@ const GamePage = () => {
                 setIsGameOver(true);
             } else if (period < RegularPeriod.THIRD) {
                 // Regular period progression
-                setPeriod(prev => prev + 1);
+                setPeriod((prev: number) => prev + 1);
                 setPeriodLabel(getPeriodByNumber(period + 1));
                 setTime(5); // 20 minutes // todo: back to 1200
             } else {
@@ -296,7 +317,7 @@ const GamePage = () => {
                 setTime(5); // 20 minutes for playoff OT
             } else if (period >= PlayoffPeriod.OT1 && period < PlayoffPeriod.OT5 && isTied) {
                 // Move to next OT
-                setPeriod(prev => prev + 1);
+                setPeriod((prev: number) => prev + 1);
                 setPeriodLabel(getPeriodByNumber(period + 1));
                 setTime(5); // 20 minutes for each playoff OT
             } else if (period === PlayoffPeriod.OT5 && isTied) {
@@ -304,7 +325,7 @@ const GamePage = () => {
                 setIsGameOver(true);
             } else if (period < PlayoffPeriod.THIRD) {
                 // Regular period progression
-                setPeriod(prev => prev + 1);
+                setPeriod((prev: number) => prev + 1);
                 setPeriodLabel(getPeriodByNumber(period + 1));
                 setTime(5); // 20 minutes
             } else {
@@ -318,7 +339,7 @@ const GamePage = () => {
         let interval: NodeJS.Timeout;
         if (isTimerRunning && time > 0) {
             interval = setInterval(() => {
-                setTime((prev) => prev - 1);
+                setTime((prev: number) => prev - 1);
             }, 1000);
         } else if (time === 0 && isTimerRunning) {
             setIsTimerRunning(false);
@@ -389,6 +410,21 @@ const GamePage = () => {
         };
     }, [hasUnsavedChanges, navigate]);
 
+    useEffect(() => {
+        const gameState = {
+            formData,
+            period,
+            time,
+            isTimerRunning,
+            homeScore,
+            awayScore,
+            actions,
+            periodLabel,
+            isGameOver,
+        };
+        localStorage.setItem('unfinishedGame', JSON.stringify(gameState));
+    }, [formData, period, time, isTimerRunning, homeScore, awayScore, actions, periodLabel, isGameOver]);
+
     console.log("hasUnsavedChanges:", hasUnsavedChanges)
 
     return (
@@ -440,7 +476,7 @@ const GamePage = () => {
                         onTouchEnd={handleTouchEnd}
                         onTouchCancel={handleTouchEnd}
                     />
-                    {showDetails && actions.map((action, index) => (
+                    {showDetails && actions.map((action: IGameAction, index: React.Key | null | undefined) => (
                         <div
                             key={index}
                             className={styles.actionIcon}

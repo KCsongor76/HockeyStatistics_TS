@@ -19,9 +19,6 @@ const PreviousGameDetailPage = () => {
     const fieldImageRef = useRef<HTMLImageElement>(null);
     const [iconSize, setIconSize] = useState(30);
 
-
-    console.log(gameData);
-
     const [selectedTeamView, setSelectedTeamView] = useState<'all' | 'home' | 'away'>('all');
     type Period = RegularPeriod | PlayoffPeriod;
     const [selectedPeriods, setSelectedPeriods] = useState<Set<Period>>(new Set(Object.values(RegularPeriod) as Period[]));

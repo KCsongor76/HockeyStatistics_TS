@@ -12,6 +12,8 @@ import {TeamService} from "../OOP/services/TeamService";
 import {storage} from "../firebaseConfig";
 import {IPlayer} from "../OOP/interfaces/IPlayer";
 import {ITeam} from "../OOP/interfaces/ITeam";
+import ContinueOrStartOverModal from '../modals/ContinueOrStartOverModal';
+
 
 // todo: implement start over/continue logic
 
@@ -86,6 +88,9 @@ const StartPage: React.FC = () => {
     const navigate = useNavigate();
     const [isDropDownOpen, setIsDropDownOpen] = useState(false);
 
+    const [showContinueModal, setShowContinueModal] = useState(false);
+    const [savedGameState, setSavedGameState] = useState<any>(null);
+
     // Image click handler for rink selection
     const handleImageClick = (imageUrl: string) => {
         setFormData({
@@ -125,7 +130,7 @@ const StartPage: React.FC = () => {
         }
 
         localStorage.setItem("formData", JSON.stringify(formData));
-        navigate("/game", { state: { formData } });
+        navigate("/game", {state: {formData}});
     };
 
     const navigateHandler = () => {
@@ -174,6 +179,26 @@ const StartPage: React.FC = () => {
             });
         }
     }, [formData.championship, teams]);
+
+    useEffect(() => {
+        const savedGame = localStorage.getItem('unfinishedGame');
+        if (savedGame) {
+            setSavedGameState(JSON.parse(savedGame));
+            setShowContinueModal(true);
+        }
+    }, []);
+
+// Handle Continue button
+    const handleContinue = () => {
+        navigate('/game', {state: {savedGameState: savedGameState}});
+        setShowContinueModal(false);
+    };
+
+// Handle Start Over button
+    const handleStartOver = () => {
+        localStorage.removeItem('unfinishedGame');
+        setShowContinueModal(false);
+    };
 
     if (championships.length === 0 || teams.length === 0) {
         return <div>Loading...</div>;
@@ -225,6 +250,12 @@ const StartPage: React.FC = () => {
 
     return (
         <form className={styles.formContainer} onSubmit={submitHandler}>
+            {showContinueModal && (
+                <ContinueOrStartOverModal
+                    onContinue={handleContinue}
+                    onStartOver={handleStartOver}
+                />
+            )}
             <div className={styles.formGroup}>
                 <label className={styles.label}>Select Championship</label>
                 <select

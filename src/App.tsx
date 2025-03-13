@@ -1,5 +1,7 @@
 import React, {useEffect, useState} from "react";
-import {createBrowserRouter, RouterProvider} from "react-router-dom";
+import {createBrowserRouter, Navigate, RouterProvider} from "react-router-dom";
+import {auth} from "./firebaseConfig";
+import {onAuthStateChanged} from "firebase/auth";
 import "./App.css";
 import RootLayout from "./components/RootLayout";
 import ErrorPage from "./pages/ErrorPage";
@@ -23,22 +25,22 @@ import HandlePlayerPage from "./pages/HandlePlayerPage";
 
 function App() {
     const [isLoaded, setIsLoaded] = useState<boolean>(false);
-    const [isSignedIn, setIsSignedIn] = useState<boolean>(true);
+    const [isSignedIn, setIsSignedIn] = useState<boolean | undefined>(undefined);
+    console.log(isLoaded, isSignedIn);
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
-        if (token) {
-            setIsSignedIn(true);
-        }
-        setIsLoaded(true);
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            setIsSignedIn(!!user);
+            setIsLoaded(true);
+        });
+
+        return () => unsubscribe();
     }, []);
 
     const adminRoutes = [
         {
             path: "/",
-            element: (
-                <RootLayout/>
-            ),
+            element: <RootLayout isSignedIn={true}/>,
             errorElement: <ErrorPage/>,
             children: [
                 {index: true, element: <HomePage/>},
@@ -63,6 +65,7 @@ function App() {
                         {path: "transfer/:id", element: <TransferPlayerPage/>},
                     ],
                 },
+                {path: "admin", element: <Navigate to="/" replace/>}
             ],
         },
     ];
@@ -78,16 +81,14 @@ function App() {
     const normalRoutes = [
         {
             path: "/",
-            element: <RootLayout/>,
+            element: <RootLayout isSignedIn={false}/>,
             errorElement: <ErrorPage/>,
             children: [
                 {index: true, element: <HomePage/>},
-                {
-                    path: "start",
-                    element: <StartPage/>, loader: startPageLoader
-                },
+                {path: "start", element: <StartPage/>, loader: startPageLoader},
                 {path: "game", element: <GamePage/>},
                 {path: "admin", element: <AuthPage/>},
+                {path: "*", element: <Navigate to="/admin" replace/>}, // Redirect unauthorized users
             ]
         }
     ]
@@ -95,6 +96,7 @@ function App() {
     const router = createBrowserRouter(
         isLoaded ? (isSignedIn ? adminRoutes : normalRoutes) : placeholderRoutes
     );
+
     return <RouterProvider router={router}/>;
 }
 

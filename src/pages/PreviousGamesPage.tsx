@@ -14,8 +14,9 @@ const PreviousGamesPage = () => {
     const [championships, setChampionships] = useState<Championship[]>([]);
     const [teams, setTeams] = useState<ITeam[]>([]);
     const [loading, setLoading] = useState(true);
-    const [filterType, setFilterType] = useState('all');
-    const [filterValue, setFilterValue] = useState('');
+    const [homeTeamFilter, setHomeTeamFilter] = useState('');
+    const [awayTeamFilter, setAwayTeamFilter] = useState('');
+    const [championshipFilter, setChampionshipFilter] = useState('');
     const [sortOrder, setSortOrder] = useState('newest');
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
@@ -70,18 +71,10 @@ const PreviousGamesPage = () => {
     }, []);
 
     const filteredGames = games.filter(game => {
-        if (!filterValue) return true;
-
-        switch (filterType) {
-            case 'home':
-                return game.teams.home.id === filterValue;
-            case 'away':
-                return game.teams.away.id === filterValue;
-            case 'championship':
-                return game.championship.id === filterValue;
-            default:
-                return true;
-        }
+        const homeMatch = homeTeamFilter ? game.teams.home.id === homeTeamFilter : true;
+        const awayMatch = awayTeamFilter ? game.teams.away.id === awayTeamFilter : true;
+        const championshipMatch = championshipFilter ? game.championship.id === championshipFilter : true;
+        return homeMatch && awayMatch && championshipMatch;
     });
 
     const sortedGames = [...filteredGames].sort((a, b) => {
@@ -110,47 +103,42 @@ const PreviousGamesPage = () => {
             <div className={styles.controlsContainer}>
                 <select
                     className={styles.selectFilter}
-                    value={filterType}
-                    onChange={(e) => {
-                        setFilterType(e.target.value);
-                        setFilterValue('');
-                    }}
+                    value={homeTeamFilter}
+                    onChange={(e) => setHomeTeamFilter(e.target.value)}
                 >
-                    <option value="all">All Games</option>
-                    <option value="home">Home Team</option>
-                    <option value="away">Away Team</option>
-                    <option value="championship">Championship</option>
+                    <option value="">All Home Teams</option>
+                    {teams.map(team => (
+                        <option key={team.id} value={team.id}>
+                            {team.name}
+                        </option>
+                    ))}
                 </select>
 
-                {filterType !== 'all' && (
-                    filterType === 'championship' ? (
-                        <select
-                            className={styles.selectFilter}
-                            value={filterValue}
-                            onChange={(e) => setFilterValue(e.target.value)}
-                        >
-                            <option value="">Select Championship...</option>
-                            {championships.map(championship => (
-                                <option key={championship.id} value={championship.id}>
-                                    {championship.name}
-                                </option>
-                            ))}
-                        </select>
-                    ) : (
-                        <select
-                            className={styles.selectFilter}
-                            value={filterValue}
-                            onChange={(e) => setFilterValue(e.target.value)}
-                        >
-                            <option value="">Select Team...</option>
-                            {teams.map(team => (
-                                <option key={team.id} value={team.id}>
-                                    {team.name}
-                                </option>
-                            ))}
-                        </select>
-                    )
-                )}
+                <select
+                    className={styles.selectFilter}
+                    value={awayTeamFilter}
+                    onChange={(e) => setAwayTeamFilter(e.target.value)}
+                >
+                    <option value="">All Away Teams</option>
+                    {teams.map(team => (
+                        <option key={team.id} value={team.id}>
+                            {team.name}
+                        </option>
+                    ))}
+                </select>
+
+                <select
+                    className={styles.selectFilter}
+                    value={championshipFilter}
+                    onChange={(e) => setChampionshipFilter(e.target.value)}
+                >
+                    <option value="">All Championships</option>
+                    {championships.map(championship => (
+                        <option key={championship.id} value={championship.id}>
+                            {championship.name}
+                        </option>
+                    ))}
+                </select>
 
                 <select
                     className={styles.selectFilter}
@@ -179,7 +167,7 @@ const PreviousGamesPage = () => {
 
             <div className={styles.listContainer}>
                 <ul className={styles.list}>
-                    {currentGames.map((game: IGame, index: number) => (
+                    {currentGames.length > 0 ? currentGames.map((game: IGame, index: number) => (
                         <li
                             className={styles.listItem}
                             key={game.id || index}
@@ -209,7 +197,7 @@ const PreviousGamesPage = () => {
                                 </div>
                             </div>
                         </li>
-                    ))}
+                    )) : <p>No games found.</p>}
                 </ul>
             </div>
 
