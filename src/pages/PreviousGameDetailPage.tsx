@@ -11,6 +11,7 @@ import IconDataModal from "../modals/IconDataModal";
 import {GameService} from "../OOP/services/GameService";
 import {IPlayer} from "../OOP/interfaces/IPlayer";
 
+
 const PreviousGameDetailPage = () => {
     const location = useLocation();
     const gameData = location.state as IGame;
@@ -100,7 +101,7 @@ const PreviousGameDetailPage = () => {
             return {
                 ...player,
                 goals: playerActions.filter(a => a.type === ActionType.GOAL).length,
-                shots: playerActions.filter(a => a.type === ActionType.SHOT).length,
+                shots: playerActions.filter(a => a.type === ActionType.SHOT || a.type === ActionType.GOAL).length,
                 turnovers: playerActions.filter(a => a.type === ActionType.TURNOVER).length
             };
         });
