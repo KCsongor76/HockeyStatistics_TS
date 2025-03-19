@@ -8,6 +8,7 @@ import {TeamService} from "../OOP/services/TeamService";
 import styles from './HandlePlayerPage.module.css';  // Import the CSS module
 
 // todo: add data, games when he played
+// todo: button colors
 
 const HandlePlayerPage = () => {
     const {id: playerId} = useParams<{ id: string }>();

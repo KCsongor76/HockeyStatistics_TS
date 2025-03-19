@@ -5,56 +5,136 @@ import {Player} from "../OOP/classes/Player";
 import {TeamService} from "../OOP/services/TeamService";
 // @ts-ignore
 import styles from './PlayerCRUDPage.module.css';
+import {Position} from "../OOP/enums/Position";
 
-// todo: pagination, filtering?
-// todo: table css not good. maybe <li>?
-// todo: delete handler?
-// todo: filter by team, position?
-// todo: create player button - middle
-// todo: too slow
+type LoaderData = {
+    players: { player: Player, teamName: string }[];
+    teams: any[];
+};
 
 const PlayerCRUDPage = () => {
-    const loaderData = useLoaderData() as { player: Player, teamName: string }[] ?? [];
+    const loaderData = useLoaderData() as LoaderData;
     const navigate = useNavigate();
+    const [playersWithTeamNames, setPlayersWithTeamNames] = useState(loaderData.players);
+    const [teams] = useState(loaderData.teams);
 
-    const [playersWithTeamNames, setPlayersWithTeamNames] = useState(loaderData);
+    // New state variables
+    const [teamFilter, setTeamFilter] = useState('');
+    const [positionFilter, setPositionFilter] = useState('');
+    const [jerseyNrFilter, setJerseyNrFilter] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+
+    const filteredPlayers = playersWithTeamNames.filter(({player, teamName}) => {
+        const matchesTeam = teamFilter ? player.teamId === teamFilter : true;
+        const matchesPosition = positionFilter ? player.position === positionFilter : true;
+        const matchesJersey = jerseyNrFilter ? player.jerseyNumber.toString().includes(jerseyNrFilter) : true;
+        const matchesSearch = searchQuery ? player.name.toLowerCase().includes(searchQuery.toLowerCase()) : true;
+        return matchesTeam && matchesPosition && matchesJersey && matchesSearch;
+    });
+
+    // Pagination
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    const currentPlayers = filteredPlayers.slice(indexOfFirstItem, indexOfLastItem);
+    const totalPages = Math.ceil(filteredPlayers.length / itemsPerPage);
 
     const deleteHandler = async (player: Player) => {
-        const isConfirmed = window.confirm("Are you sure you want to delete this player?");
-
-        if (isConfirmed) {
+        if (window.confirm("Are you sure you want to delete this player?")) {
             try {
                 await PlayerService.deletePlayer(player.teamId, player.id);
-                alert("Player deleted successfully.");
-                setPlayersWithTeamNames((prevPlayers) => prevPlayers.filter((p) => p.player.id !== player.id));
+                setPlayersWithTeamNames(prev => prev.filter(p => p.player.id !== player.id));
             } catch (error) {
-                alert("Failed to delete the player. Please try again.");
+                alert("Failed to delete player");
             }
-        } else {
-            alert("Player deletion canceled.");
         }
-    }
+    };
 
     return (
         <div className={styles.container}>
-            <table className={styles.table}>
-                <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>#</th>
-                    <th>Position</th>
-                    <th>Team</th>
-                    <th>Actions</th>
-                </tr>
-                </thead>
-                <tbody>
-                {playersWithTeamNames.length > 0 && playersWithTeamNames.map(({player, teamName}) => (
-                    <tr key={player.id}>
-                        <td>{player.name}</td>
-                        <td>{player.jerseyNumber}</td>
-                        <td>{player.position}</td>
-                        <td>{teamName}</td>
-                        <td>
+            <button className={styles.createButton} onClick={() => navigate("create")}>
+                Create New Player
+            </button>
+
+            <div className={styles.filterContainer}>
+                <input
+                    type="text"
+                    placeholder="Search name..."
+                    className={styles.filterInput}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
+
+                <select
+                    className={styles.filterInput}
+                    value={teamFilter}
+                    onChange={(e) => setTeamFilter(e.target.value)}
+                >
+                    <option value="">All Teams</option>
+                    {teams.map(team => (
+                        <option key={team.id} value={team.id}>
+                            {team.name}
+                        </option>
+                    ))}
+                </select>
+
+                <select
+                    className={styles.filterInput}
+                    value={positionFilter}
+                    onChange={(e) => setPositionFilter(e.target.value)}
+                >
+                    <option value="">All Positions</option>
+                    <option value={Position.GOALIE}>{Position.GOALIE}</option>
+                    <option value={Position.FORWARD}>{Position.FORWARD}</option>
+                    <option value={Position.DEFENDER}>{Position.DEFENDER}</option>
+                </select>
+
+                <input
+                    type="number"
+                    placeholder="Jersey Number"
+                    className={styles.filterInput}
+                    value={jerseyNrFilter}
+                    onChange={(e) => setJerseyNrFilter(e.target.value)}
+                />
+
+                <select
+                    className={styles.filterInput}
+                    value={itemsPerPage}
+                    onChange={(e) => {
+                        setItemsPerPage(Number(e.target.value));
+                        setCurrentPage(1);
+                    }}
+                >
+                    <option value={10}>10 per page</option>
+                    <option value={25}>25 per page</option>
+                    <option value={50}>50 per page</option>
+                </select>
+            </div>
+
+            <div className={styles.playerList}>
+                {currentPlayers.map(({player, teamName}) => (
+                    <div key={player.id} className={styles.playerItem}>
+                        <div key={player.id} className={styles.playerItem}>
+                            <div className={styles.playerHeader}>
+                                <div className={styles.playerName}>{player.name}</div>
+                                <div className={styles.detailItem}>
+                                    <span className={styles.detailLabel}>#</span>
+                                    {player.jerseyNumber}
+                                </div>
+                            </div>
+
+                            <div className={styles.playerDetails}>
+                                <div className={styles.detailItem}>
+                                    <span className={styles.detailLabel}>Position:</span>
+                                    {player.position}
+                                </div>
+                                <div className={styles.detailItem}>
+                                    <span className={styles.detailLabel}>Team:</span>
+                                    {teamName}
+                                </div>
+                            </div>
+
                             <div className={styles.actions}>
                                 <button
                                     className={styles.viewButton}
@@ -69,28 +149,51 @@ const PlayerCRUDPage = () => {
                                     Delete
                                 </button>
                             </div>
-                        </td>
-                    </tr>
+                        </div>
+                    </div>
                 ))}
-                </tbody>
-            </table>
-            <button className={styles.createButton} onClick={() => navigate("create")}>Create Player</button>
-            {/*<button className={styles.backButton} onClick={() => navigate("/")}>Go Back</button>*/}
+            </div>
+
+            <div className={styles.paginationContainer}>
+                <button
+                    className={styles.paginationButton}
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                >
+                    Previous
+                </button>
+                <span>Page {currentPage} of {totalPages}</span>
+                <button
+                    className={styles.paginationButton}
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage >= totalPages}
+                >
+                    Next
+                </button>
+            </div>
+
         </div>
     );
 };
 
 export default PlayerCRUDPage;
 
-export const loader = async (): Promise<{ player: Player, teamName: string }[]> => {
+export const loader = async () => {
     const players = await PlayerService.getAllPlayers();
-    return await Promise.all(
+    const teams = await TeamService.getAllTeams();
+
+    const playersWithTeams = await Promise.all(
         players.map(async (player) => {
             const team = await TeamService.getTeamById(player.teamId);
             return {
                 player,
-                teamName: team ? team.name : "Unknown Team",
+                teamName: team?.name || "Unknown Team",
             };
         })
     );
-}
+
+    return {
+        players: playersWithTeams,
+        teams
+    };
+};

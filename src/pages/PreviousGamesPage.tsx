@@ -9,6 +9,8 @@ import {Championship} from "../OOP/classes/Championship";
 import {TeamService} from "../OOP/services/TeamService";
 import {ITeam} from "../OOP/interfaces/ITeam";
 
+// todo: make smaller components
+
 const PreviousGamesPage = () => {
     const [games, setGames] = useState<IGame[]>([]);
     const [championships, setChampionships] = useState<Championship[]>([]);

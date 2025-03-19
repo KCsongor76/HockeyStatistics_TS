@@ -2,6 +2,8 @@ import {addDoc, collection, deleteDoc, doc, getDoc, getDocs, setDoc, updateDoc} 
 import {db} from "../../firebaseConfig";
 import {Player} from "../classes/Player";
 
+// todo: arrow functions, atomic operations, batch writes?
+
 export class PlayerService {
     static async addPlayerToTeam(teamId: string, player: Player) {
         const docRef = await addDoc(collection(db, `teams/${teamId}/players`), {});

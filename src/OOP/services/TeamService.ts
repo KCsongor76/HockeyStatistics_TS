@@ -5,6 +5,7 @@ import {Team} from "../classes/Team";
 import {Player} from "../classes/Player";
 import {TeamAlreadyExistsError} from "../errors/TeamAlreadyExistsError";
 
+// todo: arrow functions, atomic operations, batch writes?
 
 export class TeamService {
     private static collectionRef = collection(db, 'teams');

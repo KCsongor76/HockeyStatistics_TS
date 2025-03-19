@@ -40,22 +40,35 @@
 
 .formGroup label {
     display: block;
-    font-weight: bold;
-    margin-bottom: 8px;
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #2d3748;
+    text-transform: uppercase; /* Match StartPage */
+    letter-spacing: 0.05em;
 }
 
 .formGroup input[type="text"],
 .formGroup input[type="file"] {
     width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
+    padding: 0.75rem;
+    border: 2px solid #e2e8f0; /* Match StartPage */
+    border-radius: 8px;
+    background-color: white;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+}
+
+.formGroup input:focus {
+    outline: none;
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
 }
 
 .buttonGroup {
     display: flex;
-    justify-content: space-between;
+    justify-content: center; /* Changed from space-between */
+    gap: 1rem; /* Add spacing between buttons */
     margin-top: 20px;
 }
 
@@ -125,4 +138,46 @@
     color: #666;
     font-style: italic;
     margin-top: 20px;
+}
+
+.gamesDropdown {
+    margin-top: 2rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.dropdownHeader {
+    padding: 1rem;
+    background-color: #f7fafc;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.gamesList {
+    padding: 1rem;
+    background: white;
+}
+
+.playersDropdown {
+    margin-top: 2rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.gameItem {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.gameItem img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
 }

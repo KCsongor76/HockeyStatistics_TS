@@ -5,6 +5,8 @@ import { auth, googleProvider } from '../firebaseConfig';
 // @ts-ignore
 import styles from './AuthPage.module.css';
 
+// todo: for some reason, it does not work on mobile
+
 const AuthPage = () => {
     const navigate = useNavigate();
 

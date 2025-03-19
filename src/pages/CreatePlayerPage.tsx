@@ -9,6 +9,7 @@ import {Player} from "../OOP/classes/Player";
 import styles from './CreatePlayerPage.module.css';
 
 // todo: wider, buttons in middle
+// todo: unify styling with start page
 
 const CreatePlayerPage = () => {
     const loaderData = useLoaderData() as Team[];

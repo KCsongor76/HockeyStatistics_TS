@@ -3,6 +3,8 @@ import {useNavigate} from "react-router-dom";
 // @ts-ignore
 import styles from './ErrorPage.module.css';
 
+// todo: implement routing error logic
+
 const ErrorPage = () => {
     const navigate = useNavigate();
 

@@ -1,9 +1,6 @@
-import {IGame} from "../interfaces/IGame";
 import {Team} from "./Team";
 import {ScoreData} from "./ScoreData";
 import {GameAction} from "./GameAction";
-import {ITeam} from "../interfaces/ITeam";
-import {IGameAction} from "../interfaces/IGameAction";
 
 export class Game {
     private _id: string = "";

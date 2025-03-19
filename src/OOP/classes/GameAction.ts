@@ -2,7 +2,6 @@ import {Team} from "./Team";
 import {Player} from "./Player";
 import {PlayoffPeriod, RegularPeriod} from "../enums/Period";
 import {ActionType} from "../enums/ActionType";
-import {IGameAction} from "../interfaces/IGameAction";
 
 export class GameAction {
     private _team: Team;

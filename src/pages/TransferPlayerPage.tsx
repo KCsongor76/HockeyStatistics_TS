@@ -6,6 +6,7 @@ import {Team} from "../OOP/classes/Team";
 // @ts-ignore
 import styles from './TransferPlayerPage.module.css'; // Import the CSS module
 
+// todo: button color
 
 const TransferPlayerPage = () => {
     const player = useLocation().state.player as Player;

@@ -1,5 +1,3 @@
-import {IScoreData} from "../interfaces/IScoreData";
-
 export class ScoreData {
     private _goals: number;
     private _shots: number;

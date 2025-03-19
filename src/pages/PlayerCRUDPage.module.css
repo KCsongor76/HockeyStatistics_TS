@@ -1,48 +1,100 @@
-/* PlayerTable.module.css */
+/* PlayerCRUDPage.module.css */
 
 .container {
-    max-width: 900px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
     background-color: #f8f9fa;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 20px;
-    font-family: Arial, sans-serif;
-}
-
-.table thead th {
-    background-color: #007bff;
+.createButton {
+    background-color: #17a2b8;
     color: white;
-    padding: 12px;
-    text-align: left;
+    padding: 12px 20px;
+    margin-bottom: 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
 }
 
-.table tbody td {
-    padding: 12px;
-    border-top: 1px solid #dee2e6;
+.createButton:hover {
+    background-color: #138496;
 }
 
-.table tbody tr:hover {
-    background-color: #f1f1f1;
+.playerList {
+    display: grid;
+    gap: 15px;
+    grid-template-columns: repeat(1, 1fr);
+}
+
+@media (min-width: 768px) {
+    .playerList {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 1200px) {
+    .playerList {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+
+.playerItem {
+    background-color: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.playerHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.playerName {
+    font-weight: bold;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.playerDetails {
+    display: grid;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.detailItem {
+    display: flex;
+    justify-content: space-between;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.detailLabel {
+    font-weight: 500;
+    margin-right: 10px;
 }
 
 .actions {
     display: flex;
     gap: 10px;
+    margin-top: 10px;
 }
 
-.actions button {
-    padding: 8px 16px;
+.viewButton, .deleteButton {
+    padding: 10px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     font-size: 14px;
+    flex: 1;
+    transition: opacity 0.2s;
 }
 
 .viewButton {
@@ -51,7 +103,7 @@
 }
 
 .viewButton:hover {
-    background-color: #218838;
+    opacity: 0.9;
 }
 
 .deleteButton {
@@ -60,33 +112,41 @@
 }
 
 .deleteButton:hover {
-    background-color: #c82333;
+    opacity: 0.9;
 }
 
-.createButton,
-.backButton {
-    padding: 10px 20px;
-    border: none;
+.filterContainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.filterInput {
+    padding: 0.5rem;
     border-radius: 4px;
+    border: 1px solid #ddd;
+    width: 100%;
+}
+
+.paginationContainer {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin: 2rem 0;
+    align-items: center;
+}
+
+.paginationButton {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ddd;
+    background: white;
     cursor: pointer;
-    font-size: 16px;
-    margin-right: 10px;
+    border-radius: 4px;
 }
 
-.createButton {
-    background-color: #17a2b8;
-    color: white;
+.paginationButton:disabled {
+    background: #f0f0f0;
+    cursor: not-allowed;
 }
 
-.createButton:hover {
-    background-color: #138496;
-}
-
-.backButton {
-    background-color: #6c757d;
-    color: white;
-}
-
-.backButton:hover {
-    background-color: #5a6268;
-}

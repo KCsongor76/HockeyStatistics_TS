@@ -44,7 +44,7 @@ const ActionSelectorModal: React.FC<ActionSelectorModalProps> = ({
 
                 {/* Home Team Actions */}
                 <div className={styles.teamActions}>
-                    {Object.values(ActionType).map((action) => (
+                    {Object.values(ActionType).filter((action) => action !== ActionType.ASSIST).map((action) => (
                         <Icon
                             key={`home-${action}`}
                             type={action}
@@ -56,7 +56,7 @@ const ActionSelectorModal: React.FC<ActionSelectorModalProps> = ({
                 </div>
                 {/* Away Team Actions */}
                 <div className={styles.teamActions}>
-                    {Object.values(ActionType).map((action) => (
+                    {Object.values(ActionType).filter((action) => action !== ActionType.ASSIST).map((action) => (
                         <Icon
                             key={`away-${action}`}
                             type={action}

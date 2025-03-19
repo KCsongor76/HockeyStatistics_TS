@@ -2,6 +2,8 @@ import {collection, deleteDoc, doc, getDoc, getDocs, updateDoc} from "firebase/f
 import {db} from "../../firebaseConfig";
 import {Championship} from "../classes/Championship";
 
+// todo: arrow functions, atomic operations, batch writes?
+
 export class ChampionshipService {
     private static collectionRef = collection(db, 'championships');
 

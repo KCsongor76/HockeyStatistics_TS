@@ -39,6 +39,17 @@ const IconDataModal = ({action, onClose}: IconDataModalProps) => {
                     <span>{action.type}</span>
                 </div>
 
+                {action.assists && action.assists.length > 0 && (
+                    <div>
+                        <h4>Assists:</h4>
+                        {action.assists.map((assist, index) => (
+                            <p key={index}>
+                                {assist.name} (#{assist.jerseyNumber})
+                            </p>
+                        ))}
+                    </div>
+                )}
+
                 <div className={styles.detailItem}>
                     <label>Period:</label>
                     <span>{action.period}</span>

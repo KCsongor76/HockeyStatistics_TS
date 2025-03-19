@@ -1,6 +1,6 @@
 .formContainer {
-    min-width: 500px;
-    max-width: 1200px;
+    width: 100%;
+    max-width: 800px;
     margin: 2rem auto;
     padding: 2.5rem;
     background: linear-gradient(145deg, #ffffff, #f0f4f8);
@@ -204,8 +204,10 @@
 
 @media (max-width: 768px) {
     .formContainer {
+        width: calc(100% - 2rem); /* Account for horizontal margins */
         margin: 1rem;
         padding: 1.5rem;
+        box-sizing: border-box; /* Include padding in width calculation */
     }
 
     .colorPickerContainer {
@@ -218,6 +220,9 @@
     }
 
     .table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
         font-size: 0.875rem;
     }
 

@@ -17,6 +17,7 @@ import PlayerSelectorModal from "../modals/PlayerSelectorModal";
 import styles from './GamePage.module.css';
 import IconDataModal from "../modals/IconDataModal";
 import {IPlayer} from "../OOP/interfaces/IPlayer";
+import AssistSelectorModal from "../modals/AssistSelectorModal";
 
 type FormData = {
     championship: IChampionship;
@@ -40,11 +41,12 @@ interface ITeamRoster extends ITeam {
     roster: IPlayer[]
 }
 
-// todo: implement start over/continue logic
 // todo: add dynamic PreviousGameDetailPage view, like mid-game, you can see the game stats by teams/players -
 //  - like click on a button, and it shows an exact same page, as PreviousGameDetailPage, but it gets a button, which navigates back
 //  - to the game page, and it shows the stats for the game normally, and for eg. if the time is not stopped, it runs normally,
 //  - even if you are at the other page via the button
+// todo: make smaller components
+// todo: if goal, add assisters
 
 const GamePage = () => {
     const navigate = useNavigate();
@@ -74,6 +76,9 @@ const GamePage = () => {
     const [isLongPress, setIsLongPress] = useState(false); // To track if it's a long press
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+    const [pendingGoalAction, setPendingGoalAction] = useState<IGameAction | null>(null);
+    const [isSelectingAssists, setIsSelectingAssists] = useState(false);
 
     const updateIconSize = () => {
         if (fieldImageRef.current) {
@@ -111,18 +116,40 @@ const GamePage = () => {
 
 
     const handleActionComplete = (newAction: IGameAction) => {
-        setActions((prevActions: any) => [...prevActions, newAction]);
-        setHasUnsavedChanges(true);
-
-        if (newAction.team.id === formData.homeTeam.id) { // todo: .equals
-            setHomeScore((current: IScoreData) => handleScoreUpdate(newAction.team, newAction.type, current));
+        if (newAction.type === ActionType.GOAL) {
+            // Store the action temporarily for assist selection
+            setPendingGoalAction(newAction);
+            setIsSelectingAssists(true);
         } else {
-            setAwayScore((current: IScoreData) => handleScoreUpdate(newAction.team, newAction.type, current));
+            // Existing logic for non-goal actions
+            setActions((prevActions: any) => [...prevActions, newAction]);
+            // ...rest of your existing code
         }
-
+        // Close modals
         setSelectedAction(null);
         setSelectedPosition(null);
         setIsModalOpen(false);
+    };
+
+    const handleAssistSelection = (assists: IPlayer[]) => {
+        if (pendingGoalAction) {
+            const completedAction = {
+                ...pendingGoalAction,
+                assists: assists
+            };
+            setActions((prev: any) => [...prev, completedAction]);
+
+            // Update scores (same as before)
+            if (completedAction.team.id === formData.homeTeam.id) {
+                setHomeScore((current: IScoreData) => handleScoreUpdate(completedAction.team, completedAction.type, current));
+            } else {
+                setAwayScore((current: IScoreData) => handleScoreUpdate(completedAction.team, completedAction.type, current));
+            }
+
+            setHasUnsavedChanges(true);
+        }
+        setPendingGoalAction(null);
+        setIsSelectingAssists(false);
     };
 
     const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -441,6 +468,7 @@ const GamePage = () => {
                     onCancel={handleCancelAction}
                 />
             )}
+
             {selectedAction && (
                 <PlayerSelectorModal
                     selectedAction={selectedAction}
@@ -451,12 +479,27 @@ const GamePage = () => {
                     onCancel={handleCancelAction}
                 />
             )}
+
+            {isSelectingAssists && pendingGoalAction && (
+                <AssistSelectorModal
+                    teamRoster={pendingGoalAction.team.players.filter(player =>
+                        player.id !== pendingGoalAction.player.id
+                    )}
+                    onAssistSelected={handleAssistSelection}
+                    onCancel={() => {
+                        setIsSelectingAssists(false);
+                        setPendingGoalAction(null);
+                    }}
+                />
+            )}
+
             {selectedActionDetails && (
                 <IconDataModal
                     action={selectedActionDetails}
                     onClose={handleCloseIconData}
                 />
             )}
+
             <div className={styles.gameContainer}>
                 <div
                     className={styles.fieldContainer}

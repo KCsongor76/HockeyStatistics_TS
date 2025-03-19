@@ -1,7 +1,6 @@
 import {Player} from "./Player";
 import {Championship} from "./Championship";
 import {ITeamColor} from "../interfaces/ITeamColor";
-import {ITeam} from "../interfaces/ITeam";
 
 export class Team {
     private readonly _id: string

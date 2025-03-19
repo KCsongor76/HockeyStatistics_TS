@@ -14,8 +14,7 @@ import {IPlayer} from "../OOP/interfaces/IPlayer";
 import {ITeam} from "../OOP/interfaces/ITeam";
 import ContinueOrStartOverModal from '../modals/ContinueOrStartOverModal';
 
-
-// todo: implement start over/continue logic
+// todo: make smaller components
 
 type FormState = {
     championship: Championship;

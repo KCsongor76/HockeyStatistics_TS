@@ -6,7 +6,10 @@ import {TeamService} from "../OOP/services/TeamService";
 import styles from './HandleTeamPage.module.css';
 
 // todo: buttons in middle
-// todo: show games in which they played
+// todo: show games in which they played (a list of the games, as PreviousGamesPage)
+// todo: both player and games list, make them dropdown styled
+// todo: add stats to player table from all the games they played (Games played, goals, shots, turnovers etc.)
+// todo: edit team: unify styling with start page
 
 const HandleTeamPage = () => {
     const location = useLocation();
