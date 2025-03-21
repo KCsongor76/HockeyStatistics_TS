@@ -14,7 +14,7 @@ import {IPlayer} from "../OOP/interfaces/IPlayer";
 import {ITeam} from "../OOP/interfaces/ITeam";
 import ContinueOrStartOverModal from '../modals/ContinueOrStartOverModal';
 
-// todo: make smaller components
+// todo: roster selection - fix styling, roster selection table styling incorrect when media width is less than 768px
 
 type FormState = {
     championship: Championship;

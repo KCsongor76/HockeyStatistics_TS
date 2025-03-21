@@ -23,6 +23,8 @@ import {loader as CreatePlayerPageLoader} from "./pages/CreatePlayerPage";
 import {loader as playerCRUDPageLoader} from "./pages/PlayerCRUDPage";
 import HandlePlayerPage from "./pages/HandlePlayerPage";
 
+// todo: routing: only if no unsaved changes, otherwise window.confirm("You have unsaved changes. Are you sure you want to navigate away?")
+
 function App() {
     const [isLoaded, setIsLoaded] = useState<boolean>(false);
     const [isSignedIn, setIsSignedIn] = useState<boolean | undefined>(undefined);

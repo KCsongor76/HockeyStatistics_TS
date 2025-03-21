@@ -11,6 +11,69 @@
     background-color: #f8f9fa;
     box-sizing: border-box; /* Ensure padding is included in width calculation */
     overflow-x: hidden; /* Prevent horizontal scrolling within the container */
+    flex: 1;
+}
+
+.mainWrapper {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    padding: 16px;
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+.actualDataContainer {
+    flex: 1;
+    max-width: 1200px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 16px;
+    margin: 0 auto 16px;
+}
+
+@media (min-width: 1200px) {
+    .mainWrapper {
+        flex-direction: row;
+        align-items: flex-start;
+    }
+
+    .gameContainer,
+    .actualDataContainer {
+        max-width: calc(50% - 12px);
+    }
+}
+
+@media (max-width: 1199px) {
+    .mainWrapper {
+        flex-direction: column;
+    }
+
+    .gameContainer,
+    .actualDataContainer {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .fieldContainer {
+        overflow: visible; /* Allow full image display on mobile */
+        margin-bottom: 0; /* Remove bottom margin */
+    }
+
+    .fieldImage {
+        position: static; /* Reset positioning */
+        height: auto; /* Maintain natural aspect ratio */
+        max-height: 80vh; /* Prevent excessive height */
+    }
+
+    .gameContainer {
+        overflow: visible; /* Ensure container doesn't clip content */
+    }
+
+    .mainWrapper {
+        gap: 16px; /* Reduce spacing between stacked elements */
+    }
 }
 
 /* Game field container */
@@ -29,6 +92,11 @@
     display: block;
     cursor: crosshair;
     transition: transform 0.2s;
+}
+
+.fieldImage {
+    aspect-ratio: 1.78; /* 16:9 ratio - adjust based on your rink image's actual ratio */
+    object-fit: contain; /* Ensure full image visibility */
 }
 
 /*.fieldImage:hover {

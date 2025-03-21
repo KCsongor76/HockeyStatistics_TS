@@ -1,8 +1,9 @@
 import React, {useEffect, useRef, useState} from 'react';
+
 import {GameType} from "../OOP/enums/GameType";
 import {RegularPeriod, PlayoffPeriod} from "../OOP/enums/Period";
 import {ITeamColor} from "../OOP/interfaces/ITeamColor";
-import {useLocation, useNavigate} from "react-router-dom";
+import {useLocation} from "react-router-dom";
 import {ActionType} from "../OOP/enums/ActionType";
 import Icon from "../components/Icon";
 import {IChampionship} from "../OOP/interfaces/IChampionship";
@@ -18,6 +19,7 @@ import styles from './GamePage.module.css';
 import IconDataModal from "../modals/IconDataModal";
 import {IPlayer} from "../OOP/interfaces/IPlayer";
 import AssistSelectorModal from "../modals/AssistSelectorModal";
+import ActualGameDetails from './ActualGameDetails';
 
 type FormData = {
     championship: IChampionship;
@@ -41,16 +43,8 @@ interface ITeamRoster extends ITeam {
     roster: IPlayer[]
 }
 
-// todo: add dynamic PreviousGameDetailPage view, like mid-game, you can see the game stats by teams/players -
-//  - like click on a button, and it shows an exact same page, as PreviousGameDetailPage, but it gets a button, which navigates back
-//  - to the game page, and it shows the stats for the game normally, and for eg. if the time is not stopped, it runs normally,
-//  - even if you are at the other page via the button
-// todo: make smaller components
-// todo: if goal, add assisters
 
 const GamePage = () => {
-    const navigate = useNavigate();
-
     const location = useLocation();
     const savedGameState = location.state?.savedGameState;
 
@@ -58,7 +52,7 @@ const GamePage = () => {
     const [selectedAction, setSelectedAction] = useState<{ type: ActionType, team: ITeamRoster } | null>(null);
     const [selectedActionDetails, setSelectedActionDetails] = useState<IGameAction | null>(null);
     const [period, setPeriod] = useState(savedGameState?.period || 1);
-    const [time, setTime] = useState(savedGameState?.time || 1200);
+    const [time, setTime] = useState(savedGameState?.time || 5);
     const [isTimerRunning, setIsTimerRunning] = useState(savedGameState?.isTimerRunning || false);
     const [homeScore, setHomeScore] = useState(savedGameState?.homeScore || {goals: 0, shots: 0, turnovers: 0});
     const [awayScore, setAwayScore] = useState(savedGameState?.awayScore || {goals: 0, shots: 0, turnovers: 0});
@@ -69,16 +63,26 @@ const GamePage = () => {
     const [iconSize, setIconSize] = useState(30);
 
     const formData = savedGameState ? savedGameState.formData : location.state.formData as FormData;
-    const homeRoster = formData.homeRoster as IPlayer[];
-    const awayRoster = formData.awayRoster as IPlayer[];
     const [showDetails, setShowDetails] = useState(true);
     const pressTimer = useRef<number | null>(null);
     const [isLongPress, setIsLongPress] = useState(false); // To track if it's a long press
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
     const [pendingGoalAction, setPendingGoalAction] = useState<IGameAction | null>(null);
     const [isSelectingAssists, setIsSelectingAssists] = useState(false);
+
+    const currentGame: IGame = {
+        id: "",
+        timestamp: new Date().toISOString(),
+        actions: actions,
+        teams: {
+            home: {...formData.homeTeam, roster: formData.homeRoster},
+            away: {...formData.awayTeam, roster: formData.awayRoster}
+        },
+        score: {home: homeScore, away: awayScore},
+        selectedImage: formData.selectedImage,
+        championship: formData.championship
+    };
 
     const updateIconSize = () => {
         if (fieldImageRef.current) {
@@ -145,8 +149,6 @@ const GamePage = () => {
             } else {
                 setAwayScore((current: IScoreData) => handleScoreUpdate(completedAction.team, completedAction.type, current));
             }
-
-            setHasUnsavedChanges(true);
         }
         setPendingGoalAction(null);
         setIsSelectingAssists(false);
@@ -215,22 +217,6 @@ const GamePage = () => {
         clearPressTimer();
     };
 
-    const saveGameRecord = async (game: IGame): Promise<void> => {
-        try {
-            // do you really want to save the game?
-            if (window.confirm("Are you sure you want to save this game?")) {
-                await GameService.saveGame(game)
-                alert("Game saved successfully.")
-                setHasUnsavedChanges(false);
-            } else {
-                alert("Game saving aborted.")
-            }
-        } catch (e) {
-            console.log(e)
-            alert("Failed to save the game. Please try again.")
-        }
-    }
-
     const submitGameHandler = async (): Promise<void> => {
         const timestamp = new Date().toISOString();
         const score = {home: homeScore, away: awayScore};
@@ -254,7 +240,6 @@ const GamePage = () => {
                 await GameService.saveGame(game);
                 alert("Game saved successfully.");
                 localStorage.removeItem('unfinishedGame'); // Remove from localStorage
-                setHasUnsavedChanges(false);
             } else {
                 alert("Game saving aborted.");
             }
@@ -313,6 +298,9 @@ const GamePage = () => {
 
     const handleNextPeriod = () => {
         // First check if the game is tied - only then should we go to OT
+        const REGULAR_PERIOD_DURATION = 1200; // 20 minutes
+        const OT_PERIOD_DURATION = 300; // 5 minutes
+
         const isTied = homeScore.goals === awayScore.goals;
 
         if (formData.gameType === GameType.REGULAR) {
@@ -331,7 +319,7 @@ const GamePage = () => {
                 // Regular period progression
                 setPeriod((prev: number) => prev + 1);
                 setPeriodLabel(getPeriodByNumber(period + 1));
-                setTime(5); // 20 minutes // todo: back to 1200
+                setTime(5); // 20 minutes back to 1200
             } else {
                 // Game is over
                 setIsGameOver(true);
@@ -389,53 +377,6 @@ const GamePage = () => {
         };
     }, []);
 
-    // Route confirmation for unsaved changes
-    useEffect(() => {
-        // Block navigation if there are unsaved changes
-        if (hasUnsavedChanges) {
-            const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-                e.preventDefault();
-                e.returnValue = "You have unsaved changes. Are you sure you want to leave?";
-                return e.returnValue;
-            };
-
-            window.addEventListener('beforeunload', handleBeforeUnload);
-            return () => {
-                window.removeEventListener('beforeunload', handleBeforeUnload);
-            };
-        }
-    }, [hasUnsavedChanges]);
-
-    // Custom navigation handler to show confirmation
-    const navigateWithConfirmation = (path: string) => {
-        if (hasUnsavedChanges) {
-            if (window.confirm("You have unsaved game data. Are you sure you want to navigate away?")) {
-                navigate(path);
-            }
-        } else {
-            navigate(path);
-        }
-    };
-
-    // Override React Router navigation
-    useEffect(() => {
-        const handleClick = (e: MouseEvent) => {
-            // Check if the click was on an anchor tag
-            const target = e.target as HTMLElement;
-            const anchor = target.closest('a');
-
-            if (anchor && anchor.getAttribute('href')?.startsWith('/')) {
-                e.preventDefault();
-                const href = anchor.getAttribute('href') || '/';
-                navigateWithConfirmation(href);
-            }
-        };
-
-        document.addEventListener('click', handleClick);
-        return () => {
-            document.removeEventListener('click', handleClick);
-        };
-    }, [hasUnsavedChanges, navigate]);
 
     useEffect(() => {
         const gameState = {
@@ -451,8 +392,6 @@ const GamePage = () => {
         };
         localStorage.setItem('unfinishedGame', JSON.stringify(gameState));
     }, [formData, period, time, isTimerRunning, homeScore, awayScore, actions, periodLabel, isGameOver]);
-
-    console.log("hasUnsavedChanges:", hasUnsavedChanges)
 
     return (
         <>
@@ -500,106 +439,113 @@ const GamePage = () => {
                 />
             )}
 
-            <div className={styles.gameContainer}>
-                <div
-                    className={styles.fieldContainer}
-                    onClick={handleClick}
-                >
-                    <img
-                        ref={fieldImageRef}
-                        src={formData.selectedImage}
-                        alt="gamePage"
-                        className={styles.fieldImage}
-                        // Mouse events
-                        onMouseDown={handleMouseDown}
-                        onMouseUp={handleMouseUp}
-                        onMouseLeave={handleMouseUp}
-                        // Touch events
-                        onTouchStart={handleTouchStart}
-                        onTouchEnd={handleTouchEnd}
-                        onTouchCancel={handleTouchEnd}
-                    />
-                    {showDetails && actions.map((action: IGameAction, index: React.Key | null | undefined) => (
-                        <div
-                            key={index}
-                            className={styles.actionIcon}
-                            style={{
-                                left: `${action.x * 100}%`,
-                                top: `${action.y * 100}%`,
-                            }}
-                        >
-                            <Icon
-                                type={action.type}
-                                teamType={action.team === formData.homeTeam ? 'HOME' : 'AWAY'}
-                                teamColors={action.team.id === formData.homeTeam.id ? formData.homeColor : formData.awayColor /*TODO: oop - .equals method*/}
-                                size={iconSize}
-                                onClick={(e: React.MouseEvent<Element, MouseEvent>) => handleIconClick(action, e)}
-                            />
-                        </div>
-                    ))}
-                </div>
-
-                <div className={styles.statsContainer}>
-                    <div className={styles.teamInfo}>
-                        <img src={formData.homeTeam.logo} alt={formData.homeTeam.name} className={styles.teamLogo}/>
-                        <div className={styles.teamStats}>
-                            <p className={styles.statItem}>Shots: {homeScore.shots}</p>
-                            <p className={styles.statItem}>Turnovers: {homeScore.turnovers}</p>
-                        </div>
+            <div className={styles.mainWrapper}>
+                <div className={styles.gameContainer}>
+                    <div
+                        className={styles.fieldContainer}
+                        onClick={handleClick}
+                    >
+                        <img
+                            ref={fieldImageRef}
+                            src={formData.selectedImage}
+                            alt="gamePage"
+                            className={styles.fieldImage}
+                            // Mouse events
+                            onMouseDown={handleMouseDown}
+                            onMouseUp={handleMouseUp}
+                            onMouseLeave={handleMouseUp}
+                            // Touch events
+                            onTouchStart={handleTouchStart}
+                            onTouchEnd={handleTouchEnd}
+                            onTouchCancel={handleTouchEnd}
+                        />
+                        {showDetails && actions.map((action: IGameAction, index: React.Key | null | undefined) => (
+                            <div
+                                key={index}
+                                className={styles.actionIcon}
+                                style={{
+                                    left: `${action.x * 100}%`,
+                                    top: `${action.y * 100}%`,
+                                }}
+                            >
+                                <Icon
+                                    type={action.type}
+                                    teamType={action.team === formData.homeTeam ? 'HOME' : 'AWAY'}
+                                    teamColors={action.team.id === formData.homeTeam.id ? formData.homeColor : formData.awayColor /* oop - .equals method*/}
+                                    size={iconSize}
+                                    onClick={(e: React.MouseEvent<Element, MouseEvent>) => handleIconClick(action, e)}
+                                />
+                            </div>
+                        ))}
                     </div>
 
-                    <div className={styles.gameControls}>
-                        <p className={styles.periodDisplay}>Period: {periodLabel}</p>
-                        <p className={styles.timeDisplay}>{formatTime(time)}</p>
-                        <p className={styles.scoreDisplay}>{homeScore.goals} - {awayScore.goals}</p>
+                    <div className={styles.statsContainer}>
+                        <div className={styles.teamInfo}>
+                            <img src={formData.homeTeam.logo} alt={formData.homeTeam.name} className={styles.teamLogo}/>
+                            <div className={styles.teamStats}>
+                                <p className={styles.statItem}>Shots: {homeScore.shots}</p>
+                                <p className={styles.statItem}>Turnovers: {homeScore.turnovers}</p>
+                            </div>
+                        </div>
 
-                        <div className={styles.buttonContainer}>
-                            {!isGameOver && (
-                                isTimerRunning ? (
-                                    <button
-                                        className={`${styles.button} ${styles.secondaryButton}`}
-                                        onClick={() => setIsTimerRunning(false)}
-                                    >
-                                        Stop Time
-                                    </button>
-                                ) : (
-                                    time > 0 &&
+                        <div className={styles.gameControls}>
+                            <p className={styles.periodDisplay}>Period: {periodLabel}</p>
+                            <p className={styles.timeDisplay}>{formatTime(time)}</p>
+                            <p className={styles.scoreDisplay}>{homeScore.goals} - {awayScore.goals}</p>
+
+                            <div className={styles.buttonContainer}>
+                                {!isGameOver && (
+                                    isTimerRunning ? (
+                                        <button
+                                            className={`${styles.button} ${styles.secondaryButton}`}
+                                            onClick={() => setIsTimerRunning(false)}
+                                        >
+                                            Stop Time
+                                        </button>
+                                    ) : (
+                                        time > 0 &&
+                                        <button
+                                            className={`${styles.button} ${styles.primaryButton}`}
+                                            onClick={() => setIsTimerRunning(true)}
+                                        >
+                                            Start Time
+                                        </button>
+                                    )
+                                )}
+
+
+                                {!isTimerRunning && time === 0 && !isGameOver && (
                                     <button
                                         className={`${styles.button} ${styles.primaryButton}`}
-                                        onClick={() => setIsTimerRunning(true)}
+                                        onClick={handleNextPeriod}
                                     >
-                                        Start Time
+                                        Next Period
                                     </button>
-                                )
-                            )}
+                                )}
 
-
-                            {!isTimerRunning && time === 0 && !isGameOver && (
                                 <button
-                                    className={`${styles.button} ${styles.primaryButton}`}
-                                    onClick={handleNextPeriod}
+                                    className={`${styles.button} ${styles.successButton}`}
+                                    onClick={submitGameHandler}
                                 >
-                                    Next Period
+                                    End Game
                                 </button>
-                            )}
-
-                            <button
-                                className={`${styles.button} ${styles.successButton}`}
-                                onClick={submitGameHandler}
-                            >
-                                End Game
-                            </button>
+                            </div>
                         </div>
-                    </div>
 
-                    <div className={styles.teamInfo}>
-                        <img src={formData.awayTeam.logo} alt={formData.awayTeam.name} className={styles.teamLogo}/>
-                        <div className={styles.teamStats}>
-                            <p className={styles.statItem}>Shots: {awayScore.shots}</p>
-                            <p className={styles.statItem}>Turnovers: {awayScore.turnovers}</p>
+                        <div className={styles.teamInfo}>
+                            <img src={formData.awayTeam.logo} alt={formData.awayTeam.name} className={styles.teamLogo}/>
+                            <div className={styles.teamStats}>
+                                <p className={styles.statItem}>Shots: {awayScore.shots}</p>
+                                <p className={styles.statItem}>Turnovers: {awayScore.turnovers}</p>
+                            </div>
                         </div>
                     </div>
                 </div>
+                {showDetails && (
+                    <div className={styles.actualDataContainer}>
+                        <ActualGameDetails gameData={currentGame}/>
+                    </div>
+                )}
             </div>
         </>
     );
