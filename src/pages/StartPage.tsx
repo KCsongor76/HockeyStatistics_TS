@@ -15,6 +15,7 @@ import {ITeam} from "../OOP/interfaces/ITeam";
 import ContinueOrStartOverModal from '../modals/ContinueOrStartOverModal';
 
 // todo: roster selection - fix styling, roster selection table styling incorrect when media width is less than 768px
+// todo: make smaller components
 
 type FormState = {
     championship: Championship;

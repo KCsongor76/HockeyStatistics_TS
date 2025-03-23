@@ -24,6 +24,10 @@ import {loader as playerCRUDPageLoader} from "./pages/PlayerCRUDPage";
 import HandlePlayerPage from "./pages/HandlePlayerPage";
 
 // todo: routing: only if no unsaved changes, otherwise window.confirm("You have unsaved changes. Are you sure you want to navigate away?")
+// todo: make all files typescript correct
+// todo: switch to oop
+// todo: services: oop/atomic/batch writes/etc
+// todo: some pages too slow, maybe use context api?
 
 function App() {
     const [isLoaded, setIsLoaded] = useState<boolean>(false);

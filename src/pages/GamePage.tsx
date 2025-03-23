@@ -21,6 +21,9 @@ import {IPlayer} from "../OOP/interfaces/IPlayer";
 import AssistSelectorModal from "../modals/AssistSelectorModal";
 import ActualGameDetails from './ActualGameDetails';
 
+// todo: assist non roster bug
+// todo: make smaller components
+
 type FormData = {
     championship: IChampionship;
     homeTeam: ITeam;
