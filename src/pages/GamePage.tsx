@@ -424,7 +424,7 @@ const GamePage = () => {
 
             {isSelectingAssists && pendingGoalAction && (
                 <AssistSelectorModal
-                    teamRoster={pendingGoalAction.team.players.filter(player =>
+                    teamRoster={pendingGoalAction.team.roster.filter(player =>
                         player.id !== pendingGoalAction.player.id
                     )}
                     onAssistSelected={handleAssistSelection}
