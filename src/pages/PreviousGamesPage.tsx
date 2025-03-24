@@ -8,10 +8,17 @@ import {ChampionshipService} from "../OOP/services/ChampionshipService";
 import {Championship} from "../OOP/classes/Championship";
 import {TeamService} from "../OOP/services/TeamService";
 import {ITeam} from "../OOP/interfaces/ITeam";
+import {IPlayer} from "../OOP/interfaces/IPlayer";
+import {Player} from "../OOP/classes/Player";
 
 // todo: make smaller components
 
-const PreviousGamesPage = () => {
+interface PreviousGamesPageProps {
+    playerGames?: IGame[];
+    showFilters?: boolean;
+}
+
+const PreviousGamesPage: React.FC<PreviousGamesPageProps> = ({playerGames: playerGames, showFilters = true}) => {
     const [games, setGames] = useState<IGame[]>([]);
     const [championships, setChampionships] = useState<Championship[]>([]);
     const [teams, setTeams] = useState<ITeam[]>([]);
@@ -37,11 +44,13 @@ const PreviousGamesPage = () => {
         const fetchGames = async () => {
             try {
                 const gamesData = await GameService.getAllGames();
-                setGames(gamesData);
+                if (playerGames) {
+                    setGames(playerGames);
+                } else {
+                    setGames(gamesData);
+                }
             } catch (error) {
                 console.error("Error fetching games:", error);
-            } finally {
-                setLoading(false);
             }
         };
 
@@ -101,6 +110,12 @@ const PreviousGamesPage = () => {
     return (
         <div className={styles.container}>
             <h1 className={styles.header}>Previous Games</h1>
+
+            {showFilters && (
+                <div className={styles.controlsContainer}>
+                    {/* ... existing filter controls ... */}
+                </div>
+            )}
 
             <div className={styles.controlsContainer}>
                 <select
@@ -173,7 +188,7 @@ const PreviousGamesPage = () => {
                         <li
                             className={styles.listItem}
                             key={game.id || index}
-                            onClick={() => navigate(`${game.id}`, {state: game})}
+                            onClick={() => navigate(`/previous_games/${game.id}`, {state: game})}
                         >
                             <div className={styles.gameContent}>
                                 <div className={styles.teamSection}>

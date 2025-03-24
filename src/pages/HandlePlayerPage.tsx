@@ -5,7 +5,11 @@ import {PlayerService} from '../OOP/services/PlayerService';
 import {Team} from "../OOP/classes/Team";
 import {TeamService} from "../OOP/services/TeamService";
 // @ts-ignore
-import styles from './HandlePlayerPage.module.css';  // Import the CSS module
+import styles from './HandlePlayerPage.module.css';
+import {IGame} from "../OOP/interfaces/IGame";
+import {GameService} from "../OOP/services/GameService";
+import PreviousGamesPage from "./PreviousGamesPage";
+import {IPlayer} from "../OOP/interfaces/IPlayer";  // Import the CSS module
 
 // todo: add data, games when he played
 // todo: button colors
@@ -14,6 +18,7 @@ const HandlePlayerPage = () => {
     const {id: playerId} = useParams<{ id: string }>();
     const [player, setPlayer] = useState<Player | null>(null);
     const [team, setTeam] = useState<Team>(new Team());
+    const [games, setGames] = useState<IGame[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -29,7 +34,7 @@ const HandlePlayerPage = () => {
     }
 
     useEffect(() => {
-        const fetchPlayerAndTeam = async () => {
+        const fetchPlayerAndTeamAndGames = async () => {
             try {
                 const playerData = await PlayerService.getPlayerById(playerId as string) as Player;
                 setPlayer(playerData);
@@ -38,15 +43,30 @@ const HandlePlayerPage = () => {
                     const teamData = await TeamService.getTeamById(playerData.teamId) as Team;
                     setTeam(teamData);
                 }
+
+                // Fetch all games
+                const gamesData = await GameService.getAllGames();
+                setGames(gamesData);
             } catch (err) {
-                setError('Failed to fetch player or team data.');
+                setError('Failed to fetch player, team, or games data.');
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchPlayerAndTeam();
+        fetchPlayerAndTeamAndGames();
     }, [playerId]);
+
+    console.log(games)
+
+    const playerGames = games.filter(game => {
+        if (!player?.id) return false;
+
+        return (
+            game.teams.home.roster?.some(p => p.id === player.id) ||
+            game.teams.away.roster?.some(p => p.id === player.id)
+        );
+    });
 
     if (loading) {
         return <div className={styles.loading}>Loading...</div>;
@@ -68,6 +88,11 @@ const HandlePlayerPage = () => {
             <p className={styles.jerseyNumber}>Jersey number: #{player.jerseyNumber}</p>
             <button className={styles.button} onClick={transferNavigate}>Transfer</button>
             <button className={styles.button} onClick={goBackNavigate}>Go Back</button>
+            <h3 className={styles.subHeader}>Games Played In:</h3>
+            <PreviousGamesPage
+                playerGames={playerGames}
+                showFilters={false}
+            />
         </div>
     );
 };

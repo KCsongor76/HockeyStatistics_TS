@@ -55,3 +55,10 @@
     text-align: center;
     margin-top: 20px;
 }
+
+.subHeader {
+    margin-top: 2rem;
+    color: #333;
+    border-bottom: 2px solid #666;
+    padding-bottom: 0.5rem;
+}

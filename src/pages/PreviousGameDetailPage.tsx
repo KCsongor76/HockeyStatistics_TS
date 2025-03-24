@@ -13,6 +13,8 @@ import IconDataModal from "../modals/IconDataModal";
 import {GameService} from "../OOP/services/GameService";
 import {IPlayer} from "../OOP/interfaces/IPlayer";
 
+// todo: navigation fix
+
 const PreviousGameDetailPage = () => {
     const location = useLocation();
     const gameData = location.state as IGame;
