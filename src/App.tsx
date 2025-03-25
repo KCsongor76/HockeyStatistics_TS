@@ -49,7 +49,7 @@ function App() {
             element: <RootLayout isSignedIn={true}/>,
             errorElement: <ErrorPage/>,
             children: [
-                {index: true, element: <HomePage/>},
+                {index: true, element: <HomePage isSignedIn={isSignedIn} />},
                 {path: "start", element: <StartPage/>, loader: startPageLoader},
                 {path: "game", element: <GamePage/>},
                 {path: "previous_games", element: <PreviousGamesPage/>},
@@ -90,7 +90,7 @@ function App() {
             element: <RootLayout isSignedIn={false}/>,
             errorElement: <ErrorPage/>,
             children: [
-                {index: true, element: <HomePage/>},
+                {index: true, element: <HomePage isSignedIn={isSignedIn}/>},
                 {path: "start", element: <StartPage/>, loader: startPageLoader},
                 {path: "game", element: <GamePage/>},
                 {path: "admin", element: <AuthPage/>},
