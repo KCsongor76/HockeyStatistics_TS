@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { ActionType } from "../OOP/enums/ActionType";
-import { RegularPeriod, PlayoffPeriod } from "../OOP/enums/Period";
+import React, {useState, useEffect, useRef} from 'react';
+import {ActionType} from "../OOP/enums/ActionType";
+import {RegularPeriod, PlayoffPeriod} from "../OOP/enums/Period";
 import GameFilters from "../components/GameFilters";
 import GameVisualization from "../components/GameVisualization";
 import PlayerStats from "../components/PlayerStats";
-import { IGame } from "../OOP/interfaces/IGame";
-import { IGameAction } from "../OOP/interfaces/IGameAction";
+import {IGame} from "../OOP/interfaces/IGame";
+import {IGameAction} from "../OOP/interfaces/IGameAction";
 import IconDataModal from "../modals/IconDataModal";
-import { IPlayer } from "../OOP/interfaces/IPlayer";
+import {IPlayer} from "../OOP/interfaces/IPlayer";
 
-const ActualGameDetails = ({ gameData }: { gameData: IGame }) => {
+const ActualGameDetails = ({gameData}: { gameData: IGame }) => {
 
     const fieldImageRef = useRef<HTMLImageElement>(null);
     const [iconSize, setIconSize] = useState(30);
@@ -21,9 +21,17 @@ const ActualGameDetails = ({ gameData }: { gameData: IGame }) => {
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
     const [selectedActionDetails, setSelectedActionDetails] = useState<IGameAction | null>(null);
+    const [zoneFilter, setZoneFilter] = useState<{ x: [number, number], y: [number, number] }>({
+        x: [0, 100],
+        y: [0, 100]
+    });
+    const [timeFilter, setTimeFilter] = useState<[number, number]>([0, 3600]);
 
     const availablePeriods = Array.from(new Set(gameData.actions.map(action => action.period)));
     const availableActionTypes = Array.from(new Set(gameData.actions.map(action => action.type)));
+    const minTime = 0;
+    const maxTime = Math.max(...gameData.actions.map(a => a.time * 60), 3600);
+    const isTimeFilterActive = timeFilter[0] > minTime || timeFilter[1] < maxTime;
 
     const filteredActions = gameData.actions.filter(action => {
         const teamFilter = selectedTeamView === 'all' ||
@@ -32,7 +40,13 @@ const ActualGameDetails = ({ gameData }: { gameData: IGame }) => {
         const periodFilter = selectedPeriods.has(action.period);
         const typeFilter = selectedActionTypes.has(action.type);
         const playerFilter = !selectedPlayer || action.player.id === selectedPlayer;
-        return teamFilter && periodFilter && typeFilter && playerFilter;
+        const zoneXFilter = action.x * 100 >= zoneFilter.x[0] && action.x * 100 <= zoneFilter.x[1];
+        const zoneYFilter = action.y * 100 >= zoneFilter.y[0] && action.y * 100 <= zoneFilter.y[1];
+        const actionTimeSeconds = action.time * 60;
+        const timeFilterPass = actionTimeSeconds >= timeFilter[0] && actionTimeSeconds <= timeFilter[1];
+
+        return teamFilter && periodFilter && typeFilter && playerFilter &&
+            zoneXFilter && zoneYFilter && timeFilterPass;
     });
 
     // ... Include other functions like togglePeriod, toggleActionType, handleSort, etc. from PreviousGameDetailPage
@@ -152,6 +166,10 @@ const ActualGameDetails = ({ gameData }: { gameData: IGame }) => {
         };
     }, []);
 
+    useEffect(() => {
+        setSelectedPlayer(null);
+    }, [selectedTeamView]);
+
     return (
         <div>
             <GameFilters
@@ -163,6 +181,7 @@ const ActualGameDetails = ({ gameData }: { gameData: IGame }) => {
                 availableActionTypes={availableActionTypes}
                 selectedActionTypes={selectedActionTypes}
                 toggleActionType={toggleActionType}
+                isPeriodFilterDisabled={isTimeFilterActive}
             />
 
             <GameVisualization
@@ -171,6 +190,12 @@ const ActualGameDetails = ({ gameData }: { gameData: IGame }) => {
                 filteredActions={filteredActions}
                 iconSize={iconSize}
                 handleIconClick={(action: IGameAction) => setSelectedActionDetails(action)}
+                zoneFilter={zoneFilter}
+                setZoneFilter={setZoneFilter}
+                timeFilter={timeFilter}
+                setTimeFilter={setTimeFilter}
+                minTime={minTime}
+                maxTime={maxTime}
             />
 
             <PlayerStats

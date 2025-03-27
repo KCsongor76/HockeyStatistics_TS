@@ -21,7 +21,7 @@ import {IPlayer} from "../OOP/interfaces/IPlayer";
 import AssistSelectorModal from "../modals/AssistSelectorModal";
 import ActualGameDetails from './ActualGameDetails';
 
-// todo: make smaller components
+// todo: fix second image icons not being perfectly aligned with first image icons
 
 type FormData = {
     championship: IChampionship;
