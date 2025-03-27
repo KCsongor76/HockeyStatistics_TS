@@ -21,60 +21,58 @@ interface PlayerStatsProps {
 
 
 const PlayerStats: React.FC<PlayerStatsProps> = ({
-    selectedPlayer,
-    setSelectedPlayer,
-    sortBy,
-    sortOrder,
-    handleSort,
-    sortedPlayers,
-    uniqueNonRoster
-}) => {
+                                                     selectedPlayer,
+                                                     setSelectedPlayer,
+                                                     sortBy,
+                                                     sortOrder,
+                                                     handleSort,
+                                                     sortedPlayers,
+                                                     uniqueNonRoster
+                                                 }) => {
     return (
         <div className={styles.filterGroup}>
-            {selectedPlayer && (
-                <button
-                    className={styles.filterButton}
-                    onClick={() => setSelectedPlayer(null)}
-                >
-                    Clear Player Filter
-                </button>
-            )}
             <h3 className={styles.filterTitle}>Player Statistics</h3>
             <table className={styles.statsTable}>
                 <thead>
-                    <tr>
-                        {['name', 'jerseyNumber', 'position', 'goals', 'shots', 'turnovers'].map((col) => (
-                            <th
-                                key={col}
-                                onClick={() => handleSort(col as keyof IPlayer)}
-                            >
-                                {col === 'jerseyNumber' ? 'Number' :
-                                    col === 'name' ? 'Name' :
-                                        col[0].toUpperCase() + col.slice(1)}
-                                {sortBy === col && (
-                                    <span className={styles.sortIndicator}>
+                <tr>
+                    {['name', 'jerseyNumber', 'position', 'goals', 'shots', 'turnovers'].map((col) => (
+                        <th
+                            key={col}
+                            onClick={() => handleSort(col as keyof IPlayer)}
+                        >
+                            {col === 'jerseyNumber' ? 'Number' :
+                                col === 'name' ? 'Name' :
+                                    col[0].toUpperCase() + col.slice(1)}
+                            {sortBy === col && (
+                                <span className={styles.sortIndicator}>
                                         {sortOrder === 'asc' ? '↑' : '↓'}
                                     </span>
-                                )}
-                            </th>
-                        ))}
-                    </tr>
+                            )}
+                        </th>
+                    ))}
+                </tr>
                 </thead>
                 <tbody>
-                    {sortedPlayers.map((player) => (
-                        <tr
-                            key={player.id}
-                            className={`${styles.playerRow} ${selectedPlayer === player.id ? styles.selectedRow : ''}`}
-                            onClick={() => setSelectedPlayer(player.id)}
-                        >
-                            <td>{player.name}</td>
-                            <td>{player.jerseyNumber}</td>
-                            <td>{player.position}</td>
-                            <td>{player.goals}</td>
-                            <td>{player.shots}</td>
-                            <td>{player.turnovers}</td>
-                        </tr>
-                    ))}
+                {sortedPlayers.map((player) => (
+                    <tr
+                        key={player.id}
+                        className={`${styles.playerRow} ${selectedPlayer === player.id ? styles.selectedRow : ''}`}
+                        onClick={() => {
+                            if (selectedPlayer === player.id) {
+                                setSelectedPlayer(null);
+                            } else {
+                                setSelectedPlayer(player.id);
+                            }
+                        }}
+                    >
+                        <td>{player.name}</td>
+                        <td>{player.jerseyNumber}</td>
+                        <td>{player.position}</td>
+                        <td>{player.goals}</td>
+                        <td>{player.shots}</td>
+                        <td>{player.turnovers}</td>
+                    </tr>
+                ))}
                 </tbody>
             </table>
 

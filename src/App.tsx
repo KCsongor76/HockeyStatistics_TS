@@ -23,15 +23,15 @@ import {loader as CreatePlayerPageLoader} from "./pages/CreatePlayerPage";
 import {loader as playerCRUDPageLoader} from "./pages/PlayerCRUDPage";
 import HandlePlayerPage from "./pages/HandlePlayerPage";
 
-// todo: reset styling, unify in the entire app
-// todo: update to router v7
 // todo: change browser name (React App or what) and icon
-// todo: routing: only if no unsaved changes, otherwise window.confirm("You have unsaved changes. Are you sure you want to navigate away?")
-// todo: make all files typescript correct
 // todo: switch to oop classes
 // todo: services: oop/atomic/batch writes/etc
-// todo: some pages too slow, maybe use context api?
+// todo: make all files typescript correct
 // todo: suspense?
+// todo: some pages too slow, maybe use context api?
+// todo: update to router v7
+// todo: routing: only if no unsaved changes, otherwise window.confirm("You have unsaved changes. Are you sure you want to navigate away?")
+// todo: reset styling, unify in the entire app
 
 function App() {
     const [isLoaded, setIsLoaded] = useState<boolean>(false);

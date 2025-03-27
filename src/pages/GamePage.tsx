@@ -22,8 +22,6 @@ import AssistSelectorModal from "../modals/AssistSelectorModal";
 import ActualGameDetails from './ActualGameDetails';
 
 // todo: make smaller components
-// todo: page reload - data gets lost
-// todo: clear player filter - no button, but if we click on the selected player
 
 type FormData = {
     championship: IChampionship;
@@ -50,7 +48,7 @@ interface ITeamRoster extends ITeam {
 
 const GamePage = () => {
     const location = useLocation();
-    const savedGameState = location.state?.savedGameState;
+    const savedGameState = localStorage.getItem("unfinishedGame") ? JSON.parse(localStorage.getItem("unfinishedGame") as string) : location.state?.savedGameState;
 
     const [selectedPosition, setSelectedPosition] = useState<{ x: number, y: number } | null>(null);
     const [selectedAction, setSelectedAction] = useState<{ type: ActionType, team: ITeamRoster } | null>(null);
@@ -137,6 +135,21 @@ const GamePage = () => {
         setSelectedAction(null);
         setSelectedPosition(null);
         setIsModalOpen(false);
+
+        const gameState = {
+            formData,
+            period,
+            time,
+            isTimerRunning,
+            homeScore,
+            awayScore,
+            actions,
+            periodLabel,
+            isGameOver,
+        };
+        localStorage.removeItem("unfinishedGame");
+        localStorage.setItem('unfinishedGame', JSON.stringify(gameState));
+        console.log("localstorage")
     };
 
     const handleAssistSelection = (assists: IPlayer[]) => {
@@ -394,6 +407,7 @@ const GamePage = () => {
             periodLabel,
             isGameOver,
         };
+        console.log("useEffect")
         localStorage.setItem('unfinishedGame', JSON.stringify(gameState));
     }, [formData, period, time, isTimerRunning, homeScore, awayScore, actions, periodLabel, isGameOver]);
 
