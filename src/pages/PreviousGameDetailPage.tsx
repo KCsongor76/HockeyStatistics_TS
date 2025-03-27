@@ -13,9 +13,6 @@ import IconDataModal from "../modals/IconDataModal";
 import {GameService} from "../OOP/services/GameService";
 import {IPlayer} from "../OOP/interfaces/IPlayer";
 
-// todo: player table styling under 768 px - maybe scrap, unify
-// todo: name, position sorting is not the best
-
 // todo: into filtering: add zone filter (the picture is a rectangle,
 //  so add on the bottom side and left side 1-1 lines, with 2-2 sliders each,
 //  and these sliders determine that which positioned gameAction Icons should be shown)

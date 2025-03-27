@@ -6,6 +6,12 @@
     text-align: center;
 }
 
+.tableContainer {
+    overflow-x: auto;
+    width: 100%;
+    margin: 20px 0;
+}
+
 .filterSection {
     margin-bottom: 24px;
 }
@@ -76,6 +82,7 @@
     width: 100%;
 }
 
+/* todo: max width*/
 .gameImage {
     width: 100%;
     display: block;
@@ -95,9 +102,9 @@
 }
 
 .statsTable {
-    margin: 20px auto;
-    border-collapse: collapse;
-    width: 80%;
+    margin: 0 auto;
+    width: auto;
+    min-width: 600px; /* Minimum width before scrolling */
 }
 
 .statsTable th, .statsTable td {
@@ -218,7 +225,30 @@
 }
 
 .statsTable {
+    border-collapse: collapse;
+    width: 100%; /* Changed from 80% */
     background-color: #fff;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+@media (max-width: 768px) {
+    .statsTable {
+        font-size: 14px;
+    }
+
+    .statsTable th,
+    .statsTable td {
+        padding: 6px;
+        min-width: 80px;
+    }
+
+    .statsTable th:nth-child(2),
+    .statsTable td:nth-child(2) { /* Jersey Number */
+        display: none;
+    }
+
+    .nonRosterList {
+        width: 100%;
+    }
 }

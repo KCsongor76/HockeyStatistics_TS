@@ -68,31 +68,33 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({
                 group.players.length > 0 && (
                     <div key={group.title}>
                         <h4 className={styles.filterTitle}>{group.title}</h4>
-                        <table className={styles.statsTable}>
-                            <TableHeader/>
-                            <tbody>
-                            {group.players.map((player) => (
-                                <tr
-                                    key={player.id}
-                                    className={`${styles.playerRow} ${selectedPlayer === player.id ? styles.selectedRow : ''}`}
-                                    onClick={() => {
-                                        if (selectedPlayer === player.id) {
-                                            setSelectedPlayer(null);
-                                        } else {
-                                            setSelectedPlayer(player.id);
-                                        }
-                                    }}
-                                >
-                                    <td>{player.name}</td>
-                                    <td>{player.jerseyNumber}</td>
-                                    <td>{player.position}</td>
-                                    <td>{player.goals}</td>
-                                    <td>{player.shots}</td>
-                                    <td>{player.turnovers}</td>
-                                </tr>
-                            ))}
-                            </tbody>
-                        </table>
+                        <div className={styles.tableContainer}>
+                            <table className={styles.statsTable}>
+                                <TableHeader/>
+                                <tbody>
+                                {group.players.map((player) => (
+                                    <tr
+                                        key={player.id}
+                                        className={`${styles.playerRow} ${selectedPlayer === player.id ? styles.selectedRow : ''}`}
+                                        onClick={() => {
+                                            if (selectedPlayer === player.id) {
+                                                setSelectedPlayer(null);
+                                            } else {
+                                                setSelectedPlayer(player.id);
+                                            }
+                                        }}
+                                    >
+                                        <td>{player.name}</td>
+                                        <td>{player.jerseyNumber}</td>
+                                        <td>{player.position}</td>
+                                        <td>{player.goals}</td>
+                                        <td>{player.shots}</td>
+                                        <td>{player.turnovers}</td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 )
             ))}
