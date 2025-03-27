@@ -377,3 +377,36 @@
     width: 2px;
     transform: translateX(-1px);
 }
+
+.timeFilterContainer {
+    position: relative;
+    margin: 20px 40px;
+    height: 40px;
+}
+
+.timeSliderLabels {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+    font-size: 14px;
+    color: #3b82f6;
+}
+
+.timeSliderTrack {
+    background: #cbd5e1;
+    height: 4px;
+}
+
+.timeSliderThumb {
+    background: #3b82f6;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    top: -6px;
+}
+
+.timeSliderThumb:hover {
+    background: #2563eb;
+}

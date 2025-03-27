@@ -15,7 +15,16 @@ interface GameVisualizationProps {
     handleIconClick: (action: IGameAction) => void;
     zoneFilter: { x: [number, number], y: [number, number] };
     setZoneFilter: (filter: { x: [number, number], y: [number, number] }) => void;
+    timeFilter: [number, number];
+    setTimeFilter: (range: [number, number]) => void;
+    minTime: number;
+    maxTime: number;
 }
+
+const formatTime = (minutes: number) => {
+    const mins = Math.floor(minutes);
+    return `${mins}:00`;
+};
 
 const GameVisualization: React.FC<GameVisualizationProps> = ({
                                                                  fieldImageRef,
@@ -24,10 +33,33 @@ const GameVisualization: React.FC<GameVisualizationProps> = ({
                                                                  iconSize,
                                                                  handleIconClick,
                                                                  zoneFilter,
-                                                                 setZoneFilter
+                                                                 setZoneFilter,
+                                                                 timeFilter,
+                                                                 setTimeFilter,
+                                                                 minTime,
+                                                                 maxTime
                                                              }) => {
     return (
         <div className={styles.gameVisualization}>
+
+            <div className={styles.timeFilterContainer}>
+                <div className={styles.timeSliderLabels}>
+                    <span>{formatTime(timeFilter[0])}</span>
+                    <span>{formatTime(timeFilter[1])}</span>
+                </div>
+                <ReactSlider
+                    className={styles.horizontalSlider}
+                    thumbClassName={styles.timeSliderThumb}
+                    trackClassName={styles.timeSliderTrack}
+                    value={timeFilter}
+                    onChange={setTimeFilter}
+                    min={minTime}
+                    max={maxTime}
+                    pearling
+                    minDistance={1}
+                />
+            </div>
+
             <img
                 ref={fieldImageRef}
                 src={gameData.selectedImage}

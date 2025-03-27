@@ -13,6 +13,7 @@ interface GameFiltersProps {
     availableActionTypes: ActionType[];
     selectedActionTypes: Set<ActionType>;
     toggleActionType: (type: ActionType) => void;
+    isPeriodFilterDisabled?: boolean;
 }
 
 const GameFilters: React.FC<GameFiltersProps> = ({
@@ -23,7 +24,8 @@ const GameFilters: React.FC<GameFiltersProps> = ({
                                                      togglePeriod,
                                                      availableActionTypes,
                                                      selectedActionTypes,
-                                                     toggleActionType
+                                                     toggleActionType,
+                                                     isPeriodFilterDisabled
                                                  }) => {
     return (
         <div className={styles.filterSection}>
@@ -61,6 +63,7 @@ const GameFilters: React.FC<GameFiltersProps> = ({
                                 selectedPeriods.has(period) ? styles.periodButtonActive : ''
                             }`}
                             onClick={() => togglePeriod(period)}
+                            disabled={isPeriodFilterDisabled}
                         >
                             Period {period}
                         </button>
