@@ -5,7 +5,8 @@ import { auth, googleProvider } from '../firebaseConfig';
 // @ts-ignore
 import styles from './AuthPage.module.css';
 
-// todo: for some reason, it does not work on mobile
+// todo: instead of popup, we need to use something else,
+//  because it does not work on the deployed version, vercel
 
 const AuthPage = () => {
     const navigate = useNavigate();

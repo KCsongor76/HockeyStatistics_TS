@@ -7,12 +7,15 @@ import {TeamService} from "../OOP/services/TeamService";
 import styles from './PlayerCRUDPage.module.css';
 import {Position} from "../OOP/enums/Position";
 
+// todo: page reload: Uncaught TypeError: Cannot read properties of undefined (reading 'players')
+
 type LoaderData = {
     players: { player: Player, teamName: string }[];
     teams: any[];
 };
 
 const PlayerCRUDPage = () => {
+    console.log("page")
     const loaderData = useLoaderData() as LoaderData;
     const navigate = useNavigate();
     const [playersWithTeamNames, setPlayersWithTeamNames] = useState(loaderData.players);
@@ -179,21 +182,38 @@ const PlayerCRUDPage = () => {
 export default PlayerCRUDPage;
 
 export const loader = async () => {
-    const players = await PlayerService.getAllPlayers();
-    const teams = await TeamService.getAllTeams();
+    try {
+        console.log("loader")
+        const players = await PlayerService.getAllPlayers() || [];
+        const teams = await TeamService.getAllTeams() || [];
 
-    const playersWithTeams = await Promise.all(
-        players.map(async (player) => {
-            const team = await TeamService.getTeamById(player.teamId);
-            return {
-                player,
-                teamName: team?.name || "Unknown Team",
-            };
-        })
-    );
+        const playersWithTeams = await Promise.all(
+            players.map(async (player) => {
+                try {
+                    const team = await TeamService.getTeamById(player.teamId);
+                    return {
+                        player,
+                        teamName: team?.name || "Unknown Team",
+                    };
+                } catch (error) {
+                    console.error(`Error fetching team for player ${player.id}:`, error);
+                    return {
+                        player,
+                        teamName: "Unknown Team",
+                    };
+                }
+            })
+        );
 
-    return {
-        players: playersWithTeams,
-        teams
-    };
+        return {
+            players: playersWithTeams,
+            teams
+        };
+    } catch (error) {
+        console.error("Error in loader:", error);
+        return {
+            players: [],
+            teams: []
+        };
+    }
 };

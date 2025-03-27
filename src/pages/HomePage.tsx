@@ -35,13 +35,13 @@ const HomePage: React.FC<HomePageProps> = ({isSignedIn: isSignedIn}) => {
                 {
                     title: 'Manage Teams',
                     description: 'Create, edit, and manage hockey teams',
-                    icon: '👥', // Team emoji
+                    icon: '🏆', // Team emoji
                     path: '/handleTeams'
                 },
                 {
                     title: 'Manage Players',
                     description: 'Add, transfer, and track player information',
-                    icon: '🏆', // Trophy emoji
+                    icon: '👥', // Trophy emoji
                     path: '/handlePlayers'
                 }
             ]);

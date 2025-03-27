@@ -22,6 +22,8 @@ import AssistSelectorModal from "../modals/AssistSelectorModal";
 import ActualGameDetails from './ActualGameDetails';
 
 // todo: make smaller components
+// todo: page reload - data gets lost
+// todo: clear player filter - no button, but if we click on the selected player
 
 type FormData = {
     championship: IChampionship;

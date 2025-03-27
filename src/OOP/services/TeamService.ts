@@ -64,22 +64,23 @@ export class TeamService {
     static async getAllTeams(): Promise<Team[]> {
         const querySnapshot = await getDocs(this.collectionRef);
 
-        // Use Promise.all to ensure all player fetches are completed before returning the teams
         const teams = await Promise.all(querySnapshot.docs.map(async (doc) => {
-            // Fetch the players sub-collection for each team
             const playersSnapshot = await getDocs(collection(doc.ref, 'players'));
             const players = playersSnapshot.docs.map(playerDoc => ({
                 id: playerDoc.id,
                 ...playerDoc.data()
             } as Player));
 
-            // Return the team object including the players
             return {
                 id: doc.id,
                 ...doc.data(),
-                players // Add the players array to the team object
+                players
             } as Team;
         }));
+
+        // Sort teams alphabetically by name
+        teams.sort((a, b) => a.name.localeCompare(b.name));
+
         return teams;
     }
 

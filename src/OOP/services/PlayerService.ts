@@ -54,6 +54,18 @@ export class PlayerService {
             allPlayers.push(...teamPlayers);
         }
 
+        // Sort players: goalies -> defenders -> forwards, then alphabetically
+        allPlayers.sort((a, b) => {
+            const positionOrder = { 'Goalie': 0, 'Defender': 1, 'Forward': 2 };
+            const aOrder = positionOrder[a.position as keyof typeof positionOrder] ?? 3;
+            const bOrder = positionOrder[b.position as keyof typeof positionOrder] ?? 3;
+
+            if (aOrder !== bOrder) {
+                return aOrder - bOrder;
+            }
+            return a.name.localeCompare(b.name);
+        });
+
         return allPlayers;
     }
 

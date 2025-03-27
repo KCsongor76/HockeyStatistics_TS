@@ -7,6 +7,7 @@ import {Team} from "../OOP/classes/Team";
 import styles from './TransferPlayerPage.module.css'; // Import the CSS module
 
 // todo: button color
+// todo: team sorting, maybe filtering by championship
 
 const TransferPlayerPage = () => {
     const player = useLocation().state.player as Player;

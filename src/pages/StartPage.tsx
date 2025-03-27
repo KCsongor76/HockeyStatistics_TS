@@ -14,8 +14,9 @@ import {IPlayer} from "../OOP/interfaces/IPlayer";
 import {ITeam} from "../OOP/interfaces/ITeam";
 import ContinueOrStartOverModal from '../modals/ContinueOrStartOverModal';
 
-// todo: roster selection - fix styling, roster selection table styling incorrect when media width is less than 768px
-// todo: make smaller components
+// todo: roster selection - have different sections for goalies, defenders and forwards
+// todo: page reload - Uncaught TypeError: Cannot read properties of undefined (reading 'players')
+// todo: error handling: what if we have no teams?
 
 type FormState = {
     championship: Championship;

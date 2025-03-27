@@ -12,6 +12,7 @@ import {IPlayer} from "../OOP/interfaces/IPlayer";
 import {Player} from "../OOP/classes/Player";
 
 // todo: make smaller components
+// todo: scrap styling, unify
 
 interface PreviousGamesPageProps {
     playerGames?: IGame[];

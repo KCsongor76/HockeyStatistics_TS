@@ -14,6 +14,18 @@ import {GameService} from "../OOP/services/GameService";
 import {IPlayer} from "../OOP/interfaces/IPlayer";
 
 // todo: navigation fix
+// todo: player table styling under 768 px - maybe scrap, unify
+// todo: clear player filter - no button, but same click
+// todo: name, position sorting is not the best
+
+// todo: into filtering: add zone filter (the picture is a rectangle,
+//  so add on the bottom side and left side 1-1 lines, with 2-2 sliders each,
+//  and these sliders determine that which positioned gameAction Icons should be shown)
+
+// todo: add time filtering: line with 2 slider points, and for eg, we can set the first slider to 5 min,
+//  the next to 10 min, so we only see the actions within that time range. if this is active,
+//  then the period filters should be inactive.
+
 
 const PreviousGameDetailPage = () => {
     const location = useLocation();
@@ -183,7 +195,7 @@ const PreviousGameDetailPage = () => {
                     onClose={handleCloseIconData}
                 />
             )}
-            
+
             <GameFilters
                 selectedTeamView={selectedTeamView}
                 setSelectedTeamView={setSelectedTeamView}

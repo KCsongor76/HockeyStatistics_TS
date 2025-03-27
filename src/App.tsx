@@ -23,11 +23,15 @@ import {loader as CreatePlayerPageLoader} from "./pages/CreatePlayerPage";
 import {loader as playerCRUDPageLoader} from "./pages/PlayerCRUDPage";
 import HandlePlayerPage from "./pages/HandlePlayerPage";
 
+// todo: reset styling, unify in the entire app
+// todo: update to router v7
+// todo: change browser name (React App or what) and icon
 // todo: routing: only if no unsaved changes, otherwise window.confirm("You have unsaved changes. Are you sure you want to navigate away?")
 // todo: make all files typescript correct
-// todo: switch to oop
+// todo: switch to oop classes
 // todo: services: oop/atomic/batch writes/etc
 // todo: some pages too slow, maybe use context api?
+// todo: suspense?
 
 function App() {
     const [isLoaded, setIsLoaded] = useState<boolean>(false);
@@ -49,7 +53,7 @@ function App() {
             element: <RootLayout isSignedIn={true}/>,
             errorElement: <ErrorPage/>,
             children: [
-                {index: true, element: <HomePage isSignedIn={isSignedIn} />},
+                {index: true, element: <HomePage isSignedIn={isSignedIn}/>},
                 {path: "start", element: <StartPage/>, loader: startPageLoader},
                 {path: "game", element: <GamePage/>},
                 {path: "previous_games", element: <PreviousGamesPage/>},
