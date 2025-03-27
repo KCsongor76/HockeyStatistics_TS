@@ -13,10 +13,6 @@ import IconDataModal from "../modals/IconDataModal";
 import {GameService} from "../OOP/services/GameService";
 import {IPlayer} from "../OOP/interfaces/IPlayer";
 
-// todo: into filtering: add zone filter (the picture is a rectangle,
-//  so add on the bottom side and left side 1-1 lines, with 2-2 sliders each,
-//  and these sliders determine that which positioned gameAction Icons should be shown)
-
 // todo: add time filtering: line with 2 slider points, and for eg, we can set the first slider to 5 min,
 //  the next to 10 min, so we only see the actions within that time range. if this is active,
 //  then the period filters should be inactive.
@@ -40,6 +36,17 @@ const PreviousGameDetailPage = () => {
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
 
+    const [zoneFilter, setZoneFilter] = useState<{ x: [number, number], y: [number, number] }>({
+        x: [0, 100],
+        y: [0, 100]
+    });
+
+    // Determine if zone filter is active
+    const isZoneFilterActive = zoneFilter.x[0] > 0 ||
+        zoneFilter.x[1] < 100 ||
+        zoneFilter.y[0] > 0 ||
+        zoneFilter.y[1] < 100;
+
     const filteredActions = gameData.actions.filter(action => {
         const teamFilter = selectedTeamView === 'all' ||
             (selectedTeamView === 'home' && action.team.id === gameData.teams.home.id) ||
@@ -47,9 +54,11 @@ const PreviousGameDetailPage = () => {
 
         const periodFilter = selectedPeriods.has(action.period);
         const typeFilter = selectedActionTypes.has(action.type);
-
         const playerFilter = !selectedPlayer || action.player.id === selectedPlayer;
-        return teamFilter && periodFilter && typeFilter && playerFilter;
+        const zoneXFilter = action.x * 100 >= zoneFilter.x[0] && action.x * 100 <= zoneFilter.x[1];
+        const zoneYFilter = action.y * 100 >= zoneFilter.y[0] && action.y * 100 <= zoneFilter.y[1];
+
+        return teamFilter && periodFilter && typeFilter && playerFilter && zoneXFilter && zoneYFilter;
     });
 
 
@@ -212,6 +221,8 @@ const PreviousGameDetailPage = () => {
                 filteredActions={filteredActions}
                 iconSize={iconSize}
                 handleIconClick={handleIconClick}
+                zoneFilter={zoneFilter}
+                setZoneFilter={setZoneFilter}
             />
 
             <div className={styles.container}>

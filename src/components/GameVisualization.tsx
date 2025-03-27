@@ -1,4 +1,6 @@
 import React from 'react';
+// @ts-ignore
+import ReactSlider from 'react-slider';
 import {IGameAction} from "../OOP/interfaces/IGameAction";
 import {IGame} from "../OOP/interfaces/IGame";
 import Icon from "./Icon";
@@ -11,15 +13,19 @@ interface GameVisualizationProps {
     filteredActions: IGameAction[];
     iconSize: number;
     handleIconClick: (action: IGameAction) => void;
+    zoneFilter: { x: [number, number], y: [number, number] };
+    setZoneFilter: (filter: { x: [number, number], y: [number, number] }) => void;
 }
 
 const GameVisualization: React.FC<GameVisualizationProps> = ({
-    fieldImageRef,
-    gameData,
-    filteredActions,
-    iconSize,
-    handleIconClick
-}) => {
+                                                                 fieldImageRef,
+                                                                 gameData,
+                                                                 filteredActions,
+                                                                 iconSize,
+                                                                 handleIconClick,
+                                                                 zoneFilter,
+                                                                 setZoneFilter
+                                                             }) => {
     return (
         <div className={styles.gameVisualization}>
             <img
@@ -28,6 +34,57 @@ const GameVisualization: React.FC<GameVisualizationProps> = ({
                 alt="gamePage"
                 className={styles.gameImage}
             />
+
+            <div className={styles.visualGuides}>
+                <div
+                    className={`${styles.visualGuideLine} ${styles.horizontalGuide}`}
+                    style={{top: `${zoneFilter.y[0]}%`}}
+                />
+                <div
+                    className={`${styles.visualGuideLine} ${styles.horizontalGuide}`}
+                    style={{top: `${zoneFilter.y[1]}%`}}
+                />
+                <div
+                    className={`${styles.visualGuideLine} ${styles.verticalGuide}`}
+                    style={{left: `${zoneFilter.x[0]}%`}}
+                />
+                <div
+                    className={`${styles.visualGuideLine} ${styles.verticalGuide}`}
+                    style={{left: `${zoneFilter.x[1]}%`}}
+                />
+            </div>
+
+            {/* Horizontal (X-axis) Slider */}
+            <div className={styles.sliderXContainer}>
+                <ReactSlider
+                    className={styles.horizontalSlider}
+                    thumbClassName={styles.sliderThumb}
+                    trackClassName={styles.sliderTrack}
+                    value={zoneFilter.x}
+                    onChange={(value: any) => setZoneFilter({...zoneFilter, x: value})}
+                    min={0}
+                    max={100}
+                    pearling
+                    minDistance={5}
+                />
+            </div>
+
+            {/* Vertical (Y-axis) Slider */}
+            <div className={styles.sliderYContainer}>
+                <ReactSlider
+                    className={styles.verticalSlider}
+                    thumbClassName={styles.sliderThumb}
+                    trackClassName={styles.sliderTrack}
+                    value={zoneFilter.y}
+                    onChange={(value: any) => setZoneFilter({...zoneFilter, y: value})}
+                    min={0}
+                    max={100}
+                    pearling
+                    minDistance={5}
+                    orientation="vertical"
+                />
+            </div>
+
             {filteredActions.map((action: IGameAction, index: number) => (
                 <div
                     key={index}
