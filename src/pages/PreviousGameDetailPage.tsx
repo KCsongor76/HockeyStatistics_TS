@@ -13,9 +13,7 @@ import IconDataModal from "../modals/IconDataModal";
 import {GameService} from "../OOP/services/GameService";
 import {IPlayer} from "../OOP/interfaces/IPlayer";
 
-// todo: navigation fix
 // todo: player table styling under 768 px - maybe scrap, unify
-// todo: clear player filter - no button, but same click
 // todo: name, position sorting is not the best
 
 // todo: into filtering: add zone filter (the picture is a rectangle,
@@ -150,7 +148,7 @@ const PreviousGameDetailPage = () => {
         if (isConfirmed) {
             try {
                 await GameService.deleteGame(game);
-                navigate('/previous_games');
+                navigate(-1);
             } catch (error) {
                 console.error("Error deleting action:", error);
             }
@@ -186,6 +184,10 @@ const PreviousGameDetailPage = () => {
             window.removeEventListener('resize', handleResize);
         };
     }, []);
+
+    useEffect(() => {
+        setSelectedPlayer(null); // Clear player selection when team view changes
+    }, [selectedTeamView]); // Trigger when selectedTeamView changes
 
     return (
         <div className={styles.container}>
@@ -239,7 +241,7 @@ const PreviousGameDetailPage = () => {
             <button
                 className={styles.button}
                 onClick={() => {
-                    navigate("/previous_games")
+                    navigate(-1)
                 }}
             >
                 Go Back

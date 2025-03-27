@@ -8,8 +8,6 @@ import {ChampionshipService} from "../OOP/services/ChampionshipService";
 import {Championship} from "../OOP/classes/Championship";
 import {TeamService} from "../OOP/services/TeamService";
 import {ITeam} from "../OOP/interfaces/ITeam";
-import {IPlayer} from "../OOP/interfaces/IPlayer";
-import {Player} from "../OOP/classes/Player";
 
 // todo: make smaller components
 // todo: scrap styling, unify

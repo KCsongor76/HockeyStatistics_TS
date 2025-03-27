@@ -19,7 +19,6 @@ interface PlayerStatsProps {
     uniqueNonRoster: IPlayer[];
 }
 
-
 const PlayerStats: React.FC<PlayerStatsProps> = ({
                                                      selectedPlayer,
                                                      setSelectedPlayer,
@@ -29,52 +28,74 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({
                                                      sortedPlayers,
                                                      uniqueNonRoster
                                                  }) => {
+    const goalies = sortedPlayers.filter(player => player.position === 'Goalie');
+    const defenders = sortedPlayers.filter(player => player.position === 'Defender');
+    const forwards = sortedPlayers.filter(player => player.position === 'Forward');
+
+    const positionGroups = [
+        {title: 'Goalies', players: goalies},
+        {title: 'Defenders', players: defenders},
+        {title: 'Forwards', players: forwards}
+    ];
+
+    const TableHeader = () => (
+        <thead>
+        <tr>
+            {['name', 'jerseyNumber', 'position', 'goals', 'shots', 'turnovers'].map((col) => (
+                <th
+                    key={col}
+                    onClick={() => handleSort(col as keyof IPlayer)}
+                >
+                    {col === 'jerseyNumber' ? 'Number' :
+                        col === 'name' ? 'Name' :
+                            col[0].toUpperCase() + col.slice(1)}
+                    {sortBy === col && (
+                        <span className={styles.sortIndicator}>
+                                {sortOrder === 'asc' ? '↑' : '↓'}
+                            </span>
+                    )}
+                </th>
+            ))}
+        </tr>
+        </thead>
+    );
+
     return (
         <div className={styles.filterGroup}>
             <h3 className={styles.filterTitle}>Player Statistics</h3>
-            <table className={styles.statsTable}>
-                <thead>
-                <tr>
-                    {['name', 'jerseyNumber', 'position', 'goals', 'shots', 'turnovers'].map((col) => (
-                        <th
-                            key={col}
-                            onClick={() => handleSort(col as keyof IPlayer)}
-                        >
-                            {col === 'jerseyNumber' ? 'Number' :
-                                col === 'name' ? 'Name' :
-                                    col[0].toUpperCase() + col.slice(1)}
-                            {sortBy === col && (
-                                <span className={styles.sortIndicator}>
-                                        {sortOrder === 'asc' ? '↑' : '↓'}
-                                    </span>
-                            )}
-                        </th>
-                    ))}
-                </tr>
-                </thead>
-                <tbody>
-                {sortedPlayers.map((player) => (
-                    <tr
-                        key={player.id}
-                        className={`${styles.playerRow} ${selectedPlayer === player.id ? styles.selectedRow : ''}`}
-                        onClick={() => {
-                            if (selectedPlayer === player.id) {
-                                setSelectedPlayer(null);
-                            } else {
-                                setSelectedPlayer(player.id);
-                            }
-                        }}
-                    >
-                        <td>{player.name}</td>
-                        <td>{player.jerseyNumber}</td>
-                        <td>{player.position}</td>
-                        <td>{player.goals}</td>
-                        <td>{player.shots}</td>
-                        <td>{player.turnovers}</td>
-                    </tr>
-                ))}
-                </tbody>
-            </table>
+
+            {positionGroups.map((group) => (
+                group.players.length > 0 && (
+                    <div key={group.title}>
+                        <h4 className={styles.filterTitle}>{group.title}</h4>
+                        <table className={styles.statsTable}>
+                            <TableHeader/>
+                            <tbody>
+                            {group.players.map((player) => (
+                                <tr
+                                    key={player.id}
+                                    className={`${styles.playerRow} ${selectedPlayer === player.id ? styles.selectedRow : ''}`}
+                                    onClick={() => {
+                                        if (selectedPlayer === player.id) {
+                                            setSelectedPlayer(null);
+                                        } else {
+                                            setSelectedPlayer(player.id);
+                                        }
+                                    }}
+                                >
+                                    <td>{player.name}</td>
+                                    <td>{player.jerseyNumber}</td>
+                                    <td>{player.position}</td>
+                                    <td>{player.goals}</td>
+                                    <td>{player.shots}</td>
+                                    <td>{player.turnovers}</td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )
+            ))}
 
             {uniqueNonRoster.length > 0 && (
                 <>
@@ -92,4 +113,4 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({
     );
 };
 
-export default PlayerStats; 
+export default PlayerStats;
