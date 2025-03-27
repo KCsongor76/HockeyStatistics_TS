@@ -387,24 +387,25 @@
 .timeSliderLabels {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 4px;
-    font-size: 14px;
-    color: #3b82f6;
+    margin-bottom: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #1e40af;
 }
 
 .timeSliderTrack {
-    background: #cbd5e1;
-    height: 4px;
+    background: #e2e8f0;
+    height: 6px;
 }
 
 .timeSliderThumb {
     background: #3b82f6;
-    width: 16px;
-    height: 16px;
+    width: 20px;
+    height: 20px;
     border-radius: 50%;
     border: 2px solid white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    top: -6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    top: -7px;
 }
 
 .timeSliderThumb:hover {

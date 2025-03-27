@@ -21,9 +21,10 @@ interface GameVisualizationProps {
     maxTime: number;
 }
 
-const formatTime = (minutes: number) => {
-    const mins = Math.floor(minutes);
-    return `${mins}:00`;
+const formatTime = (totalSeconds: number) => {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 };
 
 const GameVisualization: React.FC<GameVisualizationProps> = ({

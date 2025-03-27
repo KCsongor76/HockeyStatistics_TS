@@ -13,7 +13,6 @@ import IconDataModal from "../modals/IconDataModal";
 import {GameService} from "../OOP/services/GameService";
 import {IPlayer} from "../OOP/interfaces/IPlayer";
 
-// todo: fix timing logic - filtering
 
 const PreviousGameDetailPage = () => {
     const location = useLocation();
@@ -33,10 +32,10 @@ const PreviousGameDetailPage = () => {
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
 
-    const [timeFilter, setTimeFilter] = useState<[number, number]>([0, 60]);
+    const [timeFilter, setTimeFilter] = useState<[number, number]>([0, 3600]);
 
     const minTime = 0;
-    const maxTime = Math.max(...gameData.actions.map(a => a.time), 60);
+    const maxTime = Math.max(...gameData.actions.map(a => a.time * 60), 3600);
 
     const [zoneFilter, setZoneFilter] = useState<{ x: [number, number], y: [number, number] }>({
         x: [0, 100],
@@ -44,10 +43,10 @@ const PreviousGameDetailPage = () => {
     });
 
     // Determine if zone filter is active
-    const isZoneFilterActive = zoneFilter.x[0] > 0 ||
+    /*const isZoneFilterActive = zoneFilter.x[0] > 0 ||
         zoneFilter.x[1] < 100 ||
         zoneFilter.y[0] > 0 ||
-        zoneFilter.y[1] < 100;
+        zoneFilter.y[1] < 100;*/
 
     const isTimeFilterActive = timeFilter[0] > minTime || timeFilter[1] < maxTime;
 
@@ -62,12 +61,13 @@ const PreviousGameDetailPage = () => {
         const zoneXFilter = action.x * 100 >= zoneFilter.x[0] && action.x * 100 <= zoneFilter.x[1];
         const zoneYFilter = action.y * 100 >= zoneFilter.y[0] && action.y * 100 <= zoneFilter.y[1];
 
-        const timeFilterPass = action.time >= timeFilter[0] && action.time <= timeFilter[1];
+        const actionTimeSeconds = 1200 * action.period - action.time;
+        const timeFilterPass = actionTimeSeconds >= timeFilter[0] &&
+            actionTimeSeconds <= timeFilter[1];
         const periodFilter = isTimeFilterActive ? true : selectedPeriods.has(action.period);
 
         return teamFilter && periodFilter && typeFilter && playerFilter && zoneXFilter && zoneYFilter && timeFilterPass;
     });
-
 
     const [selectedActionDetails, setSelectedActionDetails] = useState<IGameAction | null>(null);
 
