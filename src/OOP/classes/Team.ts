@@ -1,6 +1,6 @@
-import {Player} from "./Player";
-import {Championship} from "./Championship";
 import {ITeamColor} from "../interfaces/ITeamColor";
+import {IChampionship} from "../interfaces/IChampionship";
+import {IPlayer} from "../interfaces/IPlayer";
 
 export class Team {
     private readonly _id: string
@@ -8,8 +8,8 @@ export class Team {
     private _logo: string;
     private _homeColor: ITeamColor;
     private _awayColor: ITeamColor;
-    private _championships: Championship[]
-    private _players: Player[] = []
+    private _championships: IChampionship[]
+    private _players: IPlayer[] = []
 
     constructor(id: string = "", name: string = "", logo: string = "", homeColor: ITeamColor = {
         primary: "",
@@ -17,7 +17,7 @@ export class Team {
     }, awayColor: ITeamColor = {
         primary: "",
         secondary: ""
-    }, championships: Championship[] = [], players: Player[] = []) {
+    }, championships: IChampionship[] = [], players: IPlayer[] = []) {
         this._id = id;
         this._name = name;
         this._logo = logo;
@@ -63,19 +63,19 @@ export class Team {
         this._awayColor = value;
     }
 
-    get championships(): Championship[] {
+    get championships(): IChampionship[] {
         return this._championships;
     }
 
-    set championships(value: Championship[]) {
+    set championships(value: IChampionship[]) {
         this._championships = value;
     }
 
-    get players(): Player[] {
+    get players(): IPlayer[] {
         return this._players;
     }
 
-    set players(value: Player[]) {
+    set players(value: IPlayer[]) {
         this._players = value;
     }
 
@@ -88,15 +88,4 @@ export class Team {
             championships: this.championships //.map(ch => ch.id), // assuming you just need the championship IDs
         };
     }
-
-    /*static fromInterface(team: ITeam): Team {
-        return new Team(
-            team.id,
-            team.name,
-            team.logo,
-            team.homeColor,
-            team.awayColor,
-            team.championships
-        );
-    }*/
 }

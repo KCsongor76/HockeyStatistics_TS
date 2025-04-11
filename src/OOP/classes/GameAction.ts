@@ -1,19 +1,19 @@
-import {Team} from "./Team";
-import {Player} from "./Player";
 import {PlayoffPeriod, RegularPeriod} from "../enums/Period";
 import {ActionType} from "../enums/ActionType";
+import {IPlayer} from "../interfaces/IPlayer";
+import {ITeam} from "../interfaces/ITeam";
 
 export class GameAction {
-    private _team: Team;
+    private _team: ITeam;
     private _period: RegularPeriod | PlayoffPeriod;
     private _time: number;
     private _type: ActionType;
-    private _player: Player;
+    private _player: IPlayer;
     private _x: number;
     private _y: number;
 
 
-    constructor(team: Team, period: RegularPeriod | PlayoffPeriod, time: number, type: ActionType, player: Player, x: number, y: number) {
+    constructor(team: ITeam, period: RegularPeriod | PlayoffPeriod, time: number, type: ActionType, player: IPlayer, x: number, y: number) {
         this._team = team;
         this._period = period;
         this._time = time;
@@ -36,7 +36,7 @@ export class GameAction {
         return this._type;
     }
 
-    get team(): Team {
+    get team(): ITeam {
         return this._team;
     }
 

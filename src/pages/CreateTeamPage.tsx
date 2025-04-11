@@ -1,22 +1,23 @@
 import React, {useEffect, useState} from 'react';
-import {Championship} from "../OOP/classes/Championship";
-import {Team} from "../OOP/classes/Team";
 import {useLocation, useNavigate} from "react-router-dom";
 import {ITeamColor} from "../OOP/interfaces/ITeamColor";
 import {TeamService} from "../OOP/services/TeamService";
 // @ts-ignore
 import styles from './CreateTeamPage.module.css';
 import {TeamAlreadyExistsError} from "../OOP/errors/TeamAlreadyExistsError"; // Import the CSS module
+import {IChampionship} from '../OOP/interfaces/IChampionship';
+import {ITeam} from "../OOP/interfaces/ITeam";
+import {IPlayer} from "../OOP/interfaces/IPlayer";
 
 // todo: color styling, unify form with StartPage
 
 const CreateTeamPage = () => {
-    const championships = useLocation().state.championships as Championship[];
+    const championships = useLocation().state.championships as IChampionship[];
     const [name, setName] = useState<string>("");
     const [homeColor, setHomeColor] = useState<ITeamColor>({primary: "#000000", secondary: "#ffffff"});
     const [awayColor, setAwayColor] = useState<ITeamColor>({primary: "#ffffff", secondary: "#000000"});
     const [logo, setLogo] = useState<File | null>(null);
-    const [championship, setChampionship] = useState<Championship[]>([]);
+    const [championship, setChampionship] = useState<IChampionship[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
     const navigate = useNavigate();
 
@@ -71,12 +72,12 @@ const CreateTeamPage = () => {
         setAwayColor({...awayColor, secondary: e.target.value});
     }
 
-    const handleChampionshipChange = (selectedChampionship: Championship) => {
+    const handleChampionshipChange = (selectedChampionship: IChampionship) => {
         setChampionship(prevChampionships => {
             if (prevChampionships.find(ch => ch.id === selectedChampionship.id)) {
-                return prevChampionships.filter(ch => ch.id !== selectedChampionship.id) as Championship[];
+                return prevChampionships.filter(ch => ch.id !== selectedChampionship.id) as IChampionship[];
             } else {
-                return [...prevChampionships, selectedChampionship] as Championship[];
+                return [...prevChampionships, selectedChampionship] as IChampionship[];
             }
         });
     }
@@ -111,7 +112,16 @@ const CreateTeamPage = () => {
         try {
             // TODO: should be atomic operation
             const logoURL = await TeamService.uploadLogo(logo);
-            const team = new Team("0", name, logoURL, homeColor, awayColor, championship);
+            // const team = new Team("0", name, logoURL, homeColor, awayColor, championship);
+            const team = {
+                id: "0",
+                name: name,
+                logo: logoURL,
+                homeColor: homeColor,
+                awayColor: awayColor,
+                championships: championship,
+                players: [] as IPlayer[],
+            } as ITeam
             await TeamService.createTeam(team);
 
             alert("Team created successfully!");

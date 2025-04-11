@@ -5,9 +5,9 @@ import styles from './PreviousGamesPage.module.css';
 import {IGame} from "../OOP/interfaces/IGame";
 import {GameService} from "../OOP/services/GameService";
 import {ChampionshipService} from "../OOP/services/ChampionshipService";
-import {Championship} from "../OOP/classes/Championship";
 import {TeamService} from "../OOP/services/TeamService";
 import {ITeam} from "../OOP/interfaces/ITeam";
+import {IChampionship} from "../OOP/interfaces/IChampionship";
 
 // todo: make smaller components
 // todo: scrap styling, unify
@@ -19,7 +19,7 @@ interface PreviousGamesPageProps {
 
 const PreviousGamesPage: React.FC<PreviousGamesPageProps> = ({playerGames: playerGames, showFilters = true}) => {
     const [games, setGames] = useState<IGame[]>([]);
-    const [championships, setChampionships] = useState<Championship[]>([]);
+    const [championships, setChampionships] = useState<IChampionship[]>([]);
     const [teams, setTeams] = useState<ITeam[]>([]);
     const [loading, setLoading] = useState(true);
     const [homeTeamFilter, setHomeTeamFilter] = useState('');

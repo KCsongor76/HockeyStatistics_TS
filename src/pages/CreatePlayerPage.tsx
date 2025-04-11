@@ -1,18 +1,18 @@
 import React, {useState} from 'react';
 import {Position} from "../OOP/enums/Position";
 import {TeamService} from "../OOP/services/TeamService";
-import {Team} from "../OOP/classes/Team";
 import {useLoaderData, useNavigate} from "react-router-dom";
 import {PlayerService} from "../OOP/services/PlayerService";
-import {Player} from "../OOP/classes/Player";
 // @ts-ignore
 import styles from './CreatePlayerPage.module.css';
+import {IPlayer} from "../OOP/interfaces/IPlayer";
+import {ITeam} from "../OOP/interfaces/ITeam";
 
 // todo: wider, buttons in middle
 // todo: unify styling with start page
 
 const CreatePlayerPage = () => {
-    const loaderData = useLoaderData() as Team[];
+    const loaderData = useLoaderData() as ITeam[];
     const teams = loaderData ?? [];
 
     // State management for form inputs
@@ -41,8 +41,15 @@ const CreatePlayerPage = () => {
         }
 
         // Creating the player object
-        const newPlayer = new Player("0", name, position, jerseyNumber, teamId);
+        // const newPlayer = new Player("0", name, position, jerseyNumber, teamId);
 
+        const newPlayer = {
+            id: "0",
+            name,
+            position,
+            jerseyNumber,
+            teamId
+        } as IPlayer
         console.log('New player:', newPlayer);
 
         // Submit the new player (e.g., sending the newPlayer object to an API)

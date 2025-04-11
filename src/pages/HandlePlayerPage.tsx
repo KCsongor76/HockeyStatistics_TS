@@ -1,23 +1,22 @@
 import React, {useEffect, useState} from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
-import {Player} from '../OOP/classes/Player';
 import {PlayerService} from '../OOP/services/PlayerService';
-import {Team} from "../OOP/classes/Team";
 import {TeamService} from "../OOP/services/TeamService";
 // @ts-ignore
 import styles from './HandlePlayerPage.module.css';
 import {IGame} from "../OOP/interfaces/IGame";
 import {GameService} from "../OOP/services/GameService";
 import PreviousGamesPage from "./PreviousGamesPage";
-import {IPlayer} from "../OOP/interfaces/IPlayer";  // Import the CSS module
+import {IPlayer} from "../OOP/interfaces/IPlayer";
+import {ITeam} from "../OOP/interfaces/ITeam";  // Import the CSS module
 
 // todo: add data, games when he played
 // todo: button colors
 
 const HandlePlayerPage = () => {
     const {id: playerId} = useParams<{ id: string }>();
-    const [player, setPlayer] = useState<Player | null>(null);
-    const [team, setTeam] = useState<Team>(new Team());
+    const [player, setPlayer] = useState<IPlayer | null>(null);
+    const [team, setTeam] = useState<ITeam>({} as ITeam);
     const [games, setGames] = useState<IGame[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
@@ -36,11 +35,11 @@ const HandlePlayerPage = () => {
     useEffect(() => {
         const fetchPlayerAndTeamAndGames = async () => {
             try {
-                const playerData = await PlayerService.getPlayerById(playerId as string) as Player;
+                const playerData = await PlayerService.getPlayerById(playerId as string) as IPlayer;
                 setPlayer(playerData);
 
                 if (playerData && playerData.teamId) {
-                    const teamData = await TeamService.getTeamById(playerData.teamId) as Team;
+                    const teamData = await TeamService.getTeamById(playerData.teamId) as ITeam;
                     setTeam(teamData);
                 }
 

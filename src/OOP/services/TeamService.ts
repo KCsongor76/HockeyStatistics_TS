@@ -1,9 +1,9 @@
 import {addDoc, collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, updateDoc, where} from "firebase/firestore";
 import {getDownloadURL, ref, uploadBytes} from "firebase/storage";
 import {db, storage} from "../../firebaseConfig";
-import {Team} from "../classes/Team";
-import {Player} from "../classes/Player";
 import {TeamAlreadyExistsError} from "../errors/TeamAlreadyExistsError";
+import {IPlayer} from "../interfaces/IPlayer";
+import {ITeam} from "../interfaces/ITeam";
 
 // todo: arrow functions, atomic operations, batch writes?
 
@@ -11,7 +11,7 @@ export class TeamService {
     private static collectionRef = collection(db, 'teams');
 
     // TODO: arrow functions
-    static createTeam = async (team: Team) => {
+    static createTeam = async (team: ITeam) => {
         const teams = await this.getAllTeams();
         const names = teams.map(t => t.name);
         if (names.includes(team.name)) {
@@ -21,19 +21,19 @@ export class TeamService {
         const docRef = await addDoc(this.collectionRef, {});
         const teamId = docRef.id;
         const teamWithId = {
-            ...team.toPlainObject(),
+            ...team,
             id: teamId
         };
         await setDoc(docRef, teamWithId);
     }
 
-    static async getTeamById(id: string): Promise<Team | null> {
+    static async getTeamById(id: string): Promise<ITeam | null> {
         const docRef = doc(this.collectionRef, id);
         const docSnap = await getDoc(docRef);
-        return docSnap.exists() ? {id: docSnap.id, ...docSnap.data()} as Team : null;
+        return docSnap.exists() ? {id: docSnap.id, ...docSnap.data()} as ITeam : null;
     }
 
-    static async updateTeam(id: string, team: Partial<Team>) {
+    static async updateTeam(id: string, team: Partial<ITeam>) {
         const docRef = doc(this.collectionRef, id);
         console.log(team)
         // @ts-ignore
@@ -61,7 +61,7 @@ export class TeamService {
         await deleteDoc(teamDocRef);
     }
 
-    static async getAllTeams(): Promise<Team[]> {
+    static async getAllTeams(): Promise<ITeam[]> {
         const querySnapshot = await getDocs(this.collectionRef);
 
         const teams = await Promise.all(querySnapshot.docs.map(async (doc) => {
@@ -69,13 +69,13 @@ export class TeamService {
             const players = playersSnapshot.docs.map(playerDoc => ({
                 id: playerDoc.id,
                 ...playerDoc.data()
-            } as Player));
+            } as IPlayer));
 
             return {
                 id: doc.id,
                 ...doc.data(),
                 players
-            } as Team;
+            } as ITeam;
         }));
 
         // Sort teams alphabetically by name
@@ -97,7 +97,7 @@ export class TeamService {
         return await getDownloadURL(logoRef);
     };
 
-    static transferPlayer = async (fromTeam: Team, toTeam: Team, player: Player): Promise<void> => {
+    static transferPlayer = async (fromTeam: ITeam, toTeam: ITeam, player: IPlayer): Promise<void> => {
         try {
             // Reference to the player's document in the `fromTeam`'s players subcollection
             const fromTeamPlayerRef = doc(db, `teams/${fromTeam.id}/players`, player.id);

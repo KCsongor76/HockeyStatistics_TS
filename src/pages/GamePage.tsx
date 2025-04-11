@@ -22,6 +22,7 @@ import AssistSelectorModal from "../modals/AssistSelectorModal";
 import ActualGameDetails from './ActualGameDetails';
 
 // todo: fix second image icons not being perfectly aligned with first image icons
+// todo: time slider filter fix
 
 type FormData = {
     championship: IChampionship;

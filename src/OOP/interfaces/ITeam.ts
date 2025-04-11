@@ -1,6 +1,6 @@
 import {ITeamColor} from "./ITeamColor";
-import {Championship} from "../classes/Championship";
 import {IPlayer} from "./IPlayer";
+import {IChampionship} from "./IChampionship";
 
 export interface ITeam {
     id: string
@@ -8,6 +8,6 @@ export interface ITeam {
     logo: string
     homeColor: ITeamColor
     awayColor: ITeamColor
-    championships: Championship[]
+    championships: IChampionship[]
     players: IPlayer[]
 }

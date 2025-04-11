@@ -1,6 +1,4 @@
 import React, {useEffect, useState} from 'react';
-import {Championship} from "../OOP/classes/Championship";
-import {Team} from "../OOP/classes/Team";
 import {GameType} from "../OOP/enums/GameType";
 import {useLoaderData, useNavigate} from "react-router-dom";
 import {ITeamColor} from "../OOP/interfaces/ITeamColor";
@@ -13,13 +11,14 @@ import {storage} from "../firebaseConfig";
 import {IPlayer} from "../OOP/interfaces/IPlayer";
 import {ITeam} from "../OOP/interfaces/ITeam";
 import ContinueOrStartOverModal from '../modals/ContinueOrStartOverModal';
+import {IChampionship} from "../OOP/interfaces/IChampionship";
 
 // todo: roster selection - have different sections for goalies, defenders and forwards
 // todo: page reload - Uncaught TypeError: Cannot read properties of undefined (reading 'players')
 // todo: error handling: what if we have no teams?
 
 type FormState = {
-    championship: Championship;
+    championship: IChampionship;
     homeTeam: ITeam;
     awayTeam: ITeam;
     homeRoster: IPlayer[],
@@ -37,7 +36,7 @@ type FormState = {
 };
 
 type LoaderData = {
-    championships: Championship[];
+    championships: IChampionship[];
     teams: ITeam[];
     rinkImages: {
         rinkUp: string;
@@ -53,7 +52,7 @@ const StartPage: React.FC = () => {
     const rinkImages = loaderData?.rinkImages ?? {};
 
     // Get teams for the first championship
-    const getInitialTeams = (championship: Championship, allTeams: ITeam[]) => {
+    const getInitialTeams = (championship: IChampionship, allTeams: ITeam[]) => {
         const teamsInChampionship = allTeams.filter(team =>
             team.championships.some(champ => champ.id === championship.id)
         );
@@ -159,8 +158,8 @@ const StartPage: React.FC = () => {
         setFilteredTeams(filteredTeams);
 
         // Get default teams and their colors
-        const newHomeTeam = filteredTeams[0] ?? new Team();
-        const newAwayTeam = filteredTeams[1] ?? filteredTeams[0] ?? new Team();
+        const newHomeTeam = filteredTeams[0] ?? {} as ITeam;
+        const newAwayTeam = filteredTeams[1] ?? filteredTeams[0] ?? {} as ITeam;
 
         // Only update teams if current teams are not in the filtered list
         const updateTeams = !filteredTeams.some(team => team.id === formData.homeTeam.id) ||
@@ -262,7 +261,7 @@ const StartPage: React.FC = () => {
                 <select
                     value={formData.championship.id}
                     onChange={(event) => {
-                        const selectedChampionship = championships.find((c) => c.id === event.target.value) ?? new Championship();
+                        const selectedChampionship = championships.find((c) => c.id === event.target.value) ?? {} as IChampionship;
                         setFormData({
                             ...formData,
                             championship: selectedChampionship,
@@ -286,7 +285,7 @@ const StartPage: React.FC = () => {
                 <select
                     value={formData.homeTeam.id}
                     onChange={(event) => {
-                        const newHomeTeam = filteredTeams.find((t) => t.id === event.target.value) ?? new Team();
+                        const newHomeTeam = filteredTeams.find((t) => t.id === event.target.value) ?? {} as ITeam;
                         setFormData({
                             ...formData,
                             homeTeam: newHomeTeam as ITeam,
@@ -311,7 +310,7 @@ const StartPage: React.FC = () => {
                 <select
                     value={formData.awayTeam.id}
                     onChange={(event) => {
-                        const newAwayTeam = filteredTeams.find((t) => t.id === event.target.value) ?? new Team();
+                        const newAwayTeam = filteredTeams.find((t) => t.id === event.target.value) ?? {} as ITeam;
                         setFormData({
                             ...formData,
                             awayTeam: newAwayTeam as ITeam,

@@ -1,32 +1,40 @@
-import {Team} from "./Team";
-import {ScoreData} from "./ScoreData";
-import {GameAction} from "./GameAction";
+import {IGameAction} from "../interfaces/IGameAction";
+import {IScoreData} from "../interfaces/IScoreData";
+import {ITeam} from "../interfaces/ITeam";
 
 export class Game {
     private _id: string = "";
     private _timestamp: string = "";
-    private _actions: GameAction[] = [];
+    private _actions: IGameAction[] = [];
     private _teams: {
-        home: Team,
-        away: Team
+        home: ITeam,
+        away: ITeam
     } = {
-        home: new Team(),
-        away: new Team()
+        home: {} as ITeam,
+        away: {} as ITeam
     };
 
     private _score: {
-        home: ScoreData,
-        away: ScoreData
+        home: IScoreData,
+        away: IScoreData
     } = {
-        home: new ScoreData(0, 0, 0),
-        away: new ScoreData(0, 0, 0)
+        home: {
+            goals: 0,
+            shots: 0,
+            turnovers: 0
+        } as IScoreData,
+        away: {
+            goals: 0,
+            shots: 0,
+            turnovers: 0
+        } as IScoreData,
     };
     private _selectedImage: string = "";
 
 
-    constructor(id: string, timestamp: string, actions: GameAction[], teams: { home: Team; away: Team }, score: {
-        home: ScoreData;
-        away: ScoreData
+    constructor(id: string, timestamp: string, actions: IGameAction[], teams: { home: ITeam; away: ITeam }, score: {
+        home: IScoreData;
+        away: IScoreData
     }, selectedImage: string = "") {
         this._id = id;
         this._timestamp = timestamp;
@@ -45,15 +53,15 @@ export class Game {
         return this._timestamp;
     }
 
-    get actions(): GameAction[] {
+    get actions(): IGameAction[] {
         return this._actions;
     }
 
-    get teams(): { home: Team; away: Team } {
+    get Teams(): { home: ITeam; away: ITeam } {
         return this._teams;
     }
 
-    get score(): { home: ScoreData; away: ScoreData } {
+    get score(): { home: IScoreData; away: IScoreData } {
         return this._score;
     }
 
@@ -71,8 +79,8 @@ export class Game {
                 away: Team.fromInterface(game.teams.away as ITeam)
             },
             {
-                home: ScoreData.fromInterface(game.score.home),
-                away: ScoreData.fromInterface(game.score.away)
+                home: IScoreData.fromInterface(game.score.home),
+                away: IScoreData.fromInterface(game.score.away)
             },
             game.selectedImage
         );

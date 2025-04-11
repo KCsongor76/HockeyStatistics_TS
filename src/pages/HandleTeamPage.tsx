@@ -1,9 +1,9 @@
 import React, {useState} from 'react';
 import {useLocation, useNavigate} from "react-router-dom";
-import {Team} from "../OOP/classes/Team";
 import {TeamService} from "../OOP/services/TeamService";
 // @ts-ignore
 import styles from './HandleTeamPage.module.css';
+import {ITeam} from "../OOP/interfaces/ITeam";
 
 // todo: buttons in middle
 // todo: show games in which they played (a list of the games, as PreviousGamesPage)
@@ -13,7 +13,7 @@ import styles from './HandleTeamPage.module.css';
 
 const HandleTeamPage = () => {
     const location = useLocation();
-    const initialTeam = location.state.team as Team;
+    const initialTeam = location.state.team as ITeam;
 
     const [team, setTeam] = useState(initialTeam);
     const [name, setName] = useState(initialTeam.name);
@@ -70,7 +70,16 @@ const HandleTeamPage = () => {
                 logoURL = await TeamService.uploadLogo(logo);
             }
 
-            const updatedTeam = new Team(team.id, name, logoURL, team.homeColor, team.awayColor, team.championships, team.players);
+            // const updatedTeam = new Team(team.id, name, logoURL, team.homeColor, team.awayColor, team.championships, team.players);
+            const updatedTeam = {
+                id: team.id,
+                name: name,
+                logo: logoURL,
+                homeColor: team.homeColor,
+                awayColor: team.awayColor,
+                championships: team.championships,
+                players: team.players,
+            } as ITeam;
             console.log(updatedTeam);
             await TeamService.updateTeam(updatedTeam.id, updatedTeam);
             setTeam(updatedTeam);

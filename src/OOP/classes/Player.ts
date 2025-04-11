@@ -1,4 +1,3 @@
-import {Team} from "./Team";
 import {Position} from "../enums/Position";
 
 export class Player {

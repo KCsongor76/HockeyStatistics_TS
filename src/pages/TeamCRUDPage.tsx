@@ -2,21 +2,21 @@ import React, { useEffect, useState } from 'react';
 import { useLoaderData, useNavigate } from 'react-router-dom';
 import { ChampionshipService } from '../OOP/services/ChampionshipService';
 import { TeamService } from '../OOP/services/TeamService';
-import { Championship } from "../OOP/classes/Championship";
-import { Team } from "../OOP/classes/Team";
 // @ts-ignore
 import styles from './TeamCRUDPage.module.css';
 import { storage } from "../firebaseConfig";
 import { ref, deleteObject } from "firebase/storage";
+import {IChampionship} from "../OOP/interfaces/IChampionship";
+import {ITeam} from "../OOP/interfaces/ITeam";
 
 type LoaderData = {
-    championships: Championship[];
-    teams: Team[];
+    championships: IChampionship[];
+    teams: ITeam[];
 };
 
 const TeamCrudPage = () => {
     const loaderData = useLoaderData() as LoaderData;
-    const [championships, setChampionships] = useState<Championship[]>(loaderData?.championships ?? []);
+    const [championships, setChampionships] = useState<IChampionship[]>(loaderData?.championships ?? []);
     const [teams, setTeams] = useState(loaderData?.teams ?? []);
     const [selectedChampionship, setSelectedChampionship] = useState<string>("");
     const navigate = useNavigate();
@@ -25,11 +25,11 @@ const TeamCrudPage = () => {
         navigate("create", { state: { championships } });
     };
 
-    const viewNavigateHandler = (team: Team) => {
+    const viewNavigateHandler = (team: ITeam) => {
         navigate(`${team.id}`, { state: { team } });
     };
 
-    const deleteHandler = async (team: Team) => {
+    const deleteHandler = async (team: ITeam) => {
         const isConfirmed = window.confirm("Are you sure you want to delete this team?");
         if (isConfirmed) {
             try {
