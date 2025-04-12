@@ -1,64 +1,61 @@
-import {Position} from "../enums/Position";
+// Player.ts
+import {IPlayer} from "../interfaces/IPlayer";
 
-export class Player {
+export class Player implements IPlayer {
+    readonly id: string;
+    readonly name: string;
+    readonly number: number;
+    readonly position: string;
+    readonly teamId: string;
+    readonly jerseyNumber: number;
 
-    private readonly _id: string;
-    private _name: string;
-    private _position: Position;
-    private _jerseyNumber: number;
-    private _teamId: string;
-
-    constructor(id: string = "", name: string = "", position: Position = Position.GOALIE, jerseyNumber: number = 1, teamId: string = "") {
-        this._id = id;
-        this._name = name;
-        this._position = position;
-        this._jerseyNumber = jerseyNumber;
-        this._teamId = teamId;
+    constructor(id: string, name: string, number: number, position: string, teamId: string, jerseyNumber: number) {
+        this.id = id;
+        this.name = name;
+        this.number = number;
+        this.position = position;
+        this.teamId = teamId;
+        this.jerseyNumber = jerseyNumber;
     }
 
-    get id(): string {
-        return this._id;
+    static fromPlainObject(obj: any): Player {
+        return new Player(
+            obj.id,
+            obj.name,
+            obj.number,
+            obj.position,
+            obj.teamId,
+            obj.jerseyNumber
+        );
     }
 
-    get name(): string {
-        return this._name;
-    }
-
-    set name(value: string) {
-        this._name = value;
-    }
-
-    get position(): Position {
-        return this._position;
-    }
-
-    set position(value: Position) {
-        this._position = value;
-    }
-
-    get jerseyNumber(): number {
-        return this._jerseyNumber;
-    }
-
-    set jerseyNumber(value: number) {
-        this._jerseyNumber = value;
-    }
-
-    get teamId(): string {
-        return this._teamId;
-    }
-
-    set teamId(value: string) {
-        this._teamId = value;
-    }
-
-    toPlainObject = () => {
+    toPlainObject(): IPlayer {
         return {
             id: this.id,
             name: this.name,
+            number: this.number,
             position: this.position,
-            jerseyNumber: this.jerseyNumber,
-            teamId: this.teamId
-        }
+            teamId: this.teamId,
+            jerseyNumber: this.jerseyNumber
+        };
+    }
+
+    toString(): string {
+        return `${this.name} (#${this.jerseyNumber}) - ${this.position}`;
+    }
+
+    equals(other: Player): boolean {
+        if (!(other instanceof Player)) return false;
+        return this.id === other.id;
+    }
+
+    // Helper method to compare players by position
+    static compareByPosition(a: Player, b: Player): number {
+        return a.position.localeCompare(b.position);
+    }
+
+    // Helper method to compare players by jersey number
+    static compareByJerseyNumber(a: Player, b: Player): number {
+        return a.jerseyNumber - b.jerseyNumber;
     }
 }

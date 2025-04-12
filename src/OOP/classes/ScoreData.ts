@@ -1,39 +1,43 @@
-export class ScoreData {
-    private _goals: number;
-    private _shots: number;
-    private _turnovers: number;
+// ScoreData.ts
+import { IScoreData } from "../interfaces/IScoreData";
 
-    constructor(goals: number, shots: number, turnovers: number) {
-        this._goals = goals;
-        this._shots = shots;
-        this._turnovers = turnovers;
+export class ScoreData implements IScoreData {
+    readonly goals: number;
+    readonly shots: number;
+    readonly turnovers: number;
+
+    constructor(goals: number = 0, shots: number = 0, turnovers: number = 0) {
+        this.goals = goals;
+        this.shots = shots;
+        this.turnovers = turnovers;
     }
 
-    get goals(): number {
-        return this._goals;
+    static fromPlainObject(obj: any): ScoreData {
+        return new ScoreData(obj.goals, obj.shots, obj.turnovers);
     }
 
-    get shots(): number {
-        return this._shots;
+    toPlainObject(): IScoreData {
+        return {
+            goals: this.goals,
+            shots: this.shots,
+            turnovers: this.turnovers
+        };
     }
 
-    get turnovers(): number {
-        return this._turnovers;
+    toString(): string {
+        return `Goals: ${this.goals}, Shots: ${this.shots}, Turnovers: ${this.turnovers}`;
     }
 
-    set goals(value: number) {
-        this._goals = value;
+    equals(other: ScoreData): boolean {
+        if (!(other instanceof ScoreData)) return false;
+        return this.goals === other.goals &&
+            this.shots === other.shots &&
+            this.turnovers === other.turnovers;
     }
 
-    set shots(value: number) {
-        this._shots = value;
+    // Calculate shooting percentage
+    getShootingPercentage(): number {
+        if (this.shots === 0) return 0;
+        return (this.goals / this.shots) * 100;
     }
-
-    set turnovers(value: number) {
-        this._turnovers = value;
-    }
-
-    /*static fromInterface(score: IScoreData): ScoreData {
-        return new ScoreData(score.goals, score.shots, score.turnovers);
-    }*/
 }

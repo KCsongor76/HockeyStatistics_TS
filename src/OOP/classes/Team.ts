@@ -1,91 +1,114 @@
-import {ITeamColor} from "../interfaces/ITeamColor";
-import {IChampionship} from "../interfaces/IChampionship";
-import {IPlayer} from "../interfaces/IPlayer";
+// Team.ts
+import {ITeam} from "../interfaces/ITeam";
+import {TeamColor} from "./TeamColor";
+import {Player} from "./Player";
+import {Championship} from "./Championship";
+import {Position} from "../enums/Position";
 
-export class Team {
-    private readonly _id: string
-    private _name: string
-    private _logo: string;
-    private _homeColor: ITeamColor;
-    private _awayColor: ITeamColor;
-    private _championships: IChampionship[]
-    private _players: IPlayer[] = []
+export class Team implements ITeam, Iterable<Player> {
+    readonly id: string;
+    readonly name: string;
+    readonly logo: string;
+    readonly homeColor: TeamColor;
+    readonly awayColor: TeamColor;
+    readonly championships: Championship[];
+    readonly players: Player[];
 
-    constructor(id: string = "", name: string = "", logo: string = "", homeColor: ITeamColor = {
-        primary: "",
-        secondary: ""
-    }, awayColor: ITeamColor = {
-        primary: "",
-        secondary: ""
-    }, championships: IChampionship[] = [], players: IPlayer[] = []) {
-        this._id = id;
-        this._name = name;
-        this._logo = logo;
-        this._homeColor = homeColor;
-        this._awayColor = awayColor;
-        this._championships = championships;
-        this._players = players;
+    constructor(
+        id: string,
+        name: string,
+        logo: string,
+        homeColor: TeamColor,
+        awayColor: TeamColor,
+        championships: Championship[] = [],
+        players: Player[] = []
+    ) {
+        this.id = id;
+        this.name = name;
+        this.logo = logo;
+        this.homeColor = homeColor;
+        this.awayColor = awayColor;
+        this.championships = championships;
+        this.players = players;
     }
 
-    get id(): string {
-        return this._id;
+    static fromPlainObject(obj: any): Team {
+        return new Team(
+            obj.id,
+            obj.name,
+            obj.logo,
+            TeamColor.fromPlainObject(obj.homeColor),
+            TeamColor.fromPlainObject(obj.awayColor),
+            obj.championships ? obj.championships.map((c: any) => Championship.fromPlainObject(c)) : [],
+            obj.players ? obj.players.map((p: any) => Player.fromPlainObject(p)) : []
+        );
     }
 
-    get name(): string {
-        return this._name;
-    }
-
-    set name(value: string) {
-        this._name = value;
-    }
-
-    get logo(): string {
-        return this._logo;
-    }
-
-    set logo(value: string) {
-        this._logo = value;
-    }
-
-    get homeColor(): ITeamColor {
-        return this._homeColor;
-    }
-
-    set homeColor(value: ITeamColor) {
-        this._homeColor = value;
-    }
-
-    get awayColor(): ITeamColor {
-        return this._awayColor;
-    }
-
-    set awayColor(value: ITeamColor) {
-        this._awayColor = value;
-    }
-
-    get championships(): IChampionship[] {
-        return this._championships;
-    }
-
-    set championships(value: IChampionship[]) {
-        this._championships = value;
-    }
-
-    get players(): IPlayer[] {
-        return this._players;
-    }
-
-    set players(value: IPlayer[]) {
-        this._players = value;
-    }
-
-    toPlainObject() {
+    toPlainObject(): ITeam {
         return {
+            id: this.id,
             name: this.name,
             logo: this.logo,
-            homeColor: this.homeColor,
-            awayColor: this.awayColor,
-            championships: this.championships //.map(ch => ch.id), // assuming you just need the championship IDs
+            homeColor: this.homeColor.toPlainObject(),
+            awayColor: this.awayColor.toPlainObject(),
+            championships: this.championships.map(c => c.toPlainObject()),
+            players: this.players.map(p => p.toPlainObject())
         };
+    }
+
+    toString(): string {
+        return `Team: ${this.name} (${this.id})`;
+    }
+
+    equals(other: Team): boolean {
+        if (!(other instanceof Team)) return false;
+        return this.id === other.id;
+    }
+
+    // Iterator implementation
+    [Symbol.iterator](): Iterator<Player> {
+        let index = 0;
+        const players = this.players;
+
+        return {
+            next(): IteratorResult<Player> {
+                if (index < players.length) {
+                    return {
+                        value: players[index++],
+                        done: false
+                    };
+                } else {
+                    return {
+                        value: null as any,
+                        done: true
+                    };
+                }
+            }
+        };
+    }
+
+    // Get player by ID
+    getPlayerById(id: string): Player | undefined {
+        return this.players.find(player => player.id === id);
+    }
+
+    // Get player by jersey number
+    getPlayerByJerseyNumber(number: number): Player | undefined {
+        return this.players.find(player => player.jerseyNumber === number);
+    }
+
+    // Get players sorted by position
+    getPlayersByPosition(position: Position): Player[] {
+        return [...this.players].filter(player => player.position === position);
+    }
+
+    // Get players sorted by jersey number
+    getPlayersByJerseyNumber(): Player[] {
+        return [...this.players].sort(Player.compareByJerseyNumber);
+    }
+
+    // Get championship count
+    getChampionshipCount(): number {
+        return this.championships.length;
     }
 }
