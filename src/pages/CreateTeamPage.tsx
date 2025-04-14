@@ -5,19 +5,19 @@ import {TeamService} from "../OOP/services/TeamService";
 // @ts-ignore
 import styles from './CreateTeamPage.module.css';
 import {TeamAlreadyExistsError} from "../OOP/errors/TeamAlreadyExistsError"; // Import the CSS module
-import {IChampionship} from '../OOP/interfaces/IChampionship';
 import {ITeam} from "../OOP/interfaces/ITeam";
 import {IPlayer} from "../OOP/interfaces/IPlayer";
+import {Championship} from "../OOP/classes/Championship";
 
 // todo: color styling, unify form with StartPage
 
 const CreateTeamPage = () => {
-    const championships = useLocation().state.championships as IChampionship[];
+    const championships = useLocation().state.championships as Championship[];
     const [name, setName] = useState<string>("");
     const [homeColor, setHomeColor] = useState<ITeamColor>({primary: "#000000", secondary: "#ffffff"});
     const [awayColor, setAwayColor] = useState<ITeamColor>({primary: "#ffffff", secondary: "#000000"});
     const [logo, setLogo] = useState<File | null>(null);
-    const [championship, setChampionship] = useState<IChampionship[]>([]);
+    const [championship, setChampionship] = useState<Championship[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
     const navigate = useNavigate();
 
@@ -72,12 +72,14 @@ const CreateTeamPage = () => {
         setAwayColor({...awayColor, secondary: e.target.value});
     }
 
-    const handleChampionshipChange = (selectedChampionship: IChampionship) => {
+    const handleChampionshipChange = (selectedChampionship: Championship) => {
+        // todo: championship .equals method?
+        // ch.id !== selectedChampionship.id
         setChampionship(prevChampionships => {
-            if (prevChampionships.find(ch => ch.id === selectedChampionship.id)) {
-                return prevChampionships.filter(ch => ch.id !== selectedChampionship.id) as IChampionship[];
+            if (prevChampionships.find(ch => ch.equals(selectedChampionship))) {
+                return prevChampionships.filter(ch => !ch.equals(selectedChampionship)) as Championship[];
             } else {
-                return [...prevChampionships, selectedChampionship] as IChampionship[];
+                return [...prevChampionships, selectedChampionship] as Championship[];
             }
         });
     }

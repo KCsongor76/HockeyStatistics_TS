@@ -6,7 +6,6 @@ import {ITeamColor} from "../OOP/interfaces/ITeamColor";
 import {useLocation} from "react-router-dom";
 import {ActionType} from "../OOP/enums/ActionType";
 import Icon from "../components/Icon";
-import {IChampionship} from "../OOP/interfaces/IChampionship";
 import {ITeam} from "../OOP/interfaces/ITeam";
 import {IScoreData} from "../OOP/interfaces/IScoreData";
 import {IGameAction} from "../OOP/interfaces/IGameAction";
@@ -20,12 +19,13 @@ import IconDataModal from "../modals/IconDataModal";
 import {IPlayer} from "../OOP/interfaces/IPlayer";
 import AssistSelectorModal from "../modals/AssistSelectorModal";
 import ActualGameDetails from './ActualGameDetails';
+import {Championship} from "../OOP/classes/Championship";
 
 // todo: fix second image icons not being perfectly aligned with first image icons
 // todo: time slider filter fix
 
 type FormData = {
-    championship: IChampionship;
+    championship: Championship;
     homeTeam: ITeam;
     awayTeam: ITeam;
     homeRoster: IPlayer[],

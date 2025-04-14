@@ -1,6 +1,6 @@
 import {collection, deleteDoc, doc, getDoc, getDocs, updateDoc} from "firebase/firestore";
 import {db} from "../../firebaseConfig";
-import {IChampionship} from "../interfaces/IChampionship";
+import {Championship} from "../classes/Championship";
 
 // todo: arrow functions, atomic operations, batch writes?
 
@@ -27,8 +27,16 @@ export class ChampionshipService {
         await deleteDoc(docRef);
     }
 
-    static async getAllChampionships(): Promise<IChampionship[]> {
+    static async getAllChampionships(): Promise<Championship[]> {
         const querySnapshot = await getDocs(this.collectionRef);
-        return querySnapshot.docs.map(doc => ({id: doc.id, ...doc.data()} as IChampionship));
+        return querySnapshot.docs.map(
+            doc => {
+                const id = doc.id;
+                const name = doc.data().name;
+                return new Championship(id, name)
+            }
+        );
     }
 }
+
+// new Championship(doc.id, doc.data().name)
