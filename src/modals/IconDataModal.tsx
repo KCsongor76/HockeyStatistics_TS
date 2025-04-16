@@ -1,12 +1,11 @@
 import React from 'react';
-import {ActionType} from "../OOP/enums/ActionType";
-import {IGameAction} from "../OOP/interfaces/IGameAction";
-import {ITeam} from "../OOP/interfaces/ITeam";
 // @ts-ignore
 import styles from './IconDataModal.module.css';
+import {GameAction} from "../OOP/classes/GameAction";
+import {Team} from "../OOP/classes/Team";
 
 interface IconDataModalProps {
-    action: IGameAction | null;
+    action: GameAction | null;
     onClose: () => void;
 }
 
@@ -26,7 +25,7 @@ const IconDataModal = ({action, onClose}: IconDataModalProps) => {
 
                 <div className={styles.detailItem}>
                     <label>Team:</label>
-                    <span>{(action.team as ITeam).name}</span>
+                    <span>{(action.team as Team).name}</span>
                 </div>
 
                 <div className={styles.detailItem}>

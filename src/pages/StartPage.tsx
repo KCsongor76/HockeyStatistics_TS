@@ -1,33 +1,33 @@
 import React, {useEffect, useState} from 'react';
 import {GameType} from "../OOP/enums/GameType";
 import {useLoaderData, useNavigate} from "react-router-dom";
-import {ITeamColor} from "../OOP/interfaces/ITeamColor";
 import {getDownloadURL, ref} from "firebase/storage";
 // @ts-ignore
 import styles from './StartPage.module.css';
 import {ChampionshipService} from "../OOP/services/ChampionshipService";
 import {TeamService} from "../OOP/services/TeamService";
 import {storage} from "../firebaseConfig";
-import {IPlayer} from "../OOP/interfaces/IPlayer";
-import {ITeam} from "../OOP/interfaces/ITeam";
 import ContinueOrStartOverModal from '../modals/ContinueOrStartOverModal';
-import {IChampionship} from "../OOP/interfaces/IChampionship";
+import {Championship} from "../OOP/classes/Championship";
+import {TeamColor} from "../OOP/classes/TeamColor";
+import {Player} from "../OOP/classes/Player";
+import {Team} from "../OOP/classes/Team";
 
 // todo: roster selection - have different sections for goalies, defenders and forwards
 // todo: page reload - Uncaught TypeError: Cannot read properties of undefined (reading 'players')
 // todo: error handling: what if we have no teams?
 
 type FormState = {
-    championship: IChampionship;
-    homeTeam: ITeam;
-    awayTeam: ITeam;
-    homeRoster: IPlayer[],
-    homeRosterOut: IPlayer[],
-    awayRosterOut: IPlayer[],
-    awayRoster: IPlayer[],
+    championship: Championship;
+    homeTeam: Team;
+    awayTeam: Team;
+    homeRoster: Player[],
+    homeRosterOut: Player[],
+    awayRosterOut: Player[],
+    awayRoster: Player[],
     gameType: GameType;
-    homeColor: ITeamColor;
-    awayColor: ITeamColor;
+    homeColor: TeamColor;
+    awayColor: TeamColor;
     imageOption: {
         rinkUp: string;
         rinkDown: string;
@@ -36,8 +36,8 @@ type FormState = {
 };
 
 type LoaderData = {
-    championships: IChampionship[];
-    teams: ITeam[];
+    championships: Championship[];
+    teams: Team[];
     rinkImages: {
         rinkUp: string;
         rinkDown: string;
@@ -52,13 +52,13 @@ const StartPage: React.FC = () => {
     const rinkImages = loaderData?.rinkImages ?? {};
 
     // Get teams for the first championship
-    const getInitialTeams = (championship: IChampionship, allTeams: ITeam[]) => {
+    const getInitialTeams = (championship: Championship, allTeams: Team[]) => {
         const teamsInChampionship = allTeams.filter(team =>
-            team.championships.some(champ => champ.id === championship.id)
+            team.championships?.some(champ => champ.id === championship.id)
         );
         return {
-            homeTeam: teamsInChampionship[0] as ITeam,
-            awayTeam: teamsInChampionship[1] as ITeam
+            homeTeam: teamsInChampionship[0] as Team,
+            awayTeam: teamsInChampionship[1] as Team
         };
     };
 
@@ -84,7 +84,7 @@ const StartPage: React.FC = () => {
     };
 
     const [formData, setFormData] = useState<FormState>(initialState);
-    const [filteredTeams, setFilteredTeams] = useState<ITeam[]>(teams);
+    const [filteredTeams, setFilteredTeams] = useState<Team[]>(teams);
     const navigate = useNavigate();
     const [isDropDownOpen, setIsDropDownOpen] = useState(false);
 
@@ -152,14 +152,14 @@ const StartPage: React.FC = () => {
         }
 
         const filteredTeams = teams.filter(team =>
-            team.championships.some(champ => champ.id === formData.championship.id)
+            team.championships?.some(champ => champ.id === formData.championship.id)
         );
 
         setFilteredTeams(filteredTeams);
 
         // Get default teams and their colors
-        const newHomeTeam = filteredTeams[0] ?? {} as ITeam;
-        const newAwayTeam = filteredTeams[1] ?? filteredTeams[0] ?? {} as ITeam;
+        const newHomeTeam = filteredTeams[0] ?? {} as Team;
+        const newAwayTeam = filteredTeams[1] ?? filteredTeams[0] ?? {} as Team;
 
         // Only update teams if current teams are not in the filtered list
         const updateTeams = !filteredTeams.some(team => team.id === formData.homeTeam.id) ||
@@ -204,7 +204,7 @@ const StartPage: React.FC = () => {
         return <div>Loading...</div>;
     }
 
-    function addPlayerToRosterHandler(player: IPlayer, isHome: boolean) {
+    function addPlayerToRosterHandler(player: Player, isHome: boolean) {
         setFormData(prev => {
             if (isHome) {
                 const newHomeRosterOut = prev.homeRosterOut.filter(p => p.id !== player.id);
@@ -226,7 +226,7 @@ const StartPage: React.FC = () => {
         });
     }
 
-    function removePlayerFromRosterHandler(player: IPlayer, isHome: boolean) {
+    function removePlayerFromRosterHandler(player: Player, isHome: boolean) {
         setFormData(prev => {
             if (isHome) {
                 const newHomeRoster = prev.homeRoster.filter(p => p.id !== player.id);
@@ -261,7 +261,7 @@ const StartPage: React.FC = () => {
                 <select
                     value={formData.championship.id}
                     onChange={(event) => {
-                        const selectedChampionship = championships.find((c) => c.id === event.target.value) ?? {} as IChampionship;
+                        const selectedChampionship = championships.find((c) => c.id === event.target.value) ?? {} as Championship;
                         setFormData({
                             ...formData,
                             championship: selectedChampionship,
@@ -285,13 +285,13 @@ const StartPage: React.FC = () => {
                 <select
                     value={formData.homeTeam.id}
                     onChange={(event) => {
-                        const newHomeTeam = filteredTeams.find((t) => t.id === event.target.value) ?? {} as ITeam;
+                        const newHomeTeam = filteredTeams.find((t) => t.id === event.target.value) ?? {} as Team;
                         setFormData({
                             ...formData,
-                            homeTeam: newHomeTeam as ITeam,
+                            homeTeam: newHomeTeam as Team,
                             homeColor: newHomeTeam.homeColor || initialState.homeColor,
                             homeRoster: [],
-                            homeRosterOut: newHomeTeam.players as IPlayer[],
+                            homeRosterOut: newHomeTeam.players as Player[],
                         });
                         setIsDropDownOpen(false);
                     }}
@@ -310,13 +310,13 @@ const StartPage: React.FC = () => {
                 <select
                     value={formData.awayTeam.id}
                     onChange={(event) => {
-                        const newAwayTeam = filteredTeams.find((t) => t.id === event.target.value) ?? {} as ITeam;
+                        const newAwayTeam = filteredTeams.find((t) => t.id === event.target.value) ?? {} as Team;
                         setFormData({
                             ...formData,
-                            awayTeam: newAwayTeam as ITeam,
+                            awayTeam: newAwayTeam as Team,
                             awayColor: newAwayTeam.awayColor || initialState.awayColor,
                             awayRoster: [],
-                            awayRosterOut: newAwayTeam.players as IPlayer[],
+                            awayRosterOut: newAwayTeam.players as Player[],
                         });
                         setIsDropDownOpen(false);
                     }}
@@ -356,23 +356,31 @@ const StartPage: React.FC = () => {
                     <input
                         type="color"
                         value={formData.homeColor.primary}
-                        onChange={(event) =>
+                        onChange={(event) => {
+                            const primary = event.target.value;
+                            const secondary = formData.homeColor.secondary;
+                            const newHomeColor = new TeamColor(primary, secondary);
+
                             setFormData({
                                 ...formData,
-                                homeColor: {...formData.homeColor, primary: event.target.value},
+                                homeColor: newHomeColor,
                             })
-                        }
+                        }}
                         className={styles.inputColor}
                     />
                     <input
                         type="color"
                         value={formData.homeColor.secondary}
-                        onChange={(event) =>
+                        onChange={(event) => {
+                            const primary = formData.homeColor.primary;
+                            const secondary = event.target.value;
+                            const newHomeColor = new TeamColor(primary, secondary);
+
                             setFormData({
                                 ...formData,
-                                homeColor: {...formData.homeColor, secondary: event.target.value},
+                                homeColor: newHomeColor,
                             })
-                        }
+                        }}
                         className={styles.inputColor}
                     />
                 </div>
@@ -384,23 +392,31 @@ const StartPage: React.FC = () => {
                     <input
                         type="color"
                         value={formData.awayColor.primary}
-                        onChange={(event) =>
+                        onChange={(event) => {
+                            const primary = event.target.value;
+                            const secondary = formData.awayColor.secondary;
+                            const newAwayColor = new TeamColor(primary, secondary);
+
                             setFormData({
                                 ...formData,
-                                awayColor: {...formData.awayColor, primary: event.target.value},
+                                awayColor: newAwayColor,
                             })
-                        }
+                        }}
                         className={styles.inputColor}
                     />
                     <input
                         type="color"
                         value={formData.awayColor.secondary}
-                        onChange={(event) =>
+                        onChange={(event) => {
+                            const primary = formData.awayColor.primary;
+                            const secondary = event.target.value;
+                            const newAwayColor = new TeamColor(primary, secondary);
+
                             setFormData({
                                 ...formData,
-                                awayColor: {...formData.awayColor, secondary: event.target.value},
+                                awayColor: newAwayColor,
                             })
-                        }
+                        }}
                         className={styles.inputColor}
                     />
                 </div>

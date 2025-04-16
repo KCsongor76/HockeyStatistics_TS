@@ -1,26 +1,25 @@
 import React from 'react';
 import {ActionType} from "../OOP/enums/ActionType";
-import {ITeam} from "../OOP/interfaces/ITeam";
-import {ITeamColor} from "../OOP/interfaces/ITeamColor";
 import Icon from "../components/Icon";
 // @ts-ignore
 import styles from './ActionSelectorModal.module.css';
-import {IPlayer} from "../OOP/interfaces/IPlayer";
+import {TeamColor} from "../OOP/classes/TeamColor";
+import {Player} from "../OOP/classes/Player";
+import {Team} from "../OOP/classes/Team";
+import {TeamWithRoster} from "../OOP/classes/TeamWithRoster";
+
 
 interface ActionSelectorModalProps {
-    homeTeam: ITeam;
-    homeRoster: IPlayer[];
-    awayTeam: ITeam;
-    awayRoster: IPlayer[];
-    homeColor: ITeamColor;
-    awayColor: ITeamColor;
-    onActionSelect: (action: { type: ActionType, team: ITeamRoster }) => void;
+    homeTeam: Team;
+    homeRoster: Player[];
+    awayTeam: Team;
+    awayRoster: Player[];
+    homeColor: TeamColor;
+    awayColor: TeamColor;
+    onActionSelect: (action: { type: ActionType, team: TeamWithRoster }) => void;
     onCancel: () => void;
 }
 
-interface ITeamRoster extends ITeam {
-    roster: IPlayer[]
-}
 
 const ActionSelectorModal: React.FC<ActionSelectorModalProps> = ({
                                                                      homeTeam,
@@ -33,8 +32,8 @@ const ActionSelectorModal: React.FC<ActionSelectorModalProps> = ({
                                                                      onCancel
                                                                  }) => {
 
-    const homeTeamWithRoster = {...homeTeam, roster: homeRoster} as ITeamRoster;
-    const awayTeamWithRoster = {...awayTeam, roster: awayRoster} as ITeamRoster;
+    const homeTeamWithRoster = {...homeTeam, roster: homeRoster} as TeamWithRoster;
+    const awayTeamWithRoster = {...awayTeam, roster: awayRoster} as TeamWithRoster;
 
 
     return (

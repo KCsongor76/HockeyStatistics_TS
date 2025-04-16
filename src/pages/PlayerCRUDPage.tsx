@@ -5,12 +5,12 @@ import {TeamService} from "../OOP/services/TeamService";
 // @ts-ignore
 import styles from './PlayerCRUDPage.module.css';
 import {Position} from "../OOP/enums/Position";
-import {IPlayer} from "../OOP/interfaces/IPlayer";
+import {Player} from "../OOP/classes/Player";
 
 // todo: page reload: Uncaught TypeError: Cannot read properties of undefined (reading 'players')
 
 type LoaderData = {
-    players: { player: IPlayer, teamName: string }[];
+    players: { player: Player, teamName: string }[];
     teams: any[];
 };
 
@@ -43,7 +43,7 @@ const PlayerCRUDPage = () => {
     const currentPlayers = filteredPlayers.slice(indexOfFirstItem, indexOfLastItem);
     const totalPages = Math.ceil(filteredPlayers.length / itemsPerPage);
 
-    const deleteHandler = async (player: IPlayer) => {
+    const deleteHandler = async (player: Player) => {
         if (window.confirm("Are you sure you want to delete this player?")) {
             try {
                 await PlayerService.deletePlayer(player.teamId, player.id);

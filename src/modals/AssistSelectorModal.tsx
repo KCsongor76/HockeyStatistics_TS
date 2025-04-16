@@ -1,12 +1,12 @@
 // AssistSelectorModal.tsx
-import React, { useState } from 'react';
-import { IPlayer } from "../OOP/interfaces/IPlayer";
+import React, {useState} from 'react';
 // @ts-ignore
 import styles from './AssistSelectorModal.module.css';
+import {Player} from "../OOP/classes/Player";
 
 interface AssistSelectorModalProps {
-    teamRoster: IPlayer[];
-    onAssistSelected: (assists: IPlayer[]) => void;
+    teamRoster: Player[];
+    onAssistSelected: (assists: Player[]) => void;
     onCancel: () => void;
 }
 
@@ -15,9 +15,9 @@ const AssistSelectorModal: React.FC<AssistSelectorModalProps> = ({
                                                                      onAssistSelected,
                                                                      onCancel
                                                                  }) => {
-    const [selectedAssists, setSelectedAssists] = useState<IPlayer[]>([]);
+    const [selectedAssists, setSelectedAssists] = useState<Player[]>([]);
 
-    const togglePlayer = (player: IPlayer) => {
+    const togglePlayer = (player: Player) => {
         const isSelected = selectedAssists.some(p => p.id === player.id);
         if (isSelected) {
             setSelectedAssists(prev => prev.filter(p => p.id !== player.id));

@@ -2,39 +2,40 @@ import React, {useEffect, useRef, useState} from 'react';
 
 import {GameType} from "../OOP/enums/GameType";
 import {RegularPeriod, PlayoffPeriod} from "../OOP/enums/Period";
-import {ITeamColor} from "../OOP/interfaces/ITeamColor";
 import {useLocation} from "react-router-dom";
 import {ActionType} from "../OOP/enums/ActionType";
 import Icon from "../components/Icon";
-import {ITeam} from "../OOP/interfaces/ITeam";
-import {IScoreData} from "../OOP/interfaces/IScoreData";
-import {IGameAction} from "../OOP/interfaces/IGameAction";
-import {IGame} from "../OOP/interfaces/IGame";
 import {GameService} from "../OOP/services/GameService";
 import ActionSelectorModal from "../modals/ActionSelectorModal";
 import PlayerSelectorModal from "../modals/PlayerSelectorModal";
 // @ts-ignore
 import styles from './GamePage.module.css';
 import IconDataModal from "../modals/IconDataModal";
-import {IPlayer} from "../OOP/interfaces/IPlayer";
 import AssistSelectorModal from "../modals/AssistSelectorModal";
 import ActualGameDetails from './ActualGameDetails';
 import {Championship} from "../OOP/classes/Championship";
+import {Game} from "../OOP/classes/Game";
+import {GameAction} from "../OOP/classes/GameAction";
+import {ScoreData} from "../OOP/classes/ScoreData";
+import {TeamColor} from "../OOP/classes/TeamColor";
+import {Player} from "../OOP/classes/Player";
+import {Team} from "../OOP/classes/Team";
+import {TeamWithRoster} from "../OOP/classes/TeamWithRoster";
 
 // todo: fix second image icons not being perfectly aligned with first image icons
 // todo: time slider filter fix
 
 type FormData = {
     championship: Championship;
-    homeTeam: ITeam;
-    awayTeam: ITeam;
-    homeRoster: IPlayer[],
-    homeRosterOut: IPlayer[],
-    awayRosterOut: IPlayer[],
-    awayRoster: IPlayer[],
+    homeTeam: Team;
+    awayTeam: Team;
+    homeRoster: Player[],
+    homeRosterOut: Player[],
+    awayRosterOut: Player[],
+    awayRoster: Player[],
     gameType: GameType;
-    homeColor: ITeamColor;
-    awayColor: ITeamColor;
+    homeColor: TeamColor;
+    awayColor: TeamColor;
     imageOption: {
         rinkUp: string;
         rinkDown: string;
@@ -42,18 +43,14 @@ type FormData = {
     selectedImage: string;
 };
 
-interface ITeamRoster extends ITeam {
-    roster: IPlayer[]
-}
-
 
 const GamePage = () => {
     const location = useLocation();
     const savedGameState = localStorage.getItem("unfinishedGame") ? JSON.parse(localStorage.getItem("unfinishedGame") as string) : location.state?.savedGameState;
 
     const [selectedPosition, setSelectedPosition] = useState<{ x: number, y: number } | null>(null);
-    const [selectedAction, setSelectedAction] = useState<{ type: ActionType, team: ITeamRoster } | null>(null);
-    const [selectedActionDetails, setSelectedActionDetails] = useState<IGameAction | null>(null);
+    const [selectedAction, setSelectedAction] = useState<{ type: ActionType, team: TeamWithRoster } | null>(null);
+    const [selectedActionDetails, setSelectedActionDetails] = useState<GameAction | null>(null);
     const [period, setPeriod] = useState(savedGameState?.period || 1);
     const [time, setTime] = useState(savedGameState?.time || 5);
     const [isTimerRunning, setIsTimerRunning] = useState(savedGameState?.isTimerRunning || false);
@@ -71,21 +68,34 @@ const GamePage = () => {
     const [isLongPress, setIsLongPress] = useState(false); // To track if it's a long press
     const [isModalOpen, setIsModalOpen] = useState(false);
 
-    const [pendingGoalAction, setPendingGoalAction] = useState<IGameAction | null>(null);
+    const [pendingGoalAction, setPendingGoalAction] = useState<GameAction | null>(null);
     const [isSelectingAssists, setIsSelectingAssists] = useState(false);
 
-    const currentGame: IGame = {
-        id: "",
-        timestamp: new Date().toISOString(),
-        actions: actions,
-        teams: {
-            home: {...formData.homeTeam, roster: formData.homeRoster},
-            away: {...formData.awayTeam, roster: formData.awayRoster}
-        },
-        score: {home: homeScore, away: awayScore},
-        selectedImage: formData.selectedImage,
-        championship: formData.championship
+    // const currentGame: Game = {
+    //     id: "",
+    //     timestamp: new Date().toISOString(),
+    //     actions: actions,
+    //     teams: {
+    //         home: {...formData.homeTeam, roster: formData.homeRoster},
+    //         away: {...formData.awayTeam, roster: formData.awayRoster}
+    //     },
+    //     score: {home: homeScore, away: awayScore},
+    //     selectedImage: formData.selectedImage,
+    //     championship: formData.championship
+    // };
+
+    const id = "";
+    const timestamp = new Date().toISOString();
+    const teams = {
+        home: {...formData.homeTeam, roster: formData.homeRoster},
+        away: {...formData.awayTeam, roster: formData.awayRoster}
     };
+    const score = {home: homeScore, away: awayScore};
+    const selectedImage = formData.selectedImage;
+    const championship = formData.championship;
+
+    const currentGame = new Game(id, championship, actions, timestamp, score, teams, selectedImage);
+
 
     const updateIconSize = () => {
         if (fieldImageRef.current) {
@@ -96,7 +106,7 @@ const GamePage = () => {
         }
     };
 
-    const handleScoreUpdate = (team: ITeam, actionType: ActionType, currentScore: IScoreData): IScoreData => {
+    const handleScoreUpdate = (team: Team, actionType: ActionType, currentScore: ScoreData): ScoreData => {
         const newScore = {...currentScore};
 
         switch (actionType) {
@@ -118,11 +128,15 @@ const GamePage = () => {
                 break;
         }
 
-        return newScore;
+        const goals = newScore.goals;
+        const shots = newScore.shots;
+        const turnovers = newScore.turnovers;
+
+        return new ScoreData(goals, shots, turnovers);
     };
 
 
-    const handleActionComplete = (newAction: IGameAction) => {
+    const handleActionComplete = (newAction: GameAction) => {
         if (newAction.type === ActionType.GOAL) {
             // Store the action temporarily for assist selection
             setPendingGoalAction(newAction);
@@ -153,7 +167,7 @@ const GamePage = () => {
         console.log("localstorage")
     };
 
-    const handleAssistSelection = (assists: IPlayer[]) => {
+    const handleAssistSelection = (assists: Player[]) => {
         if (pendingGoalAction) {
             const completedAction = {
                 ...pendingGoalAction,
@@ -163,9 +177,9 @@ const GamePage = () => {
 
             // Update scores (same as before)
             if (completedAction.team.id === formData.homeTeam.id) {
-                setHomeScore((current: IScoreData) => handleScoreUpdate(completedAction.team, completedAction.type, current));
+                setHomeScore((current: ScoreData) => handleScoreUpdate(completedAction.team, completedAction.type, current));
             } else {
-                setAwayScore((current: IScoreData) => handleScoreUpdate(completedAction.team, completedAction.type, current));
+                setAwayScore((current: ScoreData) => handleScoreUpdate(completedAction.team, completedAction.type, current));
             }
         }
         setPendingGoalAction(null);
@@ -184,7 +198,7 @@ const GamePage = () => {
         setIsModalOpen(true);
     };
 
-    const handleIconClick = (action: IGameAction, e: React.MouseEvent) => {
+    const handleIconClick = (action: GameAction, e: React.MouseEvent) => {
         e.stopPropagation(); // Prevent the event from bubbling up
         setSelectedActionDetails(action);
         setIsModalOpen(true);
@@ -239,19 +253,12 @@ const GamePage = () => {
         const timestamp = new Date().toISOString();
         const score = {home: homeScore, away: awayScore};
         const teams = {
-            home: {...formData.homeTeam, roster: formData.homeRoster} as ITeamRoster,
-            away: {...formData.awayTeam, roster: formData.awayRoster} as ITeamRoster
+            home: {...formData.homeTeam, roster: formData.homeRoster} as TeamWithRoster,
+            away: {...formData.awayTeam, roster: formData.awayRoster} as TeamWithRoster
         };
 
-        const game: IGame = {
-            id: "",
-            timestamp: timestamp,
-            actions: actions,
-            teams: teams,
-            score: score,
-            selectedImage: formData.selectedImage,
-            championship: formData.championship
-        };
+        const game = new Game(id, championship, actions, timestamp, score, teams, formData.selectedImage);
+
 
         try {
             if (window.confirm("Are you sure you want to save this game?")) {
@@ -478,7 +485,7 @@ const GamePage = () => {
                             onTouchEnd={handleTouchEnd}
                             onTouchCancel={handleTouchEnd}
                         />
-                        {showDetails && actions.map((action: IGameAction, index: React.Key | null | undefined) => (
+                        {showDetails && actions.map((action: GameAction, index: React.Key | null | undefined) => (
                             <div
                                 key={index}
                                 className={styles.actionIcon}

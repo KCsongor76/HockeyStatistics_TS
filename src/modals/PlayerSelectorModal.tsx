@@ -1,22 +1,18 @@
 import React from 'react';
 import {ActionType} from "../OOP/enums/ActionType";
-import {ITeam} from "../OOP/interfaces/ITeam";
-import {IPlayer} from "../OOP/interfaces/IPlayer";
-import {IGameAction} from "../OOP/interfaces/IGameAction";
 // @ts-ignore
 import styles from './PlayerSelectorModal.module.css';
+import {GameAction} from "../OOP/classes/GameAction";
+import {Player} from "../OOP/classes/Player";
+import {TeamWithRoster} from "../OOP/classes/TeamWithRoster";
 
 interface PlayerSelectorModalProps {
-    selectedAction: { type: ActionType; team: ITeamRoster } | null;
+    selectedAction: { type: ActionType; team: TeamWithRoster } | null;
     selectedPosition: { x: number; y: number } | null;
     period: number;
     time: number;
-    onActionComplete: (newAction: IGameAction) => void;
+    onActionComplete: (newAction: GameAction) => void;
     onCancel: () => void;
-}
-
-interface ITeamRoster extends ITeam {
-    roster: IPlayer[]
 }
 
 const PlayerSelectorModal: React.FC<PlayerSelectorModalProps> = ({
@@ -38,15 +34,24 @@ const PlayerSelectorModal: React.FC<PlayerSelectorModalProps> = ({
                         key={player.id}
                         className={styles.playerButton}
                         onClick={() => {
-                            const newAction: IGameAction = {
-                                type: selectedAction.type,
-                                team: selectedAction.team,
+                            // const newAction: GameAction = {
+                            //     type: selectedAction.type,
+                            //     team: selectedAction.team,
+                            //     period,
+                            //     time,
+                            //     player: player as unknown as Player,
+                            //     x: selectedPosition.x,
+                            //     y: selectedPosition.y
+                            // };
+                            const newAction = new GameAction(
+                                selectedAction.type,
+                                selectedAction.team,
+                                player as unknown as Player,
                                 period,
                                 time,
-                                player: player as unknown as IPlayer,
-                                x: selectedPosition.x,
-                                y: selectedPosition.y
-                            };
+                                selectedPosition.x,
+                                selectedPosition.y
+                            )
                             onActionComplete(newAction);
                         }}
                     >

@@ -3,7 +3,7 @@ import {useLocation, useNavigate} from "react-router-dom";
 import {TeamService} from "../OOP/services/TeamService";
 // @ts-ignore
 import styles from './HandleTeamPage.module.css';
-import {ITeam} from "../OOP/interfaces/ITeam";
+import {Team} from "../OOP/classes/Team";
 
 // todo: buttons in middle
 // todo: show games in which they played (a list of the games, as PreviousGamesPage)
@@ -13,7 +13,7 @@ import {ITeam} from "../OOP/interfaces/ITeam";
 
 const HandleTeamPage = () => {
     const location = useLocation();
-    const initialTeam = location.state.team as ITeam;
+    const initialTeam = location.state.team as Team;
 
     const [team, setTeam] = useState(initialTeam);
     const [name, setName] = useState(initialTeam.name);
@@ -79,7 +79,7 @@ const HandleTeamPage = () => {
                 awayColor: team.awayColor,
                 championships: team.championships,
                 players: team.players,
-            } as ITeam;
+            } as Team;
             console.log(updatedTeam);
             await TeamService.updateTeam(updatedTeam.id, updatedTeam);
             setTeam(updatedTeam);

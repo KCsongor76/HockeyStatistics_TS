@@ -5,14 +5,14 @@ import {useLoaderData, useNavigate} from "react-router-dom";
 import {PlayerService} from "../OOP/services/PlayerService";
 // @ts-ignore
 import styles from './CreatePlayerPage.module.css';
-import {IPlayer} from "../OOP/interfaces/IPlayer";
-import {ITeam} from "../OOP/interfaces/ITeam";
+import {Player} from "../OOP/classes/Player";
+import {Team} from "../OOP/classes/Team";
 
 // todo: wider, buttons in middle
 // todo: unify styling with start page
 
 const CreatePlayerPage = () => {
-    const loaderData = useLoaderData() as ITeam[];
+    const loaderData = useLoaderData() as Team[];
     const teams = loaderData ?? [];
 
     // State management for form inputs
@@ -40,21 +40,13 @@ const CreatePlayerPage = () => {
             return;
         }
 
-        // Creating the player object
-        // const newPlayer = new Player("0", name, position, jerseyNumber, teamId);
+        const newPlayer = new Player("0", name, position, teamId, jerseyNumber);
 
-        const newPlayer = {
-            id: "0",
-            name,
-            position,
-            jerseyNumber,
-            teamId
-        } as IPlayer
         console.log('New player:', newPlayer);
 
         // Submit the new player (e.g., sending the newPlayer object to an API)
         try {
-            await PlayerService.addPlayerToTeam(newPlayer.teamId, newPlayer);
+            await PlayerService.addPlayerToTeam(newPlayer);
             alert('Player created successfully!');
             setName("");
             setPosition(Position.GOALIE);

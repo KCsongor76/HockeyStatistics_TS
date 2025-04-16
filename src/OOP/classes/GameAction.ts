@@ -3,7 +3,6 @@ import {IGameAction} from "../interfaces/IGameAction";
 import {ActionType} from "../enums/ActionType";
 import {Player} from "./Player";
 import {TeamWithRoster} from "./TeamWithRoster";
-import {IPlayer} from "../interfaces/IPlayer";
 
 export class GameAction implements IGameAction {
     readonly type: ActionType;
@@ -39,7 +38,7 @@ export class GameAction implements IGameAction {
         const team = teamsMap.get(obj.team.id) || TeamWithRoster.fromPlainObject(obj.team);
         const player = playersMap.get(obj.player.id) || Player.fromPlainObject(obj.player);
         const assists = obj.assists
-            ? obj.assists.map((a: IPlayer) => playersMap.get(a.id) || Player.fromPlainObject(a))
+            ? obj.assists.map((a: Player) => playersMap.get(a.id) || Player.fromPlainObject(a))
             : undefined;
 
         return new GameAction(

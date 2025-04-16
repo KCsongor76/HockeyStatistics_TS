@@ -1,5 +1,5 @@
 import React from 'react';
-import {useNavigate} from "react-router-dom";
+import {useNavigate, useRouteError} from "react-router-dom";
 // @ts-ignore
 import styles from './ErrorPage.module.css';
 
@@ -7,6 +7,9 @@ import styles from './ErrorPage.module.css';
 
 const ErrorPage = () => {
     const navigate = useNavigate();
+    const error = useRouteError()
+
+    console.log(error)
 
     return (
         <div className={styles.container}>

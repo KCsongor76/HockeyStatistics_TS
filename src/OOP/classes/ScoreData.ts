@@ -2,9 +2,9 @@
 import { IScoreData } from "../interfaces/IScoreData";
 
 export class ScoreData implements IScoreData {
-    readonly goals: number;
-    readonly shots: number;
-    readonly turnovers: number;
+    goals: number;
+    shots: number;
+    turnovers: number;
 
     constructor(goals: number = 0, shots: number = 0, turnovers: number = 0) {
         this.goals = goals;

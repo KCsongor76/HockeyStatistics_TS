@@ -4,15 +4,15 @@ import {IPlayer} from "../interfaces/IPlayer";
 export class Player implements IPlayer {
     readonly id: string;
     readonly name: string;
-    readonly number: number;
+
     readonly position: string;
     readonly teamId: string;
     readonly jerseyNumber: number;
 
-    constructor(id: string, name: string, number: number, position: string, teamId: string, jerseyNumber: number) {
+    constructor(id: string, name: string, position: string, teamId: string, jerseyNumber: number) {
         this.id = id;
         this.name = name;
-        this.number = number;
+
         this.position = position;
         this.teamId = teamId;
         this.jerseyNumber = jerseyNumber;
@@ -22,7 +22,6 @@ export class Player implements IPlayer {
         return new Player(
             obj.id,
             obj.name,
-            obj.number,
             obj.position,
             obj.teamId,
             obj.jerseyNumber
@@ -33,7 +32,6 @@ export class Player implements IPlayer {
         return {
             id: this.id,
             name: this.name,
-            number: this.number,
             position: this.position,
             teamId: this.teamId,
             jerseyNumber: this.jerseyNumber

@@ -1,18 +1,18 @@
 import React from 'react';
 // @ts-ignore
 import ReactSlider from 'react-slider';
-import {IGameAction} from "../OOP/interfaces/IGameAction";
-import {IGame} from "../OOP/interfaces/IGame";
 import Icon from "./Icon";
 // @ts-ignore
 import styles from '../pages/PreviousGameDetailPage.module.css';
+import {Game} from "../OOP/classes/Game";
+import {GameAction} from "../OOP/classes/GameAction";
 
 interface GameVisualizationProps {
     fieldImageRef: React.RefObject<HTMLImageElement>;
-    gameData: IGame;
-    filteredActions: IGameAction[];
+    gameData: Game;
+    filteredActions: GameAction[];
     iconSize: number;
-    handleIconClick: (action: IGameAction) => void;
+    handleIconClick: (action: GameAction) => void;
     zoneFilter: { x: [number, number], y: [number, number] };
     setZoneFilter: (filter: { x: [number, number], y: [number, number] }) => void;
     timeFilter: [number, number];
@@ -118,7 +118,7 @@ const GameVisualization: React.FC<GameVisualizationProps> = ({
                 />
             </div>
 
-            {filteredActions.map((action: IGameAction, index: number) => (
+            {filteredActions.map((action: GameAction, index: number) => (
                 <div
                     key={index}
                     className={styles.actionIcon}

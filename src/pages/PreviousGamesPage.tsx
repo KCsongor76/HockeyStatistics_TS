@@ -2,25 +2,25 @@ import React, {useEffect, useState} from 'react';
 import {useNavigate} from "react-router-dom";
 // @ts-ignore
 import styles from './PreviousGamesPage.module.css';
-import {IGame} from "../OOP/interfaces/IGame";
 import {GameService} from "../OOP/services/GameService";
 import {ChampionshipService} from "../OOP/services/ChampionshipService";
 import {TeamService} from "../OOP/services/TeamService";
-import {ITeam} from "../OOP/interfaces/ITeam";
-import {IChampionship} from "../OOP/interfaces/IChampionship";
+import {Championship} from "../OOP/classes/Championship";
+import {Game} from "../OOP/classes/Game";
+import {Team} from "../OOP/classes/Team";
 
 // todo: make smaller components
 // todo: scrap styling, unify
 
 interface PreviousGamesPageProps {
-    playerGames?: IGame[];
+    playerGames?: Game[];
     showFilters?: boolean;
 }
 
 const PreviousGamesPage: React.FC<PreviousGamesPageProps> = ({playerGames: playerGames, showFilters = true}) => {
-    const [games, setGames] = useState<IGame[]>([]);
-    const [championships, setChampionships] = useState<IChampionship[]>([]);
-    const [teams, setTeams] = useState<ITeam[]>([]);
+    const [games, setGames] = useState<Game[]>([]);
+    const [championships, setChampionships] = useState<Championship[]>([]);
+    const [teams, setTeams] = useState<Team[]>([]);
     const [loading, setLoading] = useState(true);
     const [homeTeamFilter, setHomeTeamFilter] = useState('');
     const [awayTeamFilter, setAwayTeamFilter] = useState('');
@@ -42,10 +42,10 @@ const PreviousGamesPage: React.FC<PreviousGamesPageProps> = ({playerGames: playe
     useEffect(() => {
         const fetchGames = async () => {
             try {
-                const gamesData = await GameService.getAllGames();
                 if (playerGames) {
                     setGames(playerGames);
                 } else {
+                    const gamesData = await GameService.getAllGames();
                     setGames(gamesData);
                 }
             } catch (error) {
@@ -66,7 +66,7 @@ const PreviousGamesPage: React.FC<PreviousGamesPageProps> = ({playerGames: playe
 
         const fetchTeams = async () => {
             try {
-                const teams = await TeamService.getAllTeams() as unknown as ITeam[];
+                const teams = await TeamService.getAllTeams();
                 setTeams(teams);
             } catch (error) {
                 console.error("Error fetching teams:", error);
@@ -81,9 +81,9 @@ const PreviousGamesPage: React.FC<PreviousGamesPageProps> = ({playerGames: playe
     }, []);
 
     const filteredGames = games.filter(game => {
-        const homeMatch = homeTeamFilter ? game.teams.home.id === homeTeamFilter : true;
-        const awayMatch = awayTeamFilter ? game.teams.away.id === awayTeamFilter : true;
-        const championshipMatch = championshipFilter ? game.championship.id === championshipFilter : true;
+        const homeMatch = homeTeamFilter ? game.teams?.home?.id === homeTeamFilter : true;
+        const awayMatch = awayTeamFilter ? game.teams?.away?.id === awayTeamFilter : true;
+        const championshipMatch = championshipFilter ? game.championship?.id === championshipFilter : true;
         return homeMatch && awayMatch && championshipMatch;
     });
 
@@ -110,11 +110,11 @@ const PreviousGamesPage: React.FC<PreviousGamesPageProps> = ({playerGames: playe
         <div className={styles.container}>
             <h1 className={styles.header}>Previous Games</h1>
 
-            {showFilters && (
+            {/*showFilters && (
                 <div className={styles.controlsContainer}>
-                    {/* ... existing filter controls ... */}
+                    {/* ... existing filter controls ... }
                 </div>
-            )}
+            )*/}
 
             <div className={styles.controlsContainer}>
                 <select
@@ -183,7 +183,7 @@ const PreviousGamesPage: React.FC<PreviousGamesPageProps> = ({playerGames: playe
 
             <div className={styles.listContainer}>
                 <ul className={styles.list}>
-                    {currentGames.length > 0 ? currentGames.map((game: IGame, index: number) => (
+                    {currentGames.length > 0 ? currentGames.map((game: Game, index: number) => (
                         <li
                             className={styles.listItem}
                             key={game.id || index}
@@ -192,20 +192,20 @@ const PreviousGamesPage: React.FC<PreviousGamesPageProps> = ({playerGames: playe
                             <div className={styles.gameContent}>
                                 <div className={styles.teamSection}>
                                     <img className={styles.teamLogo}
-                                         src={game.teams.home.logo}
-                                         alt={game.teams.home.name}/>
-                                    <span>{game.teams.home.name}</span>
+                                         src={game.teams?.home.logo}
+                                         alt={game.teams?.home.name}/>
+                                    <span>{game.teams?.home.name}</span>
                                 </div>
 
                                 <div className={styles.scoreSection}>
-                                    {game.score.home.goals} - {game.score.away.goals}
+                                    {game.score?.home.goals} - {game.score?.away.goals}
                                 </div>
 
                                 <div className={styles.teamSection}>
                                     <img className={styles.teamLogo}
-                                         src={game.teams.away.logo}
-                                         alt={game.teams.away.name}/>
-                                    <span>{game.teams.away.name}</span>
+                                         src={game.teams?.away.logo}
+                                         alt={game.teams?.away.name}/>
+                                    <span>{game.teams?.away.name}</span>
                                 </div>
 
                                 <div className={styles.dateSection}>

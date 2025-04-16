@@ -7,16 +7,17 @@ import GameVisualization from "../components/GameVisualization";
 import PlayerStats from "../components/PlayerStats";
 // @ts-ignore
 import styles from './PreviousGameDetailPage.module.css';
-import {IGame} from "../OOP/interfaces/IGame";
-import {IGameAction} from "../OOP/interfaces/IGameAction";
 import IconDataModal from "../modals/IconDataModal";
 import {GameService} from "../OOP/services/GameService";
-import {IPlayer} from "../OOP/interfaces/IPlayer";
+import {Game} from "../OOP/classes/Game";
+import {GameAction} from "../OOP/classes/GameAction";
+import {Player} from "../OOP/classes/Player";
+
 
 
 const PreviousGameDetailPage = () => {
     const location = useLocation();
-    const gameData = location.state as IGame;
+    const gameData = location.state as Game;
     const navigate = useNavigate();
 
     const fieldImageRef = useRef<HTMLImageElement>(null);
@@ -28,7 +29,7 @@ const PreviousGameDetailPage = () => {
     const [selectedActionTypes, setSelectedActionTypes] = useState<Set<ActionType>>(new Set(Object.values(ActionType)));
     const availablePeriods = Array.from(new Set(gameData.actions.map(action => action.period)));
     const availableActionTypes = Array.from(new Set(gameData.actions.map(action => action.type)));
-    const [sortBy, setSortBy] = useState<keyof IPlayer>('name');
+    const [sortBy, setSortBy] = useState<keyof Player>('name');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
 
@@ -69,7 +70,7 @@ const PreviousGameDetailPage = () => {
         return teamFilter && periodFilter && typeFilter && playerFilter && zoneXFilter && zoneYFilter && timeFilterPass;
     });
 
-    const [selectedActionDetails, setSelectedActionDetails] = useState<IGameAction | null>(null);
+    const [selectedActionDetails, setSelectedActionDetails] = useState<GameAction | null>(null);
 
     const updateIconSize = () => {
         if (fieldImageRef.current) {
@@ -80,7 +81,7 @@ const PreviousGameDetailPage = () => {
         }
     };
 
-    const handleSort = (column: keyof IPlayer) => {
+    const handleSort = (column: keyof Player) => {
         if (sortBy === column) {
             setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
         } else {
@@ -109,7 +110,7 @@ const PreviousGameDetailPage = () => {
         setSelectedActionTypes(newTypes);
     };
 
-    const handleIconClick = (action: IGameAction) => {
+    const handleIconClick = (action: GameAction) => {
         setSelectedActionDetails(action);
     };
 
@@ -117,7 +118,7 @@ const PreviousGameDetailPage = () => {
         setSelectedActionDetails(null);
     };
 
-    const getPlayerStats = (players: IPlayer[], teamId: string) => {
+    const getPlayerStats = (players: Player[], teamId: string) => {
         return players.map(player => {
             const playerActions = gameData.actions.filter(a =>
                 a.player.id === player.id &&
@@ -156,7 +157,7 @@ const PreviousGameDetailPage = () => {
     const {roster, nonRoster} = getDisplayPlayers();
     const uniqueNonRoster = Array.from(new Map(nonRoster.map(p => [p.id, p])).values());
 
-    const deleteHandler = async (game: IGame) => {
+    const deleteHandler = async (game: Game) => {
         const isConfirmed = window.confirm("Are you sure you want to delete this game?");
         if (isConfirmed) {
             try {

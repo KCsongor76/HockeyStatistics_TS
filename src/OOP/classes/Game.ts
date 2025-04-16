@@ -95,7 +95,7 @@ export class Game implements IGame, Iterable<GameAction> {
     toString(): string {
         const date = new Date(this.timestamp);
         const formattedDate = date.toLocaleDateString();
-        return `${this.teams.home.name} ${this.score.home.goals} vs ${this.score.away.goals} ${this.teams.away.name} (${formattedDate})`;
+        return `${this.teams?.home.name} ${this.score?.home.goals} vs ${this.score?.away.goals} ${this.teams?.away.name} (${formattedDate})`;
     }
 
     equals(other: Game): boolean {

@@ -3,12 +3,11 @@ import {Team} from "./Team";
 import {Player} from "./Player";
 import {TeamColor} from "./TeamColor";
 import {Championship} from "./Championship";
-import ITeamRoster from "../interfaces/ITeamRoster";
+import ITeamWithRoster from "../interfaces/ITeamWithRoster";
 import {Position} from "../enums/Position";
 
-// todo: fix naming
 
-export class TeamWithRoster extends Team implements ITeamRoster {
+export class TeamWithRoster extends Team implements ITeamWithRoster {
     readonly roster: Player[];
 
     constructor(
@@ -38,7 +37,7 @@ export class TeamWithRoster extends Team implements ITeamRoster {
         );
     }
 
-    toPlainObject(): ITeamRoster {
+    toPlainObject(): ITeamWithRoster {
         return {
             ...super.toPlainObject(),
             roster: this.roster.map(p => p.toPlainObject())

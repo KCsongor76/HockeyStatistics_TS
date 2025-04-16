@@ -2,7 +2,9 @@ import React from 'react';
 import {IPlayer} from "../OOP/interfaces/IPlayer";
 // @ts-ignore
 import styles from '../pages/PreviousGameDetailPage.module.css';
+import {Player} from "../OOP/classes/Player";
 
+// todo: move to separate file
 interface IPlayerWithStats extends IPlayer {
     goals: number;
     shots: number;
@@ -12,11 +14,11 @@ interface IPlayerWithStats extends IPlayer {
 interface PlayerStatsProps {
     selectedPlayer: string | null;
     setSelectedPlayer: (id: string | null) => void;
-    sortBy: keyof IPlayer;
+    sortBy: keyof Player;
     sortOrder: 'asc' | 'desc';
-    handleSort: (column: keyof IPlayer) => void;
+    handleSort: (column: keyof Player) => void;
     sortedPlayers: IPlayerWithStats[];
-    uniqueNonRoster: IPlayer[];
+    uniqueNonRoster: Player[];
 }
 
 const PlayerStats: React.FC<PlayerStatsProps> = ({
@@ -44,7 +46,7 @@ const PlayerStats: React.FC<PlayerStatsProps> = ({
             {['name', 'jerseyNumber', 'position', 'goals', 'shots', 'turnovers'].map((col) => (
                 <th
                     key={col}
-                    onClick={() => handleSort(col as keyof IPlayer)}
+                    onClick={() => handleSort(col as keyof Player)}
                 >
                     {col === 'jerseyNumber' ? 'Number' :
                         col === 'name' ? 'Name' :

@@ -1,23 +1,24 @@
 import React, {useEffect, useState} from 'react';
 import {useLocation, useNavigate} from "react-router-dom";
-import {ITeamColor} from "../OOP/interfaces/ITeamColor";
 import {TeamService} from "../OOP/services/TeamService";
 // @ts-ignore
 import styles from './CreateTeamPage.module.css';
 import {TeamAlreadyExistsError} from "../OOP/errors/TeamAlreadyExistsError"; // Import the CSS module
-import {ITeam} from "../OOP/interfaces/ITeam";
-import {IPlayer} from "../OOP/interfaces/IPlayer";
 import {Championship} from "../OOP/classes/Championship";
+import {TeamColor} from "../OOP/classes/TeamColor";
+import {Team} from "../OOP/classes/Team";
+import {IChampionship} from "../OOP/interfaces/IChampionship";
 
 // todo: color styling, unify form with StartPage
 
 const CreateTeamPage = () => {
-    const championships = useLocation().state.championships as Championship[];
+    const locationChampionships = useLocation().state.championships; // Get plain objects
     const [name, setName] = useState<string>("");
-    const [homeColor, setHomeColor] = useState<ITeamColor>({primary: "#000000", secondary: "#ffffff"});
-    const [awayColor, setAwayColor] = useState<ITeamColor>({primary: "#ffffff", secondary: "#000000"});
+    const [homeColor, setHomeColor] = useState<TeamColor>(new TeamColor("#000000", "#ffffff"));
+    const [awayColor, setAwayColor] = useState<TeamColor>(new TeamColor("#ffffff", "#000000"));
     const [logo, setLogo] = useState<File | null>(null);
-    const [championship, setChampionship] = useState<Championship[]>([]);
+    const [selectedChampionships, setSelectedChampionships] = useState<Championship[]>([]); // Renamed variable
+    const [championships, setChampionships] = useState<Championship[]>([]); // Holds converted instances
     const [isLoaded, setIsLoaded] = useState(false);
     const navigate = useNavigate();
 
@@ -57,32 +58,42 @@ const CreateTeamPage = () => {
     };
 
     const handleHomePrimaryColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setHomeColor({...homeColor, primary: e.target.value});
+        const primary = e.target.value;
+        const secondary = homeColor.secondary;
+
+        setHomeColor(new TeamColor(primary, secondary));
     }
 
     const handleHomeSecondaryColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setHomeColor({...homeColor, secondary: e.target.value});
+        const primary = homeColor.primary;
+        const secondary = e.target.value;
+
+        setHomeColor(new TeamColor(primary, secondary));
     }
 
     const handleAwayPrimaryColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setAwayColor({...awayColor, primary: e.target.value});
+        const primary = e.target.value;
+        const secondary = awayColor.secondary;
+
+        setAwayColor(new TeamColor(primary, secondary));
     }
 
     const handleAwaySecondaryColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setAwayColor({...awayColor, secondary: e.target.value});
+        const primary = awayColor.primary;
+        const secondary = e.target.value;
+
+        setAwayColor(new TeamColor(primary, secondary));
     }
 
     const handleChampionshipChange = (selectedChampionship: Championship) => {
-        // todo: championship .equals method?
-        // ch.id !== selectedChampionship.id
-        setChampionship(prevChampionships => {
-            if (prevChampionships.find(ch => ch.equals(selectedChampionship))) {
-                return prevChampionships.filter(ch => !ch.equals(selectedChampionship)) as Championship[];
+        setSelectedChampionships(prev => {
+            if (prev.some(ch => ch.equals(selectedChampionship))) {
+                return prev.filter(ch => !ch.equals(selectedChampionship));
             } else {
-                return [...prevChampionships, selectedChampionship] as Championship[];
+                return [...prev, selectedChampionship];
             }
         });
-    }
+    };
 
     const navigateHandler = () => {
         navigate("/handleTeams");
@@ -108,30 +119,21 @@ const CreateTeamPage = () => {
         if (awayColor.secondary.length === 0) {
             return alert("Please enter a team away secondary color");
         }
-        if (championship.length === 0) {
+        if (selectedChampionships.length === 0) {
             return alert("Please select a championship");
         }
         try {
             // TODO: should be atomic operation
             const logoURL = await TeamService.uploadLogo(logo);
-            // const team = new Team("0", name, logoURL, homeColor, awayColor, championship);
-            const team = {
-                id: "0",
-                name: name,
-                logo: logoURL,
-                homeColor: homeColor,
-                awayColor: awayColor,
-                championships: championship,
-                players: [] as IPlayer[],
-            } as ITeam
+            const team = new Team("0", name, logoURL, homeColor, awayColor, selectedChampionships);
             await TeamService.createTeam(team);
 
             alert("Team created successfully!");
             setName("");
-            setHomeColor({primary: "#000000", secondary: "#ffffff"});
-            setAwayColor({primary: "#ffffff", secondary: "#000000"});
+            setHomeColor(new TeamColor("#000000", "#ffffff"));
+            setAwayColor(new TeamColor("#ffffff", "#000000"));
             setLogo(null);
-            setChampionship([]);
+            setSelectedChampionships([]);
 
             // Reset the file input
             const fileInput = document.getElementById("logoInput") as HTMLInputElement;
@@ -150,10 +152,12 @@ const CreateTeamPage = () => {
     }
 
     useEffect(() => {
-        if (championships.length > 0) {
+        if (locationChampionships) {
+            const converted = locationChampionships.map((ch: IChampionship) => Championship.fromPlainObject(ch));
+            setChampionships(converted);
             setIsLoaded(true);
         }
-    }, [championships]);
+    }, [locationChampionships]);
 
     return (
         isLoaded ?
@@ -237,7 +241,8 @@ const CreateTeamPage = () => {
                                 onChange={() => {
                                     handleChampionshipChange(ch);
                                 }}
-                                checked={championship.includes(ch)}
+                                // checked={selectedChampionships.includes(ch)}
+                                checked={selectedChampionships.some(selected => selected.equals(ch))}
                             />
                             <span>{ch.name}</span>
                         </div>

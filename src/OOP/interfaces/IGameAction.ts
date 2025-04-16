@@ -1,11 +1,10 @@
 import {ActionType} from "../enums/ActionType";
-import {ITeam} from "./ITeam";
 import {IPlayer} from "./IPlayer";
-import ITeamRoster from "./ITeamRoster";
+import ITeamWithRoster from "./ITeamWithRoster";
 
 export interface IGameAction {
     type: ActionType;
-    team: ITeamRoster;
+    team: ITeamWithRoster;
     player: IPlayer
     period: number;
     time: number;

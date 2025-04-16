@@ -4,12 +4,12 @@ import {RegularPeriod, PlayoffPeriod} from "../OOP/enums/Period";
 import GameFilters from "../components/GameFilters";
 import GameVisualization from "../components/GameVisualization";
 import PlayerStats from "../components/PlayerStats";
-import {IGame} from "../OOP/interfaces/IGame";
-import {IGameAction} from "../OOP/interfaces/IGameAction";
 import IconDataModal from "../modals/IconDataModal";
-import {IPlayer} from "../OOP/interfaces/IPlayer";
+import {Game} from "../OOP/classes/Game";
+import {GameAction} from "../OOP/classes/GameAction";
+import {Player} from "../OOP/classes/Player";
 
-const ActualGameDetails = ({gameData}: { gameData: IGame }) => {
+const ActualGameDetails = ({gameData}: { gameData: Game }) => {
 
     const fieldImageRef = useRef<HTMLImageElement>(null);
     const [iconSize, setIconSize] = useState(30);
@@ -17,10 +17,10 @@ const ActualGameDetails = ({gameData}: { gameData: IGame }) => {
     type Period = RegularPeriod | PlayoffPeriod;
     const [selectedPeriods, setSelectedPeriods] = useState<Set<Period>>(new Set(Object.values(RegularPeriod) as Period[]));
     const [selectedActionTypes, setSelectedActionTypes] = useState<Set<ActionType>>(new Set(Object.values(ActionType)));
-    const [sortBy, setSortBy] = useState<keyof IPlayer>('name');
+    const [sortBy, setSortBy] = useState<keyof Player>('name');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
-    const [selectedActionDetails, setSelectedActionDetails] = useState<IGameAction | null>(null);
+    const [selectedActionDetails, setSelectedActionDetails] = useState<GameAction | null>(null);
     const [zoneFilter, setZoneFilter] = useState<{ x: [number, number], y: [number, number] }>({
         x: [0, 100],
         y: [0, 100]
@@ -60,7 +60,7 @@ const ActualGameDetails = ({gameData}: { gameData: IGame }) => {
         }
     };
 
-    const handleSort = (column: keyof IPlayer) => {
+    const handleSort = (column: keyof Player) => {
         if (sortBy === column) {
             setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
         } else {
@@ -89,7 +89,7 @@ const ActualGameDetails = ({gameData}: { gameData: IGame }) => {
         setSelectedActionTypes(newTypes);
     };
 
-    const handleIconClick = (action: IGameAction) => {
+    const handleIconClick = (action: GameAction) => {
         setSelectedActionDetails(action);
     };
 
@@ -97,7 +97,7 @@ const ActualGameDetails = ({gameData}: { gameData: IGame }) => {
         setSelectedActionDetails(null);
     };
 
-    const getPlayerStats = (players: IPlayer[], teamId: string) => {
+    const getPlayerStats = (players: Player[], teamId: string) => {
         return players.map(player => {
             const playerActions = gameData.actions.filter(a =>
                 a.player.id === player.id &&
@@ -189,7 +189,7 @@ const ActualGameDetails = ({gameData}: { gameData: IGame }) => {
                 gameData={gameData}
                 filteredActions={filteredActions}
                 iconSize={iconSize}
-                handleIconClick={(action: IGameAction) => setSelectedActionDetails(action)}
+                handleIconClick={(action: GameAction) => setSelectedActionDetails(action)}
                 zoneFilter={zoneFilter}
                 setZoneFilter={setZoneFilter}
                 timeFilter={timeFilter}

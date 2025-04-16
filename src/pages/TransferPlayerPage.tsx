@@ -3,18 +3,25 @@ import {useLocation, useNavigate} from "react-router-dom";
 import {TeamService} from "../OOP/services/TeamService";
 // @ts-ignore
 import styles from './TransferPlayerPage.module.css';
-import {IPlayer} from "../OOP/interfaces/IPlayer";
-import {ITeam} from "../OOP/interfaces/ITeam"; // Import the CSS module
+import {Player} from "../OOP/classes/Player";
+import {Team} from "../OOP/classes/Team";
 
 // todo: button color
 // todo: team sorting, maybe filtering by championship
 
 const TransferPlayerPage = () => {
-    const player = useLocation().state.player as IPlayer;
+    const playerLocation = useLocation().state.player;
+    const id = playerLocation.id
+    const name = playerLocation.name
+    const position = playerLocation.position
+    const jerseyNumber = playerLocation.jerseyNumber
+    const teamId = playerLocation.teamId
 
-    const [teams, setTeams] = useState<ITeam[]>([]);
+    const player = new Player(id, name, position, teamId, jerseyNumber);
+
+    const [teams, setTeams] = useState<Team[]>([]);
     const [isLoaded, setIsLoaded] = useState<boolean>(false);
-    const [transferToTeam, setTransferToTeam] = useState<ITeam>({} as ITeam);
+    const [transferToTeam, setTransferToTeam] = useState<Team>({} as Team);
 
     const navigate = useNavigate();
 
@@ -35,7 +42,7 @@ const TransferPlayerPage = () => {
 
         try {
             if (isConfirmed) {
-                const fromTeam = teams.find(team => team.id === player.teamId) as ITeam;
+                const fromTeam = teams.find(team => team.id === player.teamId) as Team;
                 await TeamService.transferPlayer(fromTeam, transferToTeam, player);
                 alert("Player transferred successfully.");
                 navigate('/handlePlayers');
@@ -75,7 +82,7 @@ const TransferPlayerPage = () => {
                     id="team"
                     className={styles.select}
                     value={transferToTeam.id || ''} // Default to an empty string if no team is selected
-                    onChange={(e) => setTransferToTeam(teams.find(team => team.id === e.target.value) ?? {} as ITeam)}
+                    onChange={(e) => setTransferToTeam(teams.find(team => team.id === e.target.value) ?? {} as Team)}
                 >
                     <option value="" disabled>Select a team</option>
                     {teams.filter(team => team.id !== player.teamId).map((team) => (
