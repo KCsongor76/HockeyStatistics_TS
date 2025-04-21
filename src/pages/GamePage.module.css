@@ -12,6 +12,8 @@
     box-sizing: border-box; /* Ensure padding is included in width calculation */
     overflow-x: hidden; /* Prevent horizontal scrolling within the container */
     flex: 1;
+    z-index: 2; /* Higher than actualDataContainer */
+    position: relative; /* Required for z-index */
 }
 
 .mainWrapper {
@@ -31,7 +33,13 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 16px;
     margin: 0 auto 16px;
+    z-index: 1; /* Lower than gameContainer */
+    /*pointer-events: none; !* Allow clicks to pass through *!*/
 }
+
+/*.actualDataContainer * {*/
+/*    pointer-events: auto;*/
+/*}*/
 
 @media (min-width: 1200px) {
     .mainWrapper {
@@ -300,4 +308,405 @@
     .button {
         width: 100%;
     }
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px;
+    text-align: center;
+}
+
+.tableContainer {
+    overflow-x: auto;
+    width: 100%;
+    margin: 20px 0;
+}
+
+.filterSection {
+    margin-bottom: 24px;
+}
+
+.filterGroup {
+    margin-bottom: 16px;
+}
+
+.filterTitle {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.buttonGroup {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.button {
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    background-color: #e5e5e5;
+    transition: all 0.2s ease;
+}
+
+.button:hover {
+    background-color: #d1d1d1;
+}
+
+.buttonActive {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.buttonActive:hover {
+    background-color: #2563eb;
+}
+
+.periodButton {
+    padding: 4px 12px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    background-color: #e5e5e5;
+    transition: all 0.2s ease;
+}
+
+.periodButton:hover {
+    background-color: #d1d1d1;
+}
+
+.periodButtonActive {
+    background-color: #22c55e;
+    color: white;
+}
+
+.periodButtonActive:hover {
+    background-color: #16a34a;
+}
+
+.gameVisualization {
+    position: relative;
+    width: 100%;
+    padding: 20px 40px
+}
+
+/* todo: max width*/
+.gameImage {
+    width: 100%;
+    display: block;
+}
+
+.statsTable {
+    margin: 0 auto;
+    width: auto;
+    min-width: 600px; /* Minimum width before scrolling */
+}
+
+.statsTable th, .statsTable td {
+    padding: 8px;
+    border: 1px solid #ddd;
+}
+
+.playerRow {
+    cursor: pointer;
+}
+
+.playerRow:hover {
+    background-color: #f5f5f5;
+}
+
+.filterButton {
+    margin: 10px;
+    padding: 8px 16px;
+}
+
+/* Add to PreviousGameDetailPage.module.css */
+.selectedRow {
+    background-color: #bfdbfe !important; /* Light blue background */
+}
+
+.statsTable th {
+    cursor: pointer;
+    user-select: none;
+}
+
+.sortIndicator {
+    margin-left: 8px;
+    font-size: 0.8em;
+}
+
+
+.playerRow {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.playerRow:hover {
+    background-color: #f5f5f5;
+}
+
+.selectedRow {
+    background-color: #bfdbfe !important;
+}
+
+/* Add to PreviousGameDetailPage.module.css */
+.deleteButton {
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    background-color: #ef4444;
+    color: white;
+    transition: all 0.2s ease;
+    margin: 10px;
+}
+
+.deleteButton:hover {
+    background-color: #dc2626;
+}
+
+.filterButton {
+    margin: 10px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    background-color: #e5e5e5;
+    transition: all 0.2s ease;
+}
+
+.filterButton:hover {
+    background-color: #d1d1d1;
+}
+
+.nonRosterList {
+    list-style: none;
+    padding: 0;
+    margin: 20px auto;
+    width: 80%;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.nonRosterItem {
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+    margin: 0;
+    background-color: white;
+    transition: background-color 0.2s;
+}
+
+.nonRosterItem:last-child {
+    border-bottom: none;
+}
+
+.nonRosterItem:hover {
+    background-color: #f5f5f5;
+}
+
+.nonRosterTitle {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 24px 0 12px;
+    color: #333;
+}
+
+.gameVisualization {
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 16px;
+}
+
+.statsTable {
+    border-collapse: collapse;
+    width: 100%; /* Changed from 80% */
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+@media (max-width: 768px) {
+    .statsTable {
+        font-size: 14px;
+    }
+
+    .statsTable th,
+    .statsTable td {
+        padding: 6px;
+        min-width: 80px;
+    }
+
+    .statsTable th:nth-child(2),
+    .statsTable td:nth-child(2) { /* Jersey Number */
+        display: none;
+    }
+
+    .nonRosterList {
+        width: 100%;
+    }
+}
+
+/* Zone Filter Sliders */
+.sliderXContainer {
+    position: absolute;
+    bottom: -10px;
+    left: 0;
+    right: 0;
+    height: 20px;
+}
+
+.sliderYContainer {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: -10px;
+    width: 20px;
+}
+
+.horizontalSlider {
+    height: 20px;
+    width: 100%;
+}
+
+.verticalSlider {
+    width: 20px;
+    height: 100%;
+}
+
+.sliderTrack {
+    background: #94a3b8;
+    border-radius: 4px;
+}
+
+.sliderThumb {
+    background: #3b82f6;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    cursor: grab;
+}
+
+.sliderThumb:active {
+    cursor: grabbing;
+}
+
+.sliderThumb:hover {
+    background: #2563eb;
+}
+
+.horizontalSlider .sliderTrack {
+    background: linear-gradient(to right,
+    transparent 0%,
+    #3b82f6 calc(0% + 2px),
+    #3b82f6 calc(100% - 2px),
+    transparent 100%
+    );
+    height: 4px;
+}
+
+.verticalSlider .sliderTrack {
+    background: linear-gradient(to bottom,
+    transparent 0%,
+    #3b82f6 calc(0% + 2px),
+    #3b82f6 calc(100% - 2px),
+    transparent 100%
+    );
+    width: 4px;
+}
+
+/* Add zone indicator lines */
+.zoneIndicator {
+    position: absolute;
+    background: rgba(59, 130, 246, 0.3);
+    pointer-events: none;
+    z-index: 15;
+}
+
+.sliderThumb {
+    background: #3b82f6;
+    width: 16px;
+    height: 16px;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    margin-top: -6px; /* Vertical centering for horizontal slider */
+    margin-left: -6px; /* Vertical slider centering */
+}
+
+.xZoneIndicator {
+    height: 2px;
+    width: 100%;
+}
+
+.yZoneIndicator {
+    width: 2px;
+    height: 100%;
+}
+
+.visualGuides {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 15;
+}
+
+.visualGuideLine {
+    position: absolute;
+    background: rgba(59, 130, 246, 0.4);
+    box-shadow: 0 0 4px rgba(59, 130, 246, 0.3);
+}
+
+.horizontalGuide {
+    width: 100%;
+    height: 2px;
+    transform: translateY(-1px);
+}
+
+.verticalGuide {
+    height: 100%;
+    width: 2px;
+    transform: translateX(-1px);
+}
+
+.timeFilterContainer {
+    position: relative;
+    margin: 20px 40px;
+    height: 40px;
+}
+
+.timeSliderLabels {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    color: #1e40af;
+}
+
+.timeSliderTrack {
+    background: #e2e8f0;
+    height: 6px;
+}
+
+.timeSliderThumb {
+    background: #3b82f6;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    top: -7px;
+}
+
+.timeSliderThumb:hover {
+    background: #2563eb;
 }

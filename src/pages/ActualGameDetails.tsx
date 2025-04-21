@@ -1,13 +1,15 @@
 import React, {useState, useEffect, useRef} from 'react';
 import {ActionType} from "../OOP/enums/ActionType";
 import {RegularPeriod, PlayoffPeriod} from "../OOP/enums/Period";
-import GameFilters from "../components/GameFilters";
-import GameVisualization from "../components/GameVisualization";
-import PlayerStats from "../components/PlayerStats";
+// @ts-ignore
+import ReactSlider from 'react-slider';
 import {IGame} from "../OOP/interfaces/IGame";
 import {IGameAction} from "../OOP/interfaces/IGameAction";
 import IconDataModal from "../modals/IconDataModal";
 import {IPlayer} from "../OOP/interfaces/IPlayer";
+// @ts-ignore
+import styles from "./PreviousGameDetailPage.module.css";
+import Icon from "../components/Icon";
 
 const ActualGameDetails = ({gameData}: { gameData: IGame }) => {
 
@@ -48,6 +50,7 @@ const ActualGameDetails = ({gameData}: { gameData: IGame }) => {
         return teamFilter && periodFilter && typeFilter && playerFilter &&
             zoneXFilter && zoneYFilter && timeFilterPass;
     });
+
 
     // ... Include other functions like togglePeriod, toggleActionType, handleSort, etc. from PreviousGameDetailPage
 
@@ -155,6 +158,44 @@ const ActualGameDetails = ({gameData}: { gameData: IGame }) => {
             return sortOrder === 'asc' ? compareValue : -compareValue;
         });
 
+    const formatTime = (totalSeconds: number) => {
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    };
+
+    const goalies = sortedPlayers.filter(player => player.position === 'Goalie');
+    const defenders = sortedPlayers.filter(player => player.position === 'Defender');
+    const forwards = sortedPlayers.filter(player => player.position === 'Forward');
+
+    const positionGroups = [
+        {title: 'Goalies', players: goalies},
+        {title: 'Defenders', players: defenders},
+        {title: 'Forwards', players: forwards}
+    ];
+
+    const TableHeader = () => (
+        <thead>
+        <tr>
+            {['name', 'jerseyNumber', 'position', 'goals', 'shots', 'turnovers'].map((col) => (
+                <th
+                    key={col}
+                    onClick={() => handleSort(col as keyof IPlayer)}
+                >
+                    {col === 'jerseyNumber' ? 'Number' :
+                        col === 'name' ? 'Name' :
+                            col[0].toUpperCase() + col.slice(1)}
+                    {sortBy === col && (
+                        <span className={styles.sortIndicator}>
+                                {sortOrder === 'asc' ? '↑' : '↓'}
+                            </span>
+                    )}
+                </th>
+            ))}
+        </tr>
+        </thead>
+    );
+
     useEffect(() => {
         updateIconSize();
         const handleResize = () => {
@@ -172,7 +213,7 @@ const ActualGameDetails = ({gameData}: { gameData: IGame }) => {
 
     return (
         <div>
-            <GameFilters
+            {/*<GameFilters
                 selectedTeamView={selectedTeamView}
                 setSelectedTeamView={setSelectedTeamView}
                 availablePeriods={availablePeriods}
@@ -182,9 +223,70 @@ const ActualGameDetails = ({gameData}: { gameData: IGame }) => {
                 selectedActionTypes={selectedActionTypes}
                 toggleActionType={toggleActionType}
                 isPeriodFilterDisabled={isTimeFilterActive}
-            />
+            />*/}
 
-            <GameVisualization
+            <div className={styles.filterSection}>
+                <div className={styles.filterGroup}>
+                    <h3 className={styles.filterTitle}>Team View</h3>
+                    <div className={styles.buttonGroup}>
+                        <button
+                            className={`${styles.button} ${selectedTeamView === 'all' ? styles.buttonActive : ''}`}
+                            onClick={() => setSelectedTeamView('all')}
+                        >
+                            All Teams
+                        </button>
+                        <button
+                            className={`${styles.button} ${selectedTeamView === 'home' ? styles.buttonActive : ''}`}
+                            onClick={() => setSelectedTeamView('home')}
+                        >
+                            Home Team
+                        </button>
+                        <button
+                            className={`${styles.button} ${selectedTeamView === 'away' ? styles.buttonActive : ''}`}
+                            onClick={() => setSelectedTeamView('away')}
+                        >
+                            Away Team
+                        </button>
+                    </div>
+                </div>
+
+                <div className={styles.filterGroup}>
+                    <h3 className={styles.filterTitle}>Periods</h3>
+                    <div className={styles.buttonGroup}>
+                        {availablePeriods.map((period) => (
+                            <button
+                                key={period}
+                                className={`${styles.periodButton} ${
+                                    selectedPeriods.has(period) ? styles.periodButtonActive : ''
+                                }`}
+                                onClick={() => togglePeriod(period)}
+                                disabled={isTimeFilterActive}
+                            >
+                                Period {period}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <div className={styles.filterGroup}>
+                    <h3 className={styles.filterTitle}>Action Types</h3>
+                    <div className={styles.buttonGroup}>
+                        {availableActionTypes.map((type) => (
+                            <button
+                                key={type}
+                                className={`${styles.periodButton} ${
+                                    selectedActionTypes.has(type) ? styles.periodButtonActive : ''
+                                }`}
+                                onClick={() => toggleActionType(type)}
+                            >
+                                {type}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/*<GameVisualization
                 fieldImageRef={fieldImageRef}
                 gameData={gameData}
                 filteredActions={filteredActions}
@@ -196,9 +298,106 @@ const ActualGameDetails = ({gameData}: { gameData: IGame }) => {
                 setTimeFilter={setTimeFilter}
                 minTime={minTime}
                 maxTime={maxTime}
-            />
+            />*/}
 
-            <PlayerStats
+            <div className={styles.gameVisualization}>
+
+                <div className={styles.timeFilterContainer}>
+                    <div className={styles.timeSliderLabels}>
+                        <span>{formatTime(timeFilter[0])}</span>
+                        <span>{formatTime(timeFilter[1])}</span>
+                    </div>
+                    <ReactSlider
+                        className={styles.horizontalSlider}
+                        thumbClassName={styles.timeSliderThumb}
+                        trackClassName={styles.timeSliderTrack}
+                        value={timeFilter}
+                        onChange={setTimeFilter}
+                        min={minTime}
+                        max={maxTime}
+                        pearling
+                        minDistance={1}
+                    />
+                </div>
+
+                <img
+                    ref={fieldImageRef}
+                    src={gameData.selectedImage}
+                    alt="gamePage"
+                    className={styles.gameImage}
+                />
+
+                <div className={styles.visualGuides}>
+                    <div
+                        className={`${styles.visualGuideLine} ${styles.horizontalGuide}`}
+                        style={{top: `${zoneFilter.y[0]}%`}}
+                    />
+                    <div
+                        className={`${styles.visualGuideLine} ${styles.horizontalGuide}`}
+                        style={{top: `${zoneFilter.y[1]}%`}}
+                    />
+                    <div
+                        className={`${styles.visualGuideLine} ${styles.verticalGuide}`}
+                        style={{left: `${zoneFilter.x[0]}%`}}
+                    />
+                    <div
+                        className={`${styles.visualGuideLine} ${styles.verticalGuide}`}
+                        style={{left: `${zoneFilter.x[1]}%`}}
+                    />
+                </div>
+
+                {/* Horizontal (X-axis) Slider */}
+                <div className={styles.sliderXContainer}>
+                    <ReactSlider
+                        className={styles.horizontalSlider}
+                        thumbClassName={styles.sliderThumb}
+                        trackClassName={styles.sliderTrack}
+                        value={zoneFilter.x}
+                        onChange={(value: any) => setZoneFilter({...zoneFilter, x: value})}
+                        min={0}
+                        max={100}
+                        pearling
+                        minDistance={5}
+                    />
+                </div>
+
+                {/* Vertical (Y-axis) Slider */}
+                <div className={styles.sliderYContainer}>
+                    <ReactSlider
+                        className={styles.verticalSlider}
+                        thumbClassName={styles.sliderThumb}
+                        trackClassName={styles.sliderTrack}
+                        value={zoneFilter.y}
+                        onChange={(value: any) => setZoneFilter({...zoneFilter, y: value})}
+                        min={0}
+                        max={100}
+                        pearling
+                        minDistance={5}
+                        orientation="vertical"
+                    />
+                </div>
+
+                {filteredActions.map((action: IGameAction, index: number) => (
+                    <div
+                        key={index}
+                        className={styles.actionIcon}
+                        style={{
+                            left: `${action.x * 100}%`,
+                            top: `${action.y * 100}%`,
+                        }}
+                    >
+                        <Icon
+                            type={action.type}
+                            teamType={action.team.id === gameData.teams.home.id ? 'HOME' : 'AWAY'}
+                            teamColors={action.team.id === gameData.teams.home.id ? gameData.teams.home.homeColor : gameData.teams.away.homeColor}
+                            size={iconSize}
+                            onClick={() => handleIconClick(action)}
+                        />
+                    </div>
+                ))}
+            </div>
+
+            {/*<PlayerStats
                 selectedPlayer={selectedPlayer}
                 setSelectedPlayer={setSelectedPlayer}
                 sortBy={sortBy}
@@ -206,12 +405,65 @@ const ActualGameDetails = ({gameData}: { gameData: IGame }) => {
                 handleSort={handleSort}
                 sortedPlayers={sortedPlayers}
                 uniqueNonRoster={uniqueNonRoster}
-            />
+            />*/}
+
+            <div className={styles.filterGroup}>
+                <h3 className={styles.filterTitle}>Player Statistics</h3>
+
+                {positionGroups.map((group) => (
+                    group.players.length > 0 && (
+                        <div key={group.title}>
+                            <h4 className={styles.filterTitle}>{group.title}</h4>
+                            <div className={styles.tableContainer}>
+                                <table className={styles.statsTable}>
+                                    <TableHeader/>
+                                    <tbody>
+                                    {group.players.map((player) => (
+                                        <tr
+                                            key={player.id}
+                                            className={`${styles.playerRow} ${selectedPlayer === player.id ? styles.selectedRow : ''}`}
+                                            onClick={() => {
+                                                if (selectedPlayer === player.id) {
+                                                    setSelectedPlayer(null);
+                                                } else {
+                                                    setSelectedPlayer(player.id);
+                                                }
+                                            }}
+                                        >
+                                            <td>{player.name}</td>
+                                            <td>{player.jerseyNumber}</td>
+                                            <td>{player.position}</td>
+                                            <td>{player.goals}</td>
+                                            <td>{player.shots}</td>
+                                            <td>{player.turnovers}</td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )
+                ))}
+
+                {uniqueNonRoster.length > 0 && (
+                    <>
+                        <h4 className={styles.nonRosterTitle}>Non-Roster Players</h4>
+                        <ul className={styles.nonRosterList}>
+                            {uniqueNonRoster.map(player => (
+                                <li className={styles.nonRosterItem} key={player.id}>
+                                    {player.name} (#{player.jerseyNumber})
+                                </li>
+                            ))}
+                        </ul>
+                    </>
+                )}
+            </div>
 
             {selectedActionDetails && (
                 <IconDataModal
                     action={selectedActionDetails}
                     onClose={() => setSelectedActionDetails(null)}
+                    gameType={gameData.type}
                 />
             )}
         </div>

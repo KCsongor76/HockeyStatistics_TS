@@ -1,6 +1,6 @@
 import {ITeam} from "./ITeam";
 import {IPlayer} from "./IPlayer";
 
-export default interface ITeamRoster extends ITeam {
+export default interface ITeamWithRoster extends ITeam {
     roster: IPlayer[];
 }

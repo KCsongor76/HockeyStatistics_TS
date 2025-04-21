@@ -81,8 +81,8 @@ const PreviousGamesPage: React.FC<PreviousGamesPageProps> = ({playerGames: playe
     }, []);
 
     const filteredGames = games.filter(game => {
-        const homeMatch = homeTeamFilter ? game.teams.home.id === homeTeamFilter : true;
-        const awayMatch = awayTeamFilter ? game.teams.away.id === awayTeamFilter : true;
+        const homeMatch = homeTeamFilter ? game.teams?.home.id === homeTeamFilter : true;
+        const awayMatch = awayTeamFilter ? game.teams?.away.id === awayTeamFilter : true;
         const championshipMatch = championshipFilter ? game.championship.id === championshipFilter : true;
         return homeMatch && awayMatch && championshipMatch;
     });
@@ -192,20 +192,20 @@ const PreviousGamesPage: React.FC<PreviousGamesPageProps> = ({playerGames: playe
                             <div className={styles.gameContent}>
                                 <div className={styles.teamSection}>
                                     <img className={styles.teamLogo}
-                                         src={game.teams.home.logo}
-                                         alt={game.teams.home.name}/>
-                                    <span>{game.teams.home.name}</span>
+                                         src={game.teams?.home.logo}
+                                         alt={game.teams?.home.name}/>
+                                    <span>{game.teams?.home.name}</span>
                                 </div>
 
                                 <div className={styles.scoreSection}>
-                                    {game.score.home.goals} - {game.score.away.goals}
+                                    {game.score?.home.goals} - {game.score?.away.goals}
                                 </div>
 
                                 <div className={styles.teamSection}>
                                     <img className={styles.teamLogo}
-                                         src={game.teams.away.logo}
-                                         alt={game.teams.away.name}/>
-                                    <span>{game.teams.away.name}</span>
+                                         src={game.teams?.away.logo}
+                                         alt={game.teams?.away.name}/>
+                                    <span>{game.teams?.away.name}</span>
                                 </div>
 
                                 <div className={styles.dateSection}>

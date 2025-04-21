@@ -1,7 +1,8 @@
 import React, {useEffect, useRef, useState} from 'react';
-
+// @ts-ignore
+import ReactSlider from 'react-slider';
 import {GameType} from "../OOP/enums/GameType";
-import {RegularPeriod, PlayoffPeriod} from "../OOP/enums/Period";
+import {PlayoffPeriod, RegularPeriod} from "../OOP/enums/Period";
 import {ITeamColor} from "../OOP/interfaces/ITeamColor";
 import {useLocation} from "react-router-dom";
 import {ActionType} from "../OOP/enums/ActionType";
@@ -19,10 +20,7 @@ import styles from './GamePage.module.css';
 import IconDataModal from "../modals/IconDataModal";
 import {IPlayer} from "../OOP/interfaces/IPlayer";
 import AssistSelectorModal from "../modals/AssistSelectorModal";
-import ActualGameDetails from './ActualGameDetails';
 
-// todo: fix second image icons not being perfectly aligned with first image icons
-// todo: time slider filter fix
 
 type FormData = {
     championship: IChampionship;
@@ -74,8 +72,11 @@ const GamePage = () => {
     const [pendingGoalAction, setPendingGoalAction] = useState<IGameAction | null>(null);
     const [isSelectingAssists, setIsSelectingAssists] = useState(false);
 
-    const currentGame: IGame = {
+    console.log(homeScore)
+
+    const gameData: IGame = {
         id: "",
+        type: formData.gameType,
         timestamp: new Date().toISOString(),
         actions: actions,
         teams: {
@@ -86,6 +87,82 @@ const GamePage = () => {
         selectedImage: formData.selectedImage,
         championship: formData.championship
     };
+    const isPlayoff = gameData.type === GameType.PLAYOFF;
+
+    const [selectedTeamView, setSelectedTeamView] = useState<'all' | 'home' | 'away'>('all');
+    type Period = RegularPeriod | PlayoffPeriod;
+    const [selectedPeriods, setSelectedPeriods] = useState<Set<Period>>(new Set(Object.values(RegularPeriod) as Period[]));
+    const [selectedActionTypes, setSelectedActionTypes] = useState<Set<ActionType>>(new Set(Object.values(ActionType)));
+    const [sortBy, setSortBy] = useState<keyof IPlayer>('name');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
+    const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
+    const [zoneFilter, setZoneFilter] = useState<{ x: [number, number], y: [number, number] }>({
+        x: [0, 100],
+        y: [0, 100]
+    });
+    // const [timeFilter, setTimeFilter] = useState<[number, number]>([0, 3600]);
+
+    const calculateActionTimeSeconds = (action: IGameAction): number => {
+        const period = action.period;
+        let periodStart = 0;
+        let periodDuration = 0;
+
+        if (gameData.type === GameType.PLAYOFF) {
+            if (period <= 3) {
+                periodDuration = 1200;
+                periodStart = (period - 1) * 1200;
+            } else {
+                periodDuration = 1200;
+                const otNumber = period - 3;
+                periodStart = 3600 + (otNumber - 1) * 1200;
+            }
+        } else {
+            if (period <= 3) {
+                periodDuration = 1200;
+                periodStart = (period - 1) * 1200;
+            } else if (period === 4) { // OT
+                periodDuration = 300;
+                periodStart = 3600;
+            } else if (period === 5) { // SO
+                periodDuration = 0;
+                periodStart = 3600 + 300; // 3900
+            }
+        }
+
+        const elapsedInPeriod = periodDuration - action.time;
+        return periodStart + elapsedInPeriod;
+    };
+
+    const initialActionTimes = gameData.actions.map(a => calculateActionTimeSeconds(a));
+    const defaultMaxTime = isPlayoff ? 4800 : 3900; // OT1 for playoff, OT for regular
+    const initialMaxTime = initialActionTimes.length > 0 ? Math.max(...initialActionTimes) : defaultMaxTime;
+    const [timeFilter, setTimeFilter] = useState<[number, number]>([0, initialMaxTime]);
+    const minTime = 0;
+    // const maxTime = initialMaxTime;
+    const [maxTime, setMaxTime] = useState(defaultMaxTime);
+
+    const availablePeriods = Array.from(new Set(gameData.actions.map(action => action.period)));
+    const availableActionTypes = Array.from(new Set(gameData.actions.map(action => action.type)));
+    // const minTime = 0;
+    // const maxTime = Math.max(...gameData.actions.map(a => a.time * 60), 3600);
+    const isTimeFilterActive = timeFilter[0] > minTime || timeFilter[1] < maxTime;
+
+    const filteredActions = gameData.actions.filter(action => {
+        const teamFilter = selectedTeamView === 'all' ||
+            (selectedTeamView === 'home' && action.team.id === gameData.teams.home.id) ||
+            (selectedTeamView === 'away' && action.team.id === gameData.teams.away.id);
+        const periodFilter = selectedPeriods.has(action.period);
+        const typeFilter = selectedActionTypes.has(action.type);
+        const playerFilter = !selectedPlayer || action.player.id === selectedPlayer;
+        const zoneXFilter = action.x * 100 >= zoneFilter.x[0] && action.x * 100 <= zoneFilter.x[1];
+        const zoneYFilter = action.y * 100 >= zoneFilter.y[0] && action.y * 100 <= zoneFilter.y[1];
+        const actionTimeSeconds = calculateActionTimeSeconds(action)
+        const timeFilterPass = actionTimeSeconds >= timeFilter[0] && actionTimeSeconds <= timeFilter[1];
+
+        return teamFilter && periodFilter && typeFilter && playerFilter &&
+            zoneXFilter && zoneYFilter && timeFilterPass;
+    });
+
 
     const updateIconSize = () => {
         if (fieldImageRef.current) {
@@ -124,14 +201,30 @@ const GamePage = () => {
 
     const handleActionComplete = (newAction: IGameAction) => {
         if (newAction.type === ActionType.GOAL) {
-            // Store the action temporarily for assist selection
-            setPendingGoalAction(newAction);
-            setIsSelectingAssists(true);
+            if (gameData.type === GameType.REGULAR && period === RegularPeriod.SO) {
+                // Shootout goal, no assists
+                const completedAction = {...newAction, assists: []};
+                setActions((prev: any) => [...prev, completedAction]);
+                // Update score
+                if (completedAction.team.id === formData.homeTeam.id) {
+                    setHomeScore((current: IScoreData) => handleScoreUpdate(completedAction.team, completedAction.type, current));
+                } else {
+                    setAwayScore((current: IScoreData) => handleScoreUpdate(completedAction.team, completedAction.type, current));
+                }
+            } else {
+                setPendingGoalAction(newAction);
+                setIsSelectingAssists(true);
+            }
         } else {
-            // Existing logic for non-goal actions
+            // Update scores for non-goal actions
             setActions((prevActions: any) => [...prevActions, newAction]);
-            // ...rest of your existing code
+            if (newAction.team.id === formData.homeTeam.id) {
+                setHomeScore((current: IScoreData) => handleScoreUpdate(newAction.team, newAction.type, current));
+            } else {
+                setAwayScore((current: IScoreData) => handleScoreUpdate(newAction.team, newAction.type, current));
+            }
         }
+
         // Close modals
         setSelectedAction(null);
         setSelectedPosition(null);
@@ -245,6 +338,7 @@ const GamePage = () => {
 
         const game: IGame = {
             id: "",
+            type: formData.gameType,
             timestamp: timestamp,
             actions: actions,
             teams: teams,
@@ -265,12 +359,6 @@ const GamePage = () => {
             console.error(e);
             alert("Failed to save the game. Please try again.");
         }
-    };
-
-    const formatTime = (seconds: number) => {
-        const minutes = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     };
 
     // Updated time handlers for regular/playoff periods
@@ -368,6 +456,152 @@ const GamePage = () => {
         }
     };
 
+
+    const handleSort = (column: keyof IPlayer) => {
+        if (sortBy === column) {
+            setSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortBy(column);
+            setSortOrder('asc');
+        }
+    };
+
+    const togglePeriod = (period: RegularPeriod | PlayoffPeriod) => {
+        const newPeriods = new Set(selectedPeriods);
+        if (newPeriods.has(period)) {
+            newPeriods.delete(period);
+        } else {
+            newPeriods.add(period);
+        }
+        setSelectedPeriods(newPeriods);
+    };
+
+    const toggleActionType = (type: ActionType) => {
+        const newTypes = new Set(selectedActionTypes);
+        if (newTypes.has(type)) {
+            newTypes.delete(type);
+        } else {
+            newTypes.add(type);
+        }
+        setSelectedActionTypes(newTypes);
+    };
+
+
+    // const handleCloseIconData = () => {
+    //     setSelectedActionDetails(null);
+    // };
+
+    const getPlayerStats = (players: IPlayer[], teamId: string) => {
+        return players.map(player => {
+            const playerActions = gameData.actions.filter(a =>
+                a.player.id === player.id &&
+                (teamId ? a.team.id === teamId : true) // Only filter by team if teamId is provided
+            );
+
+            return {
+                ...player,
+                goals: playerActions.filter(a => a.type === ActionType.GOAL).length,
+                shots: playerActions.filter(a => a.type === ActionType.SHOT || a.type === ActionType.GOAL).length,
+                turnovers: playerActions.filter(a => a.type === ActionType.TURNOVER).length
+            };
+        });
+    };
+
+    const getDisplayPlayers = () => {
+        if (selectedTeamView === 'home') {
+            return {
+                roster: gameData.teams.home.roster,
+                nonRoster: gameData.teams.home.players.filter(p => !gameData.teams.home.roster.some(r => r.id === p.id))
+            };
+
+        }
+        if (selectedTeamView === 'away') {
+            return {
+                roster: gameData.teams.away.roster,
+                nonRoster: gameData.teams.away.players.filter(p => !gameData.teams.away.roster.some(r => r.id === p.id))
+            };
+        }
+        return {
+            roster: [...gameData.teams.home.roster, ...gameData.teams.away.roster],
+            nonRoster: [...gameData.teams.home.players, ...gameData.teams.away.players].filter(p => !gameData.teams.home.roster.some(r => r.id === p.id) && !gameData.teams.away.roster.some(r => r.id === p.id))
+        };
+    };
+
+    const {roster, nonRoster} = getDisplayPlayers();
+    const uniqueNonRoster = Array.from(new Map(nonRoster.map(p => [p.id, p])).values());
+
+    const sortedPlayers = getPlayerStats(roster, selectedTeamView === 'all' ? '' :
+        selectedTeamView === 'home' ? gameData.teams.home.id : gameData.teams.away.id)
+        .sort((a, b) => {
+            let compareValue = 0;
+
+            if (sortBy === 'name' || sortBy === 'position') {
+                compareValue = a.name.localeCompare(b.name);
+            } else {
+                const aValue = a[sortBy as keyof typeof a];
+                const bValue = b[sortBy as keyof typeof b];
+
+                if (typeof aValue === 'number' && typeof bValue === 'number') {
+                    compareValue = aValue - bValue;
+                }
+            }
+
+            return sortOrder === 'asc' ? compareValue : -compareValue;
+        });
+
+    const formatTime = (totalSeconds: number) => {
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    };
+
+    const goalies = sortedPlayers.filter(player => player.position === 'Goalie');
+    const defenders = sortedPlayers.filter(player => player.position === 'Defender');
+    const forwards = sortedPlayers.filter(player => player.position === 'Forward');
+
+    const positionGroups = [
+        {title: 'Goalies', players: goalies},
+        {title: 'Defenders', players: defenders},
+        {title: 'Forwards', players: forwards}
+    ];
+
+    const TableHeader = () => (
+        <thead>
+        <tr>
+            {['name', 'jerseyNumber', 'position', 'goals', 'shots', 'turnovers'].map((col) => (
+                <th
+                    key={col}
+                    onClick={() => handleSort(col as keyof IPlayer)}
+                >
+                    {col === 'jerseyNumber' ? 'Number' :
+                        col === 'name' ? 'Name' :
+                            col[0].toUpperCase() + col.slice(1)}
+                    {sortBy === col && (
+                        <span className={styles.sortIndicator}>
+                                {sortOrder === 'asc' ? '↑' : '↓'}
+                            </span>
+                    )}
+                </th>
+            ))}
+        </tr>
+        </thead>
+    );
+
+    useEffect(() => {
+        updateIconSize();
+        const handleResize = () => {
+            updateIconSize();
+        };
+        window.addEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
+
+    useEffect(() => {
+        setSelectedPlayer(null);
+    }, [selectedTeamView]);
+
     useEffect(() => {
         let interval: NodeJS.Timeout;
         if (isTimerRunning && time > 0) {
@@ -394,6 +628,13 @@ const GamePage = () => {
             window.removeEventListener('resize', handleResize);
         };
     }, []);
+
+    useEffect(() => {
+        const actionTimes = gameData.actions.map(a => calculateActionTimeSeconds(a));
+        const newMaxTime = actionTimes.length > 0 ? Math.max(...actionTimes) : defaultMaxTime;
+        setMaxTime(newMaxTime);
+        setTimeFilter(prev => [prev[0], newMaxTime]);
+    }, [gameData.actions, defaultMaxTime]);
 
 
     useEffect(() => {
@@ -455,6 +696,7 @@ const GamePage = () => {
                 <IconDataModal
                     action={selectedActionDetails}
                     onClose={handleCloseIconData}
+                    gameType={gameData.type}
                 />
             )}
 
@@ -509,7 +751,7 @@ const GamePage = () => {
 
                         <div className={styles.gameControls}>
                             <p className={styles.periodDisplay}>Period: {periodLabel}</p>
-                            <p className={styles.timeDisplay}>{formatTime(time)}</p>
+                            <p className={styles.timeDisplay}>{periodLabel === "SO" ? "0:00" : formatTime(time)}</p>
                             <p className={styles.scoreDisplay}>{homeScore.goals} - {awayScore.goals}</p>
 
                             <div className={styles.buttonContainer}>
@@ -562,7 +804,289 @@ const GamePage = () => {
                 </div>
                 {showDetails && (
                     <div className={styles.actualDataContainer}>
-                        <ActualGameDetails gameData={currentGame}/>
+                        {/*<ActualGameDetails gameData={currentGame}/>*/}
+                        <div>
+                            {/*<GameFilters
+                selectedTeamView={selectedTeamView}
+                setSelectedTeamView={setSelectedTeamView}
+                availablePeriods={availablePeriods}
+                selectedPeriods={selectedPeriods}
+                togglePeriod={togglePeriod}
+                availableActionTypes={availableActionTypes}
+                selectedActionTypes={selectedActionTypes}
+                toggleActionType={toggleActionType}
+                isPeriodFilterDisabled={isTimeFilterActive}
+            />*/}
+
+                            <div className={styles.filterSection}>
+                                <div className={styles.filterGroup}>
+                                    <h3 className={styles.filterTitle}>Team View</h3>
+                                    <div className={styles.buttonGroup}>
+                                        <button
+                                            className={`${styles.button} ${selectedTeamView === 'all' ? styles.buttonActive : ''}`}
+                                            onClick={() => setSelectedTeamView('all')}
+                                        >
+                                            All Teams
+                                        </button>
+                                        <button
+                                            className={`${styles.button} ${selectedTeamView === 'home' ? styles.buttonActive : ''}`}
+                                            onClick={() => setSelectedTeamView('home')}
+                                        >
+                                            Home Team
+                                        </button>
+                                        <button
+                                            className={`${styles.button} ${selectedTeamView === 'away' ? styles.buttonActive : ''}`}
+                                            onClick={() => setSelectedTeamView('away')}
+                                        >
+                                            Away Team
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className={styles.filterGroup}>
+                                    <h3 className={styles.filterTitle}>Periods</h3>
+                                    <div className={styles.buttonGroup}>
+                                        {availablePeriods.map((period) => {
+                                            const getPeriodLabel = () => {
+                                                if (gameData.type === GameType.REGULAR) {
+                                                    switch (period) {
+                                                        case RegularPeriod.FIRST:
+                                                        case RegularPeriod.SECOND:
+                                                        case RegularPeriod.THIRD:
+                                                            return `Period ${period}`;
+                                                        case RegularPeriod.OT:
+                                                            return 'OT';
+                                                        case RegularPeriod.SO:
+                                                            return 'SO';
+                                                        default:
+                                                            return `Period ${period}`;
+                                                    }
+                                                } else {
+                                                    if (period <= PlayoffPeriod.THIRD) {
+                                                        return `Period ${period}`;
+                                                    } else {
+                                                        const otNumber = period - PlayoffPeriod.THIRD;
+                                                        return `OT${otNumber}`;
+                                                    }
+                                                }
+                                            };
+
+                                            return (
+                                                <button
+                                                    key={period}
+                                                    className={`${styles.periodButton} ${
+                                                        selectedPeriods.has(period) ? styles.periodButtonActive : ''
+                                                    }`}
+                                                    onClick={() => togglePeriod(period)}
+                                                    disabled={isTimeFilterActive}
+                                                >
+                                                    {getPeriodLabel()}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                <div className={styles.filterGroup}>
+                                    <h3 className={styles.filterTitle}>Action Types</h3>
+                                    <div className={styles.buttonGroup}>
+                                        {availableActionTypes.map((type) => (
+                                            <button
+                                                key={type}
+                                                className={`${styles.periodButton} ${
+                                                    selectedActionTypes.has(type) ? styles.periodButtonActive : ''
+                                                }`}
+                                                onClick={() => toggleActionType(type)}
+                                            >
+                                                {type}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/*<GameVisualization
+                fieldImageRef={fieldImageRef}
+                gameData={gameData}
+                filteredActions={filteredActions}
+                iconSize={iconSize}
+                handleIconClick={(action: IGameAction) => setSelectedActionDetails(action)}
+                zoneFilter={zoneFilter}
+                setZoneFilter={setZoneFilter}
+                timeFilter={timeFilter}
+                setTimeFilter={setTimeFilter}
+                minTime={minTime}
+                maxTime={maxTime}
+            />*/}
+
+                            <div className={styles.gameVisualization}>
+
+                                <div className={styles.timeFilterContainer}>
+                                    <div className={styles.timeSliderLabels}>
+                                        <span>{formatTime(timeFilter[0])}</span>
+                                        <span>{formatTime(timeFilter[1])}</span>
+                                    </div>
+                                    <ReactSlider
+                                        className={styles.horizontalSlider}
+                                        thumbClassName={styles.timeSliderThumb}
+                                        trackClassName={styles.timeSliderTrack}
+                                        value={timeFilter}
+                                        onChange={setTimeFilter}
+                                        min={minTime}
+                                        max={maxTime}
+                                        pearling
+                                        minDistance={1}
+                                    />
+                                </div>
+
+                                <img
+                                    ref={fieldImageRef}
+                                    src={gameData.selectedImage}
+                                    alt="gamePage"
+                                    className={styles.gameImage}
+                                />
+
+                                <div className={styles.visualGuides}>
+                                    <div
+                                        className={`${styles.visualGuideLine} ${styles.horizontalGuide}`}
+                                        style={{top: `${zoneFilter.y[0]}%`}}
+                                    />
+                                    <div
+                                        className={`${styles.visualGuideLine} ${styles.horizontalGuide}`}
+                                        style={{top: `${zoneFilter.y[1]}%`}}
+                                    />
+                                    <div
+                                        className={`${styles.visualGuideLine} ${styles.verticalGuide}`}
+                                        style={{left: `${zoneFilter.x[0]}%`}}
+                                    />
+                                    <div
+                                        className={`${styles.visualGuideLine} ${styles.verticalGuide}`}
+                                        style={{left: `${zoneFilter.x[1]}%`}}
+                                    />
+                                </div>
+
+                                {/* Horizontal (X-axis) Slider */}
+                                <div className={styles.sliderXContainer}>
+                                    <ReactSlider
+                                        className={styles.horizontalSlider}
+                                        thumbClassName={styles.sliderThumb}
+                                        trackClassName={styles.sliderTrack}
+                                        value={zoneFilter.x}
+                                        onChange={(value: any) => setZoneFilter({...zoneFilter, x: value})}
+                                        min={0}
+                                        max={100}
+                                        pearling
+                                        minDistance={5}
+                                    />
+                                </div>
+
+                                {/* Vertical (Y-axis) Slider */}
+                                <div className={styles.sliderYContainer}>
+                                    <ReactSlider
+                                        className={styles.verticalSlider}
+                                        thumbClassName={styles.sliderThumb}
+                                        trackClassName={styles.sliderTrack}
+                                        value={zoneFilter.y}
+                                        onChange={(value: any) => setZoneFilter({...zoneFilter, y: value})}
+                                        min={0}
+                                        max={100}
+                                        pearling
+                                        minDistance={5}
+                                        orientation="vertical"
+                                    />
+                                </div>
+
+                                {filteredActions.map((action: IGameAction, index: number) => (
+                                    <div
+                                        key={index}
+                                        className={styles.actionIcon}
+                                        style={{
+                                            left: `${action.x * 100}%`,
+                                            top: `${action.y * 100}%`,
+                                        }}
+                                    >
+                                        <Icon
+                                            type={action.type}
+                                            teamType={action.team.id === gameData.teams.home.id ? 'HOME' : 'AWAY'}
+                                            teamColors={action.team.id === gameData.teams.home.id ? gameData.teams.home.homeColor : gameData.teams.away.homeColor}
+                                            size={iconSize}
+                                            // onClick={() => handleIconClick(action)}
+                                            onClick={(e: React.MouseEvent<Element, MouseEvent>) => handleIconClick(action, e)}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/*<PlayerStats
+                selectedPlayer={selectedPlayer}
+                setSelectedPlayer={setSelectedPlayer}
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+                handleSort={handleSort}
+                sortedPlayers={sortedPlayers}
+                uniqueNonRoster={uniqueNonRoster}
+            />*/}
+
+                            <div className={styles.filterGroup}>
+                                <h3 className={styles.filterTitle}>Player Statistics</h3>
+
+                                {positionGroups.map((group) => (
+                                    group.players.length > 0 && (
+                                        <div key={group.title}>
+                                            <h4 className={styles.filterTitle}>{group.title}</h4>
+                                            <div className={styles.tableContainer}>
+                                                <table className={styles.statsTable}>
+                                                    <TableHeader/>
+                                                    <tbody>
+                                                    {group.players.map((player) => (
+                                                        <tr
+                                                            key={player.id}
+                                                            className={`${styles.playerRow} ${selectedPlayer === player.id ? styles.selectedRow : ''}`}
+                                                            onClick={() => {
+                                                                if (selectedPlayer === player.id) {
+                                                                    setSelectedPlayer(null);
+                                                                } else {
+                                                                    setSelectedPlayer(player.id);
+                                                                }
+                                                            }}
+                                                        >
+                                                            <td>{player.name}</td>
+                                                            <td>{player.jerseyNumber}</td>
+                                                            <td>{player.position}</td>
+                                                            <td>{player.goals}</td>
+                                                            <td>{player.shots}</td>
+                                                            <td>{player.turnovers}</td>
+                                                        </tr>
+                                                    ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    )
+                                ))}
+
+                                {uniqueNonRoster.length > 0 && (
+                                    <>
+                                        <h4 className={styles.nonRosterTitle}>Non-Roster Players</h4>
+                                        <ul className={styles.nonRosterList}>
+                                            {uniqueNonRoster.map(player => (
+                                                <li className={styles.nonRosterItem} key={player.id}>
+                                                    {player.name} (#{player.jerseyNumber})
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </>
+                                )}
+                            </div>
+
+                            {selectedActionDetails && (
+                                <IconDataModal
+                                    action={selectedActionDetails}
+                                    onClose={() => setSelectedActionDetails(null)}
+                                    gameType={gameData.type}
+                                />
+                            )}
+                        </div>
                     </div>
                 )}
             </div>

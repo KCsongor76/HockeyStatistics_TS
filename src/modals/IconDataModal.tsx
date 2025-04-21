@@ -4,10 +4,13 @@ import {IGameAction} from "../OOP/interfaces/IGameAction";
 import {ITeam} from "../OOP/interfaces/ITeam";
 // @ts-ignore
 import styles from './IconDataModal.module.css';
+import {GameType} from "../OOP/enums/GameType";
+import {PlayoffPeriod, RegularPeriod} from "../OOP/enums/Period";
 
 interface IconDataModalProps {
     action: IGameAction | null;
     onClose: () => void;
+    gameType: GameType;  // Add this line
 }
 
 const formatTime = (seconds: number) => {
@@ -16,7 +19,31 @@ const formatTime = (seconds: number) => {
     return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 };
 
-const IconDataModal = ({action, onClose}: IconDataModalProps) => {
+const getPeriodLabel = (gameType: GameType, period: RegularPeriod | PlayoffPeriod) => {
+    if (gameType === GameType.REGULAR) {
+        switch (period) {
+            case RegularPeriod.FIRST:
+            case RegularPeriod.SECOND:
+            case RegularPeriod.THIRD:
+                return `Period ${period}`;
+            case RegularPeriod.OT:
+                return 'OT';
+            case RegularPeriod.SO:
+                return 'SO';
+            default:
+                return `Period ${period}`;
+        }
+    } else {
+        if (period <= PlayoffPeriod.THIRD) {
+            return `Period ${period}`;
+        } else {
+            const otNumber = period - PlayoffPeriod.THIRD;
+            return `OT${otNumber}`;
+        }
+    }
+};
+
+const IconDataModal = ({action, onClose, gameType}: IconDataModalProps) => {
     if (!action) return null;
 
     return (
@@ -52,11 +79,11 @@ const IconDataModal = ({action, onClose}: IconDataModalProps) => {
 
                 <div className={styles.detailItem}>
                     <label>Period:</label>
-                    <span>{action.period}</span>
+                    <span>{getPeriodLabel(gameType, action.period)}</span>
                 </div>
 
                 <div className={styles.detailItem}>
-                    <label>Time:</label>
+                <label>Time:</label>
                     <span>{formatTime(action.time)}</span>
                 </div>
 
