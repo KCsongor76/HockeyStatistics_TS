@@ -19,7 +19,7 @@ const PreviousGameDetailPage = () => {
     const location = useLocation();
     const gameData = location.state as IGame;
     const navigate = useNavigate();
-    const isPlayoff = gameData.type !== GameType.PLAYOFF; // todo: ===
+    const isPlayoff = gameData.type === GameType.PLAYOFF;
 
     const fieldImageRef = useRef<HTMLImageElement>(null);
     const [iconSize, setIconSize] = useState(30);
@@ -28,9 +28,10 @@ const PreviousGameDetailPage = () => {
     type Period = RegularPeriod | PlayoffPeriod;
     const [selectedPeriods, setSelectedPeriods] = useState<Set<Period>>(new Set(Object.values(RegularPeriod) as Period[]));
     const [selectedActionTypes, setSelectedActionTypes] = useState<Set<ActionType>>(new Set(Object.values(ActionType)));
-    const availablePeriods = isPlayoff
-        ? Object.values(PlayoffPeriod).filter(v => typeof v === 'number') as PlayoffPeriod[]
-        : Object.values(RegularPeriod).filter(v => typeof v === 'number') as RegularPeriod[];
+    // const availablePeriods = isPlayoff
+    //     ? Object.values(PlayoffPeriod).filter(v => typeof v === 'number') as PlayoffPeriod[]
+    //     : Object.values(RegularPeriod).filter(v => typeof v === 'number') as RegularPeriod[];
+    const availablePeriods = Array.from(new Set(gameData.actions.map(action => action.period)));
     const availableActionTypes = Array.from(new Set(gameData.actions.map(action => action.type)));
     const [sortBy, setSortBy] = useState<keyof IPlayer>('name');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
@@ -72,7 +73,8 @@ const PreviousGameDetailPage = () => {
     const initialMaxTime = initialActionTimes.length > 0 ? Math.max(...initialActionTimes) : defaultMaxTime;
     const [timeFilter, setTimeFilter] = useState<[number, number]>([0, initialMaxTime]);
     const minTime = 0;
-    const maxTime = initialMaxTime;
+    // const maxTime = initialMaxTime;
+    const [maxTime, setMaxTime] = useState(defaultMaxTime);
 
     const [zoneFilter, setZoneFilter] = useState<{ x: [number, number], y: [number, number] }>({
         x: [0, 100],
@@ -235,6 +237,36 @@ const PreviousGameDetailPage = () => {
         {title: 'Forwards', players: forwards}
     ];
 
+    const homeStats = {
+        goals: filteredActions.filter(a =>
+            a.team.id === gameData.teams.home.id &&
+            a.type === ActionType.GOAL
+        ).length,
+        shots: filteredActions.filter(a =>
+            a.team.id === gameData.teams.home.id &&
+            (a.type === ActionType.SHOT || a.type === ActionType.GOAL)
+        ).length,
+        turnovers: filteredActions.filter(a =>
+            a.team.id === gameData.teams.home.id &&
+            a.type === ActionType.TURNOVER
+        ).length
+    };
+
+    const awayStats = {
+        goals: filteredActions.filter(a =>
+            a.team.id === gameData.teams.away.id &&
+            a.type === ActionType.GOAL
+        ).length,
+        shots: filteredActions.filter(a =>
+            a.team.id === gameData.teams.away.id &&
+            (a.type === ActionType.SHOT || a.type === ActionType.GOAL)
+        ).length,
+        turnovers: filteredActions.filter(a =>
+            a.team.id === gameData.teams.away.id &&
+            a.type === ActionType.TURNOVER
+        ).length
+    };
+
     const TableHeader = () => (
         <thead>
         <tr>
@@ -272,6 +304,13 @@ const PreviousGameDetailPage = () => {
         setSelectedPlayer(null); // Clear player selection when team view changes
     }, [selectedTeamView]); // Trigger when selectedTeamView changes
 
+    useEffect(() => {
+        const actionTimes = gameData.actions.map(a => calculateActionTimeSeconds(a));
+        const newMaxTime = actionTimes.length > 0 ? Math.max(...actionTimes) : defaultMaxTime;
+        setMaxTime(newMaxTime);
+        setTimeFilter(prev => [prev[0], newMaxTime]);
+    }, [gameData.actions, defaultMaxTime]);
+
     return (
         <div className={styles.container}>
             {selectedActionDetails && (
@@ -282,17 +321,52 @@ const PreviousGameDetailPage = () => {
                 />
             )}
 
-            {/*<GameFilters
-                selectedTeamView={selectedTeamView}
-                setSelectedTeamView={setSelectedTeamView}
-                availablePeriods={availablePeriods}
-                selectedPeriods={selectedPeriods}
-                togglePeriod={togglePeriod}
-                availableActionTypes={availableActionTypes}
-                selectedActionTypes={selectedActionTypes}
-                toggleActionType={toggleActionType}
-                isPeriodFilterDisabled={isTimeFilterActive}
-            />*/}
+            <h1>Full game stats</h1>
+            <div className={styles.statsContainer}>
+                <div className={styles.teamInfo}>
+                    <img src={gameData.teams.home.logo} alt={gameData.teams.home.name} className={styles.teamLogo}/>
+                    <div className={styles.teamStats}>
+                        <p className={styles.statItem}>Shots: {gameData.score.home.shots}</p>
+                        <p className={styles.statItem}>Turnovers: {gameData.score.home.turnovers}</p>
+                    </div>
+                </div>
+
+                <div className={styles.gameControls}>
+                    <p className={styles.scoreDisplay}>{gameData.score.home.goals} - {gameData.score.away.goals}</p>
+                </div>
+
+                <div className={styles.teamInfo}>
+                    <img src={gameData.teams.away.logo} alt={gameData.teams.away.name} className={styles.teamLogo}/>
+                    <div className={styles.teamStats}>
+                        <p className={styles.statItem}>Shots: {gameData.score.away.shots}</p>
+                        <p className={styles.statItem}>Turnovers: {gameData.score.away.turnovers}</p>
+                    </div>
+                </div>
+            </div>
+
+
+            <h1>Active filtered stats (period/time/space/player)</h1>
+            <div className={styles.statsContainer}>
+                <div className={styles.teamInfo}>
+                    <img src={gameData.teams.home.logo} alt={gameData.teams.home.name} className={styles.teamLogo}/>
+                    <div className={styles.teamStats}>
+                        <p className={styles.statItem}>Shots: {homeStats.shots}</p>
+                        <p className={styles.statItem}>Turnovers: {homeStats.turnovers}</p>
+                    </div>
+                </div>
+
+                <div className={styles.gameControls}>
+                    <p className={styles.scoreDisplay}>{homeStats.goals} - {awayStats.goals}</p>
+                </div>
+
+                <div className={styles.teamInfo}>
+                    <img src={gameData.teams.away.logo} alt={gameData.teams.away.name} className={styles.teamLogo}/>
+                    <div className={styles.teamStats}>
+                        <p className={styles.statItem}>Shots: {awayStats.shots}</p>
+                        <p className={styles.statItem}>Turnovers: {awayStats.turnovers}</p>
+                    </div>
+                </div>
+            </div>
 
             <div className={styles.filterSection}>
                 <div className={styles.filterGroup}>
@@ -322,18 +396,44 @@ const PreviousGameDetailPage = () => {
                 <div className={styles.filterGroup}>
                     <h3 className={styles.filterTitle}>Periods</h3>
                     <div className={styles.buttonGroup}>
-                        {availablePeriods.map((period) => (
-                            <button
-                                key={period}
-                                className={`${styles.periodButton} ${
-                                    selectedPeriods.has(period) ? styles.periodButtonActive : ''
-                                }`}
-                                onClick={() => togglePeriod(period)}
-                                disabled={isTimeFilterActive}
-                            >
-                                Period {period}
-                            </button>
-                        ))}
+                        {availablePeriods.map((period) => {
+                            const getPeriodLabel = () => {
+                                if (gameData.type === GameType.REGULAR) {
+                                    switch (period) {
+                                        case RegularPeriod.FIRST:
+                                        case RegularPeriod.SECOND:
+                                        case RegularPeriod.THIRD:
+                                            return `Period ${period}`;
+                                        case RegularPeriod.OT:
+                                            return 'OT';
+                                        case RegularPeriod.SO:
+                                            return 'SO';
+                                        default:
+                                            return `Period ${period}`;
+                                    }
+                                } else {
+                                    if (period <= PlayoffPeriod.THIRD) {
+                                        return `Period ${period}`;
+                                    } else {
+                                        const otNumber = period - PlayoffPeriod.THIRD;
+                                        return `OT${otNumber}`;
+                                    }
+                                }
+                            };
+
+                            return (
+                                <button
+                                    key={period}
+                                    className={`${styles.periodButton} ${
+                                        selectedPeriods.has(period) ? styles.periodButtonActive : ''
+                                    }`}
+                                    onClick={() => togglePeriod(period)}
+                                    disabled={isTimeFilterActive}
+                                >
+                                    {getPeriodLabel()}
+                                </button>
+                            );
+                        })}
                     </div>
                 </div>
 

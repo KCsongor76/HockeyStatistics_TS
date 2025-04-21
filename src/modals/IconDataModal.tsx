@@ -62,6 +62,11 @@ const IconDataModal = ({action, onClose, gameType}: IconDataModalProps) => {
                 </div>
 
                 <div className={styles.detailItem}>
+                    <label>JerseyNr:</label>
+                    <span>#{action.player.jerseyNumber}</span>
+                </div>
+
+                <div className={styles.detailItem}>
                     <label>Action Type:</label>
                     <span>{action.type}</span>
                 </div>
@@ -83,7 +88,7 @@ const IconDataModal = ({action, onClose, gameType}: IconDataModalProps) => {
                 </div>
 
                 <div className={styles.detailItem}>
-                <label>Time:</label>
+                    <label>Time:</label>
                     <span>{formatTime(action.time)}</span>
                 </div>
 

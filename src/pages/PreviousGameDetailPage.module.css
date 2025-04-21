@@ -252,6 +252,25 @@
     .nonRosterList {
         width: 100%;
     }
+
+    .statsContainer {
+        flex-direction: column;
+    }
+
+    .teamInfo {
+        width: 100%;
+        margin-bottom: 16px;
+    }
+
+    .gameControls {
+        width: 100%;
+        border-left: none;
+        border-right: none;
+        border-top: 1px solid #eee;
+        border-bottom: 1px solid #eee;
+        padding: 16px 0;
+        margin: 8px 0;
+    }
 }
 
 /* Zone Filter Sliders */
@@ -410,4 +429,56 @@
 
 .timeSliderThumb:hover {
     background: #2563eb;
+}
+
+.statsContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 16px;
+}
+
+.teamInfo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 30%;
+}
+
+.teamLogo {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    margin-bottom: 8px;
+}
+
+.teamStats {
+    text-align: center;
+}
+
+.statItem {
+    margin: 4px 0;
+    font-size: 14px;
+    color: #555;
+}
+
+.gameControls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 40%;
+    padding: 0 16px;
+    border-left: 1px solid #eee;
+    border-right: 1px solid #eee;
+}
+
+.scoreDisplay {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 16px;
+    color: #111;
 }

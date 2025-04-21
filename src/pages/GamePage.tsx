@@ -61,6 +61,7 @@ const GamePage = () => {
     const [periodLabel, setPeriodLabel] = useState(savedGameState?.periodLabel || "1st");
     const [isGameOver, setIsGameOver] = useState(savedGameState?.isGameOver || false);
     const fieldImageRef = useRef<HTMLImageElement>(null);
+    const visualizationImageRef = useRef<HTMLImageElement>(null);
     const [iconSize, setIconSize] = useState(30);
 
     const formData = savedGameState ? savedGameState.formData : location.state.formData as FormData;
@@ -171,6 +172,16 @@ const GamePage = () => {
             const newSize = Math.max(Math.floor(imageWidth * 0.03), 20);
             setIconSize(newSize);
         }
+    };
+
+    const getIconPosition = (imgRef: React.RefObject<HTMLImageElement>, x: number, y: number) => {
+        if (!imgRef.current) return {left: '0%', top: '0%'};
+        const naturalWidth = imgRef.current.naturalWidth;
+        const naturalHeight = imgRef.current.naturalHeight;
+        return {
+            left: `${(x * 100) / naturalWidth}%`,
+            top: `${(y * 100) / naturalHeight}%`
+        };
     };
 
     const handleScoreUpdate = (team: ITeam, actionType: ActionType, currentScore: IScoreData): IScoreData => {
@@ -804,20 +815,7 @@ const GamePage = () => {
                 </div>
                 {showDetails && (
                     <div className={styles.actualDataContainer}>
-                        {/*<ActualGameDetails gameData={currentGame}/>*/}
                         <div>
-                            {/*<GameFilters
-                selectedTeamView={selectedTeamView}
-                setSelectedTeamView={setSelectedTeamView}
-                availablePeriods={availablePeriods}
-                selectedPeriods={selectedPeriods}
-                togglePeriod={togglePeriod}
-                availableActionTypes={availableActionTypes}
-                selectedActionTypes={selectedActionTypes}
-                toggleActionType={toggleActionType}
-                isPeriodFilterDisabled={isTimeFilterActive}
-            />*/}
-
                             <div className={styles.filterSection}>
                                 <div className={styles.filterGroup}>
                                     <h3 className={styles.filterTitle}>Team View</h3>
@@ -905,20 +903,6 @@ const GamePage = () => {
                                 </div>
                             </div>
 
-                            {/*<GameVisualization
-                fieldImageRef={fieldImageRef}
-                gameData={gameData}
-                filteredActions={filteredActions}
-                iconSize={iconSize}
-                handleIconClick={(action: IGameAction) => setSelectedActionDetails(action)}
-                zoneFilter={zoneFilter}
-                setZoneFilter={setZoneFilter}
-                timeFilter={timeFilter}
-                setTimeFilter={setTimeFilter}
-                minTime={minTime}
-                maxTime={maxTime}
-            />*/}
-
                             <div className={styles.gameVisualization}>
 
                                 <div className={styles.timeFilterContainer}>
@@ -940,11 +924,30 @@ const GamePage = () => {
                                 </div>
 
                                 <img
-                                    ref={fieldImageRef}
+                                    ref={visualizationImageRef}  // Changed from fieldImageRef
                                     src={gameData.selectedImage}
                                     alt="gamePage"
                                     className={styles.gameImage}
                                 />
+                                {filteredActions.map((action: IGameAction, index: number) => (
+                                    <div
+                                        key={index}
+                                        className={styles.actionIcon}
+                                        style={{
+                                            left: `${action.x * 100}%`,
+                                            top: `${action.y * 100}%`,
+                                        }}
+                                    >
+                                        <Icon
+                                            type={action.type}
+                                            teamType={action.team.id === gameData.teams.home.id ? 'HOME' : 'AWAY'}
+                                            teamColors={action.team.id === gameData.teams.home.id ? gameData.teams.home.homeColor : gameData.teams.away.homeColor}
+                                            size={iconSize}
+                                            // onClick={() => handleIconClick(action)}
+                                            onClick={(e: React.MouseEvent<Element, MouseEvent>) => handleIconClick(action, e)}
+                                        />
+                                    </div>
+                                ))}
 
                                 <div className={styles.visualGuides}>
                                     <div
@@ -976,6 +979,7 @@ const GamePage = () => {
                                         min={0}
                                         max={100}
                                         pearling
+                                        step={1}
                                         minDistance={5}
                                     />
                                 </div>
@@ -991,41 +995,12 @@ const GamePage = () => {
                                         min={0}
                                         max={100}
                                         pearling
+                                        step={1}
                                         minDistance={5}
                                         orientation="vertical"
                                     />
                                 </div>
-
-                                {filteredActions.map((action: IGameAction, index: number) => (
-                                    <div
-                                        key={index}
-                                        className={styles.actionIcon}
-                                        style={{
-                                            left: `${action.x * 100}%`,
-                                            top: `${action.y * 100}%`,
-                                        }}
-                                    >
-                                        <Icon
-                                            type={action.type}
-                                            teamType={action.team.id === gameData.teams.home.id ? 'HOME' : 'AWAY'}
-                                            teamColors={action.team.id === gameData.teams.home.id ? gameData.teams.home.homeColor : gameData.teams.away.homeColor}
-                                            size={iconSize}
-                                            // onClick={() => handleIconClick(action)}
-                                            onClick={(e: React.MouseEvent<Element, MouseEvent>) => handleIconClick(action, e)}
-                                        />
-                                    </div>
-                                ))}
                             </div>
-
-                            {/*<PlayerStats
-                selectedPlayer={selectedPlayer}
-                setSelectedPlayer={setSelectedPlayer}
-                sortBy={sortBy}
-                sortOrder={sortOrder}
-                handleSort={handleSort}
-                sortedPlayers={sortedPlayers}
-                uniqueNonRoster={uniqueNonRoster}
-            />*/}
 
                             <div className={styles.filterGroup}>
                                 <h3 className={styles.filterTitle}>Player Statistics</h3>
