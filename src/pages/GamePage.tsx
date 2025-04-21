@@ -904,7 +904,6 @@ const GamePage = () => {
                             </div>
 
                             <div className={styles.gameVisualization}>
-
                                 <div className={styles.timeFilterContainer}>
                                     <div className={styles.timeSliderLabels}>
                                         <span>{formatTime(timeFilter[0])}</span>
@@ -923,31 +922,33 @@ const GamePage = () => {
                                     />
                                 </div>
 
-                                <img
-                                    ref={visualizationImageRef}  // Changed from fieldImageRef
-                                    src={gameData.selectedImage}
-                                    alt="gamePage"
-                                    className={styles.gameImage}
-                                />
-                                {filteredActions.map((action: IGameAction, index: number) => (
-                                    <div
-                                        key={index}
-                                        className={styles.actionIcon}
-                                        style={{
-                                            left: `${action.x * 100}%`,
-                                            top: `${action.y * 100}%`,
-                                        }}
-                                    >
-                                        <Icon
-                                            type={action.type}
-                                            teamType={action.team.id === gameData.teams.home.id ? 'HOME' : 'AWAY'}
-                                            teamColors={action.team.id === gameData.teams.home.id ? gameData.teams.home.homeColor : gameData.teams.away.homeColor}
-                                            size={iconSize}
-                                            // onClick={() => handleIconClick(action)}
-                                            onClick={(e: React.MouseEvent<Element, MouseEvent>) => handleIconClick(action, e)}
-                                        />
-                                    </div>
-                                ))}
+                                <div className={styles.visualizationImageWrapper}>
+                                    <img
+                                        ref={visualizationImageRef}  // Changed from fieldImageRef
+                                        src={gameData.selectedImage}
+                                        alt="gamePage"
+                                        className={styles.gameImage}
+                                    />
+                                    {filteredActions.map((action: IGameAction, index: number) => (
+                                        <div
+                                            key={index}
+                                            className={styles.actionIcon}
+                                            style={{
+                                                left: `${action.x * 100}%`,
+                                                top: `${action.y * 100}%`,
+                                            }}
+                                        >
+                                            <Icon
+                                                type={action.type}
+                                                teamType={action.team.id === gameData.teams.home.id ? 'HOME' : 'AWAY'}
+                                                teamColors={action.team.id === gameData.teams.home.id ? gameData.teams.home.homeColor : gameData.teams.away.homeColor}
+                                                size={iconSize}
+                                                // onClick={() => handleIconClick(action)}
+                                                onClick={(e: React.MouseEvent<Element, MouseEvent>) => handleIconClick(action, e)}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
 
                                 <div className={styles.visualGuides}>
                                     <div
