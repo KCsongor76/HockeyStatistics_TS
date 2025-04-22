@@ -1,4 +1,7 @@
-import {addDoc, collection, deleteDoc, doc, getDoc, getDocs, query, setDoc, updateDoc, where} from "firebase/firestore";
+import {
+    addDoc, collection, collectionGroup, deleteDoc, doc,
+    getDoc, getDocs, query, setDoc, updateDoc, where
+} from "firebase/firestore";
 import {getDownloadURL, ref, uploadBytes} from "firebase/storage";
 import {db, storage} from "../../firebaseConfig";
 import {TeamAlreadyExistsError} from "../errors/TeamAlreadyExistsError";
@@ -10,20 +13,16 @@ import {ITeam} from "../interfaces/ITeam";
 export class TeamService {
     private static collectionRef = collection(db, 'teams');
 
-    // TODO: arrow functions
     static createTeam = async (team: ITeam) => {
-        const teams = await this.getAllTeams();
-        const names = teams.map(t => t.name);
-        if (names.includes(team.name)) {
+        // Check for existing team name using a query (faster than fetching all)
+        const q = query(this.collectionRef, where('name', '==', team.name));
+        if (!(await getDocs(q)).empty) {
             throw new TeamAlreadyExistsError(`Team "${team.name}" already exists`);
         }
 
-        const docRef = await addDoc(this.collectionRef, {});
-        const teamId = docRef.id;
-        const teamWithId = {
-            ...team,
-            id: teamId
-        };
+        // Single write operation
+        const docRef = doc(this.collectionRef);
+        const teamWithId = {...team, id: docRef.id};
         await setDoc(docRef, teamWithId);
     }
 
@@ -62,25 +61,29 @@ export class TeamService {
     }
 
     static async getAllTeams(): Promise<ITeam[]> {
-        const querySnapshot = await getDocs(this.collectionRef);
+        // Fetch all teams and players in parallel
+        const teamsSnapshot = await getDocs(this.collectionRef);
+        const teamsData = teamsSnapshot.docs.map(doc => ({id: doc.id, ...doc.data()} as ITeam));
 
-        const teams = await Promise.all(querySnapshot.docs.map(async (doc) => {
-            const playersSnapshot = await getDocs(collection(doc.ref, 'players'));
-            const players = playersSnapshot.docs.map(playerDoc => ({
-                id: playerDoc.id,
-                ...playerDoc.data()
-            } as IPlayer));
+        // Fetch all players using a collection group query
+        const playersSnapshot = await getDocs(collectionGroup(db, 'players'));
+        const playersByTeamId = playersSnapshot.docs.reduce((acc, doc) => {
+            const teamId = doc.ref.parent.parent?.id;
+            if (teamId) {
+                if (!acc[teamId]) acc[teamId] = [];
+                acc[teamId].push({id: doc.id, ...doc.data()} as IPlayer);
+            }
+            return acc;
+        }, {} as Record<string, IPlayer[]>);
 
-            return {
-                id: doc.id,
-                ...doc.data(),
-                players
-            } as ITeam;
+        // Merge players into teams
+        const teams = teamsData.map(team => ({
+            ...team,
+            players: playersByTeamId[team.id]?.sort((a, b) => a.name.localeCompare(b.name)) || []
         }));
 
-        // Sort teams alphabetically by name
+        // Sort teams alphabetically
         teams.sort((a, b) => a.name.localeCompare(b.name));
-
         return teams;
     }
 

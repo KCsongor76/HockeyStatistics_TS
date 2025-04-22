@@ -15,6 +15,7 @@ import {ITeam} from "../OOP/interfaces/ITeam";  // Import the CSS module
 
 const HandlePlayerPage = () => {
     const {id: playerId} = useParams<{ id: string }>();
+    // console.log(playerId);
     const [player, setPlayer] = useState<IPlayer | null>(null);
     const [team, setTeam] = useState<ITeam>({} as ITeam);
     const [games, setGames] = useState<IGame[]>([]);
@@ -37,16 +38,20 @@ const HandlePlayerPage = () => {
             try {
                 const playerData = await PlayerService.getPlayerById(playerId as string) as IPlayer;
                 setPlayer(playerData);
+                console.log("playerData", playerData);
 
                 if (playerData && playerData.teamId) {
                     const teamData = await TeamService.getTeamById(playerData.teamId) as ITeam;
                     setTeam(teamData);
+                    console.log("teamData", teamData);
                 }
 
                 // Fetch all games
                 const gamesData = await GameService.getAllGames();
                 setGames(gamesData);
+                console.log("gamesData", gamesData);
             } catch (err) {
+                console.error(err)
                 setError('Failed to fetch player, team, or games data.');
             } finally {
                 setLoading(false);
@@ -56,7 +61,7 @@ const HandlePlayerPage = () => {
         fetchPlayerAndTeamAndGames();
     }, [playerId]);
 
-    console.log(games)
+    // console.log(games)
 
     const playerGames = games.filter(game => {
         if (!player?.id) return false;

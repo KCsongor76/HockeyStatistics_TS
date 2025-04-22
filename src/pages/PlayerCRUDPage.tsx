@@ -188,27 +188,20 @@ export default PlayerCRUDPage;
 
 export const loader = async () => {
     try {
-        console.log("loader");
-        const players = await PlayerService.getAllPlayers() || [];
-        const teams = await TeamService.getAllTeams() || [];
+        // Parallelize initial data fetching
+        const [players, teams] = await Promise.all([
+            PlayerService.getAllPlayers(),
+            TeamService.getAllTeams()
+        ]);
 
-        const playersWithTeams = await Promise.all(
-            players.map(async (player) => {
-                try {
-                    const team = await TeamService.getTeamById(player.teamId);
-                    return {
-                        player,
-                        teamName: team?.name || "Unknown Team",
-                    };
-                } catch (error) {
-                    console.error(`Error fetching team for player ${player.id}:`, error);
-                    return {
-                        player,
-                        teamName: "Unknown Team",
-                    };
-                }
-            })
-        );
+        // Create team lookup map (O(1) access)
+        const teamMap = new Map(teams.map(team => [team.id, team]));
+
+        // Process players in-memory (no async operations)
+        const playersWithTeams = players.map(player => ({
+            player,
+            teamName: teamMap.get(player.teamId)?.name || "Unknown Team"
+        }));
 
         return {
             players: playersWithTeams,
@@ -216,9 +209,6 @@ export const loader = async () => {
         };
     } catch (error) {
         console.error("Error in loader:", error);
-        return {
-            players: [],
-            teams: []
-        };
+        return {players: [], teams: []};
     }
 };

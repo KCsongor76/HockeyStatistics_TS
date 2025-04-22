@@ -8,13 +8,9 @@ export class GameService {
     private static collectionRef = collection(db, 'games');
 
     static saveGame = async (game: IGame) => {
-        const docRef = await addDoc(this.collectionRef, {});
-        const gameId = docRef.id;
-        const gameWithId = {
-            ...game,
-            id: gameId
-        };
-        await setDoc(docRef, gameWithId);
+        const docRef = doc(this.collectionRef); // Generate ID upfront
+        const gameWithId = {...game, id: docRef.id};
+        await setDoc(docRef, gameWithId); // Single write operation
         return gameWithId as IGame;
     }
 
