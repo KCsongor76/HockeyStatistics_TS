@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {useLoaderData, useNavigate} from "react-router-dom";
 import {PlayerService} from "../OOP/services/PlayerService";
 import {TeamService} from "../OOP/services/TeamService";
@@ -7,19 +7,27 @@ import styles from './PlayerCRUDPage.module.css';
 import {Position} from "../OOP/enums/Position";
 import {IPlayer} from "../OOP/interfaces/IPlayer";
 
-// todo: page reload: Uncaught TypeError: Cannot read properties of undefined (reading 'players')
-
 type LoaderData = {
     players: { player: IPlayer, teamName: string }[];
     teams: any[];
 };
 
 const PlayerCRUDPage = () => {
-    console.log("page")
+    console.log("page");
     const loaderData = useLoaderData() as LoaderData;
     const navigate = useNavigate();
-    const [playersWithTeamNames, setPlayersWithTeamNames] = useState(loaderData.players);
-    const [teams] = useState(loaderData.teams);
+
+    // Initialize with empty arrays and update when loaderData is available
+    const [playersWithTeamNames, setPlayersWithTeamNames] = useState<{ player: IPlayer, teamName: string }[]>([]);
+    const [teams, setTeams] = useState<any[]>([]);
+
+    // Use useEffect to safely update state when loaderData is available
+    useEffect(() => {
+        if (loaderData) {
+            setPlayersWithTeamNames(loaderData.players || []);
+            setTeams(loaderData.teams || []);
+        }
+    }, [loaderData]);
 
     // New state variables
     const [teamFilter, setTeamFilter] = useState('');
@@ -118,40 +126,38 @@ const PlayerCRUDPage = () => {
             <div className={styles.playerList}>
                 {currentPlayers.map(({player, teamName}) => (
                     <div key={player.id} className={styles.playerItem}>
-                        <div key={player.id} className={styles.playerItem}>
-                            <div className={styles.playerHeader}>
-                                <div className={styles.playerName}>{player.name}</div>
-                                <div className={styles.detailItem}>
-                                    <span className={styles.detailLabel}>#</span>
-                                    {player.jerseyNumber}
-                                </div>
+                        <div className={styles.playerHeader}>
+                            <div className={styles.playerName}>{player.name}</div>
+                            <div className={styles.detailItem}>
+                                <span className={styles.detailLabel}>#</span>
+                                {player.jerseyNumber}
                             </div>
+                        </div>
 
-                            <div className={styles.playerDetails}>
-                                <div className={styles.detailItem}>
-                                    <span className={styles.detailLabel}>Position:</span>
-                                    {player.position}
-                                </div>
-                                <div className={styles.detailItem}>
-                                    <span className={styles.detailLabel}>Team:</span>
-                                    {teamName}
-                                </div>
+                        <div className={styles.playerDetails}>
+                            <div className={styles.detailItem}>
+                                <span className={styles.detailLabel}>Position:</span>
+                                {player.position}
                             </div>
+                            <div className={styles.detailItem}>
+                                <span className={styles.detailLabel}>Team:</span>
+                                {teamName}
+                            </div>
+                        </div>
 
-                            <div className={styles.actions}>
-                                <button
-                                    className={styles.viewButton}
-                                    onClick={() => navigate(`${player.id}`, {state: {player}})}
-                                >
-                                    View
-                                </button>
-                                <button
-                                    className={styles.deleteButton}
-                                    onClick={() => deleteHandler(player)}
-                                >
-                                    Delete
-                                </button>
-                            </div>
+                        <div className={styles.actions}>
+                            <button
+                                className={styles.viewButton}
+                                onClick={() => navigate(`${player.id}`, {state: {player}})}
+                            >
+                                View
+                            </button>
+                            <button
+                                className={styles.deleteButton}
+                                onClick={() => deleteHandler(player)}
+                            >
+                                Delete
+                            </button>
                         </div>
                     </div>
                 ))}
@@ -165,16 +171,15 @@ const PlayerCRUDPage = () => {
                 >
                     Previous
                 </button>
-                <span>Page {currentPage} of {totalPages}</span>
+                <span>Page {currentPage} of {totalPages || 1}</span>
                 <button
                     className={styles.paginationButton}
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                    disabled={currentPage >= totalPages}
+                    onClick={() => setCurrentPage(p => Math.min(totalPages || 1, p + 1))}
+                    disabled={currentPage >= (totalPages || 1)}
                 >
                     Next
                 </button>
             </div>
-
         </div>
     );
 };
@@ -183,7 +188,7 @@ export default PlayerCRUDPage;
 
 export const loader = async () => {
     try {
-        console.log("loader")
+        console.log("loader");
         const players = await PlayerService.getAllPlayers() || [];
         const teams = await TeamService.getAllTeams() || [];
 

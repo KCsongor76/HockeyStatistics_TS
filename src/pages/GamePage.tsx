@@ -44,6 +44,8 @@ interface ITeamRoster extends ITeam {
     roster: IPlayer[]
 }
 
+// todo: remove sliders, fix second set of icon positioning
+
 
 const GamePage = () => {
     const location = useLocation();

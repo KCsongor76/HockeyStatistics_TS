@@ -14,8 +14,6 @@ import ContinueOrStartOverModal from '../modals/ContinueOrStartOverModal';
 import {IChampionship} from "../OOP/interfaces/IChampionship";
 
 // todo: roster selection - have different sections for goalies, defenders and forwards
-// todo: page reload - Uncaught TypeError: Cannot read properties of undefined (reading 'players')
-// todo: error handling: what if we have no teams?
 
 type FormState = {
     championship: IChampionship;
@@ -45,51 +43,184 @@ type LoaderData = {
 };
 
 const StartPage: React.FC = () => {
-    const loaderData = useLoaderData() as LoaderData;
-
-    const championships = loaderData?.championships ?? [];
-    const teams = loaderData?.teams ?? [];
-    const rinkImages = loaderData?.rinkImages ?? {};
-
-    // Get teams for the first championship
-    const getInitialTeams = (championship: IChampionship, allTeams: ITeam[]) => {
-        const teamsInChampionship = allTeams.filter(team =>
-            team.championships.some(champ => champ.id === championship.id)
-        );
-        return {
-            homeTeam: teamsInChampionship[0] as ITeam,
-            awayTeam: teamsInChampionship[1] as ITeam
-        };
-    };
-
-    const initialTeams = getInitialTeams(championships[0], teams);
-
-
-    const initialState: FormState = {
-        championship: championships[0],
-        homeTeam: initialTeams.homeTeam,
-        awayTeam: initialTeams.awayTeam,
-        homeRoster: [],
-        homeRosterOut: initialTeams.homeTeam.players,
-        awayRoster: [],
-        awayRosterOut: initialTeams.awayTeam.players,
-        gameType: GameType.REGULAR,
-        homeColor: teams[0].homeColor,
-        awayColor: teams[1].awayColor,
-        imageOption: {
-            rinkUp: rinkImages.rinkUp,
-            rinkDown: rinkImages.rinkDown,
-        },
-        selectedImage: "",
-    };
-
-    const [formData, setFormData] = useState<FormState>(initialState);
-    const [filteredTeams, setFilteredTeams] = useState<ITeam[]>(teams);
+    // First, get all the hooks declarations at the top in a consistent order
     const navigate = useNavigate();
-    const [isDropDownOpen, setIsDropDownOpen] = useState(false);
+    const rawLoaderData = useLoaderData() as LoaderData | null;
 
+    // Always declare all useState hooks first, regardless of whether they depend on each other
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [loaderData, setLoaderData] = useState<LoaderData | null>(null);
+    const [formData, setFormData] = useState<FormState | null>(null);
+    const [filteredTeams, setFilteredTeams] = useState<ITeam[]>([]);
+    const [isDropDownOpen, setIsDropDownOpen] = useState(false);
     const [showContinueModal, setShowContinueModal] = useState(false);
     const [savedGameState, setSavedGameState] = useState<any>(null);
+
+    // Load data effect - this should be the first effect
+    useEffect(() => {
+        const loadData = async () => {
+            if (rawLoaderData) {
+                setLoaderData(rawLoaderData);
+                setIsLoading(false);
+            } else {
+                try {
+                    // Attempt to load data directly
+                    const championships = await ChampionshipService.getAllChampionships();
+                    const teams = await TeamService.getAllTeams();
+
+                    const [rinkDown, rinkUp] = await Promise.all([
+                        getDownloadURL(ref(storage, "rink-images/icerink_down.jpg")),
+                        getDownloadURL(ref(storage, "rink-images/icerink_up.jpg")),
+                    ]);
+
+                    const data = {
+                        championships,
+                        teams,
+                        rinkImages: {rinkUp, rinkDown}
+                    };
+
+                    setLoaderData(data);
+                    setIsLoading(false);
+                } catch (err) {
+                    console.error("Error loading data:", err);
+                    setError("Failed to load data. Please try again later.");
+                    setIsLoading(false);
+                }
+            }
+        };
+
+        loadData();
+    }, [rawLoaderData]);
+
+    // Initialize form data once loader data is available
+    useEffect(() => {
+        if (!loaderData) return;
+
+        const {championships, teams, rinkImages} = loaderData;
+
+        // Get teams for the first championship
+        const getInitialTeams = (championship: IChampionship, allTeams: ITeam[]) => {
+            const teamsInChampionship = allTeams.filter(team =>
+                team.championships.some(champ => champ.id === championship.id)
+            );
+            return {
+                homeTeam: teamsInChampionship[0] || ({} as ITeam),
+                awayTeam: teamsInChampionship[1] || teamsInChampionship[0] || ({} as ITeam)
+            };
+        };
+
+        const initialTeams = championships.length > 0 ?
+            getInitialTeams(championships[0], teams) :
+            {homeTeam: {} as ITeam, awayTeam: {} as ITeam};
+
+        const initialState: FormState = {
+            championship: championships[0] || ({} as IChampionship),
+            homeTeam: initialTeams.homeTeam,
+            awayTeam: initialTeams.awayTeam,
+            homeRoster: [],
+            homeRosterOut: initialTeams.homeTeam.players || [],
+            awayRoster: [],
+            awayRosterOut: initialTeams.awayTeam.players || [],
+            gameType: GameType.REGULAR,
+            homeColor: teams[0]?.homeColor || ({} as ITeamColor),
+            awayColor: teams[1]?.awayColor || ({} as ITeamColor),
+            imageOption: {
+                rinkUp: rinkImages.rinkUp || "",
+                rinkDown: rinkImages.rinkDown || "",
+            },
+            selectedImage: "",
+        };
+
+        setFormData(initialState);
+        setFilteredTeams(teams);
+    }, [loaderData]);
+
+    // Check for saved game
+    useEffect(() => {
+        const savedGame = localStorage.getItem('unfinishedGame');
+        if (savedGame) {
+            setSavedGameState(JSON.parse(savedGame));
+            setShowContinueModal(true);
+        }
+    }, []);
+
+    // Update filtered teams when championship changes
+    useEffect(() => {
+        if (!formData || !loaderData) return;
+
+        const {championship} = formData;
+        const {teams} = loaderData;
+
+        if (!championship || championship.id === "") {
+            setFilteredTeams(teams);
+            return;
+        }
+
+        const newFilteredTeams = teams.filter(team =>
+            team.championships.some(champ => champ.id === championship.id)
+        );
+
+        setFilteredTeams(newFilteredTeams);
+
+        // Get default teams and their colors
+        const newHomeTeam = newFilteredTeams[0] ?? {} as ITeam;
+        const newAwayTeam = newFilteredTeams[1] ?? newFilteredTeams[0] ?? {} as ITeam;
+
+        // Only update teams if current teams are not in the filtered list
+        const updateTeams = !newFilteredTeams.some(team => team.id === formData.homeTeam.id) ||
+            !newFilteredTeams.some(team => team.id === formData.awayTeam.id);
+
+        if (updateTeams) {
+            setFormData({
+                ...formData,
+                homeTeam: newHomeTeam,
+                awayTeam: newAwayTeam,
+                homeColor: newHomeTeam.homeColor || formData.homeColor,
+                awayColor: newAwayTeam.awayColor || formData.awayColor,
+                homeRoster: [],
+                homeRosterOut: newHomeTeam.players || [],
+                awayRoster: [],
+                awayRosterOut: newAwayTeam.players || [],
+            });
+        }
+    }, [formData?.championship, loaderData]);
+
+    // Return early with loading or error state
+    if (isLoading) {
+        return <div className={styles.loadingContainer}>
+            <div className={styles.loadingSpinner}></div>
+            <p>Loading game data...</p>
+        </div>;
+    }
+
+    if (error || !loaderData || !formData) {
+        return <div className={styles.errorContainer}>
+            <h2>Error</h2>
+            <p>{error || "Something went wrong. Please try again."}</p>
+            <button
+                className={styles.rosterButton}
+                onClick={() => window.location.reload()}
+            >
+                Reload Page
+            </button>
+        </div>;
+    }
+
+    const {championships, teams} = loaderData;
+
+    if (championships.length === 0 || teams.length === 0) {
+        return <div className={styles.errorContainer}>
+            <h2>No Data Available</h2>
+            <p>There are no championships or teams available. Please check your database.</p>
+            <button
+                className={styles.rosterButton}
+                onClick={() => window.location.reload()}
+            >
+                Reload Page
+            </button>
+        </div>;
+    }
 
     // Image click handler for rink selection
     const handleImageClick = (imageUrl: string) => {
@@ -137,75 +268,22 @@ const StartPage: React.FC = () => {
         navigate("/")
     }
 
-    /*useEffect(() => {
-        const storedFormData = localStorage.getItem("formData");
-        if (storedFormData) {
-            setModalIsOpen(true);
-        }
-    }, []);*/
-
-    // Update filtered teams when championship changes
-    useEffect(() => {
-        if (!formData.championship || formData.championship.id === "") {
-            setFilteredTeams(teams);
-            return;
-        }
-
-        const filteredTeams = teams.filter(team =>
-            team.championships.some(champ => champ.id === formData.championship.id)
-        );
-
-        setFilteredTeams(filteredTeams);
-
-        // Get default teams and their colors
-        const newHomeTeam = filteredTeams[0] ?? {} as ITeam;
-        const newAwayTeam = filteredTeams[1] ?? filteredTeams[0] ?? {} as ITeam;
-
-        // Only update teams if current teams are not in the filtered list
-        const updateTeams = !filteredTeams.some(team => team.id === formData.homeTeam.id) ||
-            !filteredTeams.some(team => team.id === formData.awayTeam.id);
-
-        if (updateTeams) {
-            setFormData({
-                ...formData,
-                homeTeam: newHomeTeam,
-                awayTeam: newAwayTeam,
-                homeColor: newHomeTeam.homeColor || initialState.homeColor,
-                awayColor: newAwayTeam.awayColor || initialState.awayColor,
-                homeRoster: [],
-                homeRosterOut: newHomeTeam.players,
-                awayRoster: [],
-                awayRosterOut: newAwayTeam.players,
-            });
-        }
-    }, [formData.championship, teams]);
-
-    useEffect(() => {
-        const savedGame = localStorage.getItem('unfinishedGame');
-        if (savedGame) {
-            setSavedGameState(JSON.parse(savedGame));
-            setShowContinueModal(true);
-        }
-    }, []);
-
-// Handle Continue button
+    // Handle Continue button
     const handleContinue = () => {
         navigate('/game', {state: {savedGameState: savedGameState}});
         setShowContinueModal(false);
     };
 
-// Handle Start Over button
+    // Handle Start Over button
     const handleStartOver = () => {
         localStorage.removeItem('unfinishedGame');
         setShowContinueModal(false);
     };
 
-    if (championships.length === 0 || teams.length === 0) {
-        return <div>Loading...</div>;
-    }
-
     function addPlayerToRosterHandler(player: IPlayer, isHome: boolean) {
         setFormData(prev => {
+            if (!prev) return prev;
+
             if (isHome) {
                 const newHomeRosterOut = prev.homeRosterOut.filter(p => p.id !== player.id);
                 const newHomeRoster = [...prev.homeRoster, player];
@@ -228,6 +306,8 @@ const StartPage: React.FC = () => {
 
     function removePlayerFromRosterHandler(player: IPlayer, isHome: boolean) {
         setFormData(prev => {
+            if (!prev) return prev;
+
             if (isHome) {
                 const newHomeRoster = prev.homeRoster.filter(p => p.id !== player.id);
                 const newHomeRosterOut = [...prev.homeRosterOut, player];
@@ -289,7 +369,7 @@ const StartPage: React.FC = () => {
                         setFormData({
                             ...formData,
                             homeTeam: newHomeTeam as ITeam,
-                            homeColor: newHomeTeam.homeColor || initialState.homeColor,
+                            homeColor: newHomeTeam.homeColor || formData.homeColor,
                             homeRoster: [],
                             homeRosterOut: newHomeTeam.players as IPlayer[],
                         });
@@ -314,7 +394,7 @@ const StartPage: React.FC = () => {
                         setFormData({
                             ...formData,
                             awayTeam: newAwayTeam as ITeam,
-                            awayColor: newAwayTeam.awayColor || initialState.awayColor,
+                            awayColor: newAwayTeam.awayColor || formData.awayColor,
                             awayRoster: [],
                             awayRosterOut: newAwayTeam.players as IPlayer[],
                         });
@@ -564,7 +644,6 @@ const StartPage: React.FC = () => {
                         src={formData.imageOption.rinkDown}
                         alt="RinkImage"
                         className={`${styles.imagePreview} ${formData.selectedImage === formData.imageOption.rinkDown ? styles.selectedImage : ''}`}
-                        //onClick={() => handleImageClick(formData.imageOption.rinkDown)}
                     />
                 </div>
                 <div
@@ -588,7 +667,6 @@ const StartPage: React.FC = () => {
                         src={formData.imageOption.rinkUp}
                         alt="RinkImage"
                         className={`${styles.imagePreview} ${formData.selectedImage === formData.imageOption.rinkUp ? styles.selectedImage : ''}`}
-                        //onClick={() => handleImageClick(formData.imageOption.rinkUp)}
                     />
                 </div>
             </div>
@@ -609,10 +687,11 @@ const StartPage: React.FC = () => {
 export default StartPage;
 
 export const loader = async () => {
-    const championships = await ChampionshipService.getAllChampionships();
-    const teams = await TeamService.getAllTeams();
-
+    console.log("loader")
     try {
+        const championships = await ChampionshipService.getAllChampionships();
+        const teams = await TeamService.getAllTeams();
+
         const [rinkDown, rinkUp] = await Promise.all([
             getDownloadURL(ref(storage, "rink-images/icerink_down.jpg")),
             getDownloadURL(ref(storage, "rink-images/icerink_up.jpg")),
@@ -622,6 +701,8 @@ export const loader = async () => {
         return {championships, teams, rinkImages};
 
     } catch (error) {
-        console.error("Error fetching download URLs:", error);
+        console.error("Error in loader function:", error);
+        // Return null explicitly rather than letting it fall through to undefined
+        return null;
     }
 };
