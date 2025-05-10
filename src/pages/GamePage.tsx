@@ -97,11 +97,6 @@ const GamePage = () => {
     const [sortBy, setSortBy] = useState<keyof IPlayer>('name');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
-    const [zoneFilter, setZoneFilter] = useState<{ x: [number, number], y: [number, number] }>({
-        x: [0, 100],
-        y: [0, 100]
-    });
-    // const [timeFilter, setTimeFilter] = useState<[number, number]>([0, 3600]);
 
     const calculateActionTimeSeconds = (action: IGameAction): number => {
         const period = action.period;
@@ -155,13 +150,10 @@ const GamePage = () => {
         const periodFilter = selectedPeriods.has(action.period);
         const typeFilter = selectedActionTypes.has(action.type);
         const playerFilter = !selectedPlayer || action.player.id === selectedPlayer;
-        const zoneXFilter = action.x * 100 >= zoneFilter.x[0] && action.x * 100 <= zoneFilter.x[1];
-        const zoneYFilter = action.y * 100 >= zoneFilter.y[0] && action.y * 100 <= zoneFilter.y[1];
         const actionTimeSeconds = calculateActionTimeSeconds(action)
         const timeFilterPass = actionTimeSeconds >= timeFilter[0] && actionTimeSeconds <= timeFilter[1];
 
-        return teamFilter && periodFilter && typeFilter && playerFilter &&
-            zoneXFilter && zoneYFilter && timeFilterPass;
+        return teamFilter && periodFilter && typeFilter && playerFilter && timeFilterPass;
     });
 
 
@@ -172,16 +164,6 @@ const GamePage = () => {
             const newSize = Math.max(Math.floor(imageWidth * 0.03), 20);
             setIconSize(newSize);
         }
-    };
-
-    const getIconPosition = (imgRef: React.RefObject<HTMLImageElement>, x: number, y: number) => {
-        if (!imgRef.current) return {left: '0%', top: '0%'};
-        const naturalWidth = imgRef.current.naturalWidth;
-        const naturalHeight = imgRef.current.naturalHeight;
-        return {
-            left: `${(x * 100) / naturalWidth}%`,
-            top: `${(y * 100) / naturalHeight}%`
-        };
     };
 
     const handleScoreUpdate = (team: ITeam, actionType: ActionType, currentScore: IScoreData): IScoreData => {
@@ -903,24 +885,6 @@ const GamePage = () => {
                         </div>
 
                         <div className={styles.gameVisualization}>
-                            <div className={styles.timeFilterContainer}>
-                                <div className={styles.timeSliderLabels}>
-                                    <span>{formatTime(timeFilter[0])}</span>
-                                    <span>{formatTime(timeFilter[1])}</span>
-                                </div>
-                                <ReactSlider
-                                    className={styles.horizontalSlider}
-                                    thumbClassName={styles.timeSliderThumb}
-                                    trackClassName={styles.timeSliderTrack}
-                                    value={timeFilter}
-                                    onChange={setTimeFilter}
-                                    min={minTime}
-                                    max={maxTime}
-                                    pearling
-                                    minDistance={1}
-                                />
-                            </div>
-
                             <div className={styles.visualizationImageWrapper}>
                                 <img
                                     ref={visualizationImageRef}  // Changed from fieldImageRef
@@ -942,63 +906,10 @@ const GamePage = () => {
                                             teamType={action.team.id === gameData.teams.home.id ? 'HOME' : 'AWAY'}
                                             teamColors={action.team.id === gameData.teams.home.id ? gameData.teams.home.homeColor : gameData.teams.away.homeColor}
                                             size={iconSize}
-                                            // onClick={() => handleIconClick(action)}
                                             onClick={(e: React.MouseEvent<Element, MouseEvent>) => handleIconClick(action, e)}
                                         />
                                     </div>
                                 ))}
-                            </div>
-
-                            <div className={styles.visualGuides}>
-                                <div
-                                    className={`${styles.visualGuideLine} ${styles.horizontalGuide}`}
-                                    style={{top: `${zoneFilter.y[0]}%`}}
-                                />
-                                <div
-                                    className={`${styles.visualGuideLine} ${styles.horizontalGuide}`}
-                                    style={{top: `${zoneFilter.y[1]}%`}}
-                                />
-                                <div
-                                    className={`${styles.visualGuideLine} ${styles.verticalGuide}`}
-                                    style={{left: `${zoneFilter.x[0]}%`}}
-                                />
-                                <div
-                                    className={`${styles.visualGuideLine} ${styles.verticalGuide}`}
-                                    style={{left: `${zoneFilter.x[1]}%`}}
-                                />
-                            </div>
-
-                            {/* Horizontal (X-axis) Slider */}
-                            <div className={styles.sliderXContainer}>
-                                <ReactSlider
-                                    className={styles.horizontalSlider}
-                                    thumbClassName={styles.sliderThumb}
-                                    trackClassName={styles.sliderTrack}
-                                    value={zoneFilter.x}
-                                    onChange={(value: any) => setZoneFilter({...zoneFilter, x: value})}
-                                    min={0}
-                                    max={100}
-                                    pearling
-                                    step={1}
-                                    minDistance={5}
-                                />
-                            </div>
-
-                            {/* Vertical (Y-axis) Slider */}
-                            <div className={styles.sliderYContainer}>
-                                <ReactSlider
-                                    className={styles.verticalSlider}
-                                    thumbClassName={styles.sliderThumb}
-                                    trackClassName={styles.sliderTrack}
-                                    value={zoneFilter.y}
-                                    onChange={(value: any) => setZoneFilter({...zoneFilter, y: value})}
-                                    min={0}
-                                    max={100}
-                                    pearling
-                                    step={1}
-                                    minDistance={5}
-                                    orientation="vertical"
-                                />
                             </div>
                         </div>
 

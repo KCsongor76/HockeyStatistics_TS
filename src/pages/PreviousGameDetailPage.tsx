@@ -455,95 +455,13 @@ const PreviousGameDetailPage = () => {
                 </div>
             </div>
 
-            {/*<GameVisualization
-                fieldImageRef={fieldImageRef}
-                gameData={gameData}
-                filteredActions={filteredActions}
-                iconSize={iconSize}
-                handleIconClick={handleIconClick}
-                zoneFilter={zoneFilter}
-                setZoneFilter={setZoneFilter}
-                timeFilter={timeFilter}
-                setTimeFilter={setTimeFilter}
-                minTime={minTime}
-                maxTime={maxTime}
-            />*/}
-
             <div className={styles.gameVisualization}>
-                <div className={styles.timeFilterContainer}>
-                    <div className={styles.timeSliderLabels}>
-                        <span>{formatTime(timeFilter[0])}</span>
-                        <span>{formatTime(timeFilter[1])}</span>
-                    </div>
-                    <ReactSlider
-                        className={styles.horizontalSlider}
-                        thumbClassName={styles.timeSliderThumb}
-                        trackClassName={styles.timeSliderTrack}
-                        value={timeFilter}
-                        onChange={setTimeFilter}
-                        min={minTime}
-                        max={maxTime}
-                        pearling
-                        minDistance={1}
-                    />
-                </div>
-
                 <img
                     ref={fieldImageRef}
                     src={gameData.selectedImage}
                     alt="gamePage"
                     className={styles.gameImage}
                 />
-
-                <div className={styles.visualGuides}>
-                    <div
-                        className={`${styles.visualGuideLine} ${styles.horizontalGuide}`}
-                        style={{top: `${zoneFilter.y[0]}%`}}
-                    />
-                    <div
-                        className={`${styles.visualGuideLine} ${styles.horizontalGuide}`}
-                        style={{top: `${zoneFilter.y[1]}%`}}
-                    />
-                    <div
-                        className={`${styles.visualGuideLine} ${styles.verticalGuide}`}
-                        style={{left: `${zoneFilter.x[0]}%`}}
-                    />
-                    <div
-                        className={`${styles.visualGuideLine} ${styles.verticalGuide}`}
-                        style={{left: `${zoneFilter.x[1]}%`}}
-                    />
-                </div>
-
-                {/* Horizontal (X-axis) Slider */}
-                <div className={styles.sliderXContainer}>
-                    <ReactSlider
-                        className={styles.horizontalSlider}
-                        thumbClassName={styles.sliderThumb}
-                        trackClassName={styles.sliderTrack}
-                        value={zoneFilter.x}
-                        onChange={(value: any) => setZoneFilter({...zoneFilter, x: value})}
-                        min={0}
-                        max={100}
-                        pearling
-                        minDistance={5}
-                    />
-                </div>
-
-                {/* Vertical (Y-axis) Slider */}
-                <div className={styles.sliderYContainer}>
-                    <ReactSlider
-                        className={styles.verticalSlider}
-                        thumbClassName={styles.sliderThumb}
-                        trackClassName={styles.sliderTrack}
-                        value={zoneFilter.y}
-                        onChange={(value: any) => setZoneFilter({...zoneFilter, y: value})}
-                        min={0}
-                        max={100}
-                        pearling
-                        minDistance={5}
-                        orientation="vertical"
-                    />
-                </div>
 
                 {filteredActions.map((action: IGameAction, index: number) => (
                     <div
@@ -566,16 +484,6 @@ const PreviousGameDetailPage = () => {
             </div>
 
             <div className={styles.container}>
-                {/*<PlayerStats
-                    selectedPlayer={selectedPlayer}
-                    setSelectedPlayer={setSelectedPlayer}
-                    sortBy={sortBy}
-                    sortOrder={sortOrder}
-                    handleSort={handleSort}
-                    sortedPlayers={sortedPlayers}
-                    uniqueNonRoster={uniqueNonRoster}
-                />*/}
-
                 <div className={styles.filterGroup}>
                     <h3 className={styles.filterTitle}>Player Statistics</h3>
 

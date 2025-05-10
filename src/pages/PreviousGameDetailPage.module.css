@@ -80,7 +80,10 @@
 .gameVisualization {
     position: relative;
     width: 100%;
-    padding: 20px 40px
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 16px;
 }
 
 /* todo: max width*/
@@ -215,14 +218,6 @@
     font-weight: 600;
     margin: 24px 0 12px;
     color: #333;
-}
-
-.gameVisualization {
-    background-color: #fff;
-    border-radius: 8px;
-    padding: 16px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    margin-bottom: 16px;
 }
 
 .statsTable {
