@@ -10,7 +10,6 @@ import PreviousGamesPage from "./PreviousGamesPage";
 import {IPlayer} from "../OOP/interfaces/IPlayer";
 import {ITeam} from "../OOP/interfaces/ITeam";  // Import the CSS module
 
-// todo: add data, games when he played
 // todo: button colors
 
 const HandlePlayerPage = () => {

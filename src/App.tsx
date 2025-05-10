@@ -23,7 +23,6 @@ import {loader as CreatePlayerPageLoader} from "./pages/CreatePlayerPage";
 import {loader as playerCRUDPageLoader} from "./pages/PlayerCRUDPage";
 import HandlePlayerPage from "./pages/HandlePlayerPage";
 
-// todo: change browser name (React App or what) and icon
 // todo: switch to oop classes
 // todo: services: oop/atomic/batch writes/etc
 // todo: make all files typescript correct

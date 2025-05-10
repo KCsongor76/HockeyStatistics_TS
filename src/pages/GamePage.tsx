@@ -44,8 +44,6 @@ interface ITeamRoster extends ITeam {
     roster: IPlayer[]
 }
 
-// todo: remove sliders, fix second set of icon positioning
-
 
 const GamePage = () => {
     const location = useLocation();
@@ -817,254 +815,253 @@ const GamePage = () => {
                 </div>
                 {showDetails && (
                     <div className={styles.actualDataContainer}>
-                        <div>
-                            <div className={styles.filterSection}>
-                                <div className={styles.filterGroup}>
-                                    <h3 className={styles.filterTitle}>Team View</h3>
-                                    <div className={styles.buttonGroup}>
-                                        <button
-                                            className={`${styles.button} ${selectedTeamView === 'all' ? styles.buttonActive : ''}`}
-                                            onClick={() => setSelectedTeamView('all')}
-                                        >
-                                            All Teams
-                                        </button>
-                                        <button
-                                            className={`${styles.button} ${selectedTeamView === 'home' ? styles.buttonActive : ''}`}
-                                            onClick={() => setSelectedTeamView('home')}
-                                        >
-                                            Home Team
-                                        </button>
-                                        <button
-                                            className={`${styles.button} ${selectedTeamView === 'away' ? styles.buttonActive : ''}`}
-                                            onClick={() => setSelectedTeamView('away')}
-                                        >
-                                            Away Team
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div className={styles.filterGroup}>
-                                    <h3 className={styles.filterTitle}>Periods</h3>
-                                    <div className={styles.buttonGroup}>
-                                        {availablePeriods.map((period) => {
-                                            const getPeriodLabel = () => {
-                                                if (gameData.type === GameType.REGULAR) {
-                                                    switch (period) {
-                                                        case RegularPeriod.FIRST:
-                                                        case RegularPeriod.SECOND:
-                                                        case RegularPeriod.THIRD:
-                                                            return `Period ${period}`;
-                                                        case RegularPeriod.OT:
-                                                            return 'OT';
-                                                        case RegularPeriod.SO:
-                                                            return 'SO';
-                                                        default:
-                                                            return `Period ${period}`;
-                                                    }
-                                                } else {
-                                                    if (period <= PlayoffPeriod.THIRD) {
-                                                        return `Period ${period}`;
-                                                    } else {
-                                                        const otNumber = period - PlayoffPeriod.THIRD;
-                                                        return `OT${otNumber}`;
-                                                    }
-                                                }
-                                            };
-
-                                            return (
-                                                <button
-                                                    key={period}
-                                                    className={`${styles.periodButton} ${
-                                                        selectedPeriods.has(period) ? styles.periodButtonActive : ''
-                                                    }`}
-                                                    onClick={() => togglePeriod(period)}
-                                                    disabled={isTimeFilterActive}
-                                                >
-                                                    {getPeriodLabel()}
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
-
-                                <div className={styles.filterGroup}>
-                                    <h3 className={styles.filterTitle}>Action Types</h3>
-                                    <div className={styles.buttonGroup}>
-                                        {availableActionTypes.map((type) => (
-                                            <button
-                                                key={type}
-                                                className={`${styles.periodButton} ${
-                                                    selectedActionTypes.has(type) ? styles.periodButtonActive : ''
-                                                }`}
-                                                onClick={() => toggleActionType(type)}
-                                            >
-                                                {type}
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className={styles.gameVisualization}>
-                                <div className={styles.timeFilterContainer}>
-                                    <div className={styles.timeSliderLabels}>
-                                        <span>{formatTime(timeFilter[0])}</span>
-                                        <span>{formatTime(timeFilter[1])}</span>
-                                    </div>
-                                    <ReactSlider
-                                        className={styles.horizontalSlider}
-                                        thumbClassName={styles.timeSliderThumb}
-                                        trackClassName={styles.timeSliderTrack}
-                                        value={timeFilter}
-                                        onChange={setTimeFilter}
-                                        min={minTime}
-                                        max={maxTime}
-                                        pearling
-                                        minDistance={1}
-                                    />
-                                </div>
-
-                                <div className={styles.visualizationImageWrapper}>
-                                    <img
-                                        ref={visualizationImageRef}  // Changed from fieldImageRef
-                                        src={gameData.selectedImage}
-                                        alt="gamePage"
-                                        className={styles.gameImage}
-                                    />
-                                    {filteredActions.map((action: IGameAction, index: number) => (
-                                        <div
-                                            key={index}
-                                            className={styles.actionIcon}
-                                            style={{
-                                                left: `${action.x * 100}%`,
-                                                top: `${action.y * 100}%`,
-                                            }}
-                                        >
-                                            <Icon
-                                                type={action.type}
-                                                teamType={action.team.id === gameData.teams.home.id ? 'HOME' : 'AWAY'}
-                                                teamColors={action.team.id === gameData.teams.home.id ? gameData.teams.home.homeColor : gameData.teams.away.homeColor}
-                                                size={iconSize}
-                                                // onClick={() => handleIconClick(action)}
-                                                onClick={(e: React.MouseEvent<Element, MouseEvent>) => handleIconClick(action, e)}
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <div className={styles.visualGuides}>
-                                    <div
-                                        className={`${styles.visualGuideLine} ${styles.horizontalGuide}`}
-                                        style={{top: `${zoneFilter.y[0]}%`}}
-                                    />
-                                    <div
-                                        className={`${styles.visualGuideLine} ${styles.horizontalGuide}`}
-                                        style={{top: `${zoneFilter.y[1]}%`}}
-                                    />
-                                    <div
-                                        className={`${styles.visualGuideLine} ${styles.verticalGuide}`}
-                                        style={{left: `${zoneFilter.x[0]}%`}}
-                                    />
-                                    <div
-                                        className={`${styles.visualGuideLine} ${styles.verticalGuide}`}
-                                        style={{left: `${zoneFilter.x[1]}%`}}
-                                    />
-                                </div>
-
-                                {/* Horizontal (X-axis) Slider */}
-                                <div className={styles.sliderXContainer}>
-                                    <ReactSlider
-                                        className={styles.horizontalSlider}
-                                        thumbClassName={styles.sliderThumb}
-                                        trackClassName={styles.sliderTrack}
-                                        value={zoneFilter.x}
-                                        onChange={(value: any) => setZoneFilter({...zoneFilter, x: value})}
-                                        min={0}
-                                        max={100}
-                                        pearling
-                                        step={1}
-                                        minDistance={5}
-                                    />
-                                </div>
-
-                                {/* Vertical (Y-axis) Slider */}
-                                <div className={styles.sliderYContainer}>
-                                    <ReactSlider
-                                        className={styles.verticalSlider}
-                                        thumbClassName={styles.sliderThumb}
-                                        trackClassName={styles.sliderTrack}
-                                        value={zoneFilter.y}
-                                        onChange={(value: any) => setZoneFilter({...zoneFilter, y: value})}
-                                        min={0}
-                                        max={100}
-                                        pearling
-                                        step={1}
-                                        minDistance={5}
-                                        orientation="vertical"
-                                    />
+                        <div className={styles.filterSection}>
+                            <div className={styles.filterGroup}>
+                                <h3 className={styles.filterTitle}>Team View</h3>
+                                <div className={styles.buttonGroup}>
+                                    <button
+                                        className={`${styles.button} ${selectedTeamView === 'all' ? styles.buttonActive : ''}`}
+                                        onClick={() => setSelectedTeamView('all')}
+                                    >
+                                        All Teams
+                                    </button>
+                                    <button
+                                        className={`${styles.button} ${selectedTeamView === 'home' ? styles.buttonActive : ''}`}
+                                        onClick={() => setSelectedTeamView('home')}
+                                    >
+                                        Home Team
+                                    </button>
+                                    <button
+                                        className={`${styles.button} ${selectedTeamView === 'away' ? styles.buttonActive : ''}`}
+                                        onClick={() => setSelectedTeamView('away')}
+                                    >
+                                        Away Team
+                                    </button>
                                 </div>
                             </div>
 
                             <div className={styles.filterGroup}>
-                                <h3 className={styles.filterTitle}>Player Statistics</h3>
+                                <h3 className={styles.filterTitle}>Periods</h3>
+                                <div className={styles.buttonGroup}>
+                                    {availablePeriods.map((period) => {
+                                        const getPeriodLabel = () => {
+                                            if (gameData.type === GameType.REGULAR) {
+                                                switch (period) {
+                                                    case RegularPeriod.FIRST:
+                                                    case RegularPeriod.SECOND:
+                                                    case RegularPeriod.THIRD:
+                                                        return `Period ${period}`;
+                                                    case RegularPeriod.OT:
+                                                        return 'OT';
+                                                    case RegularPeriod.SO:
+                                                        return 'SO';
+                                                    default:
+                                                        return `Period ${period}`;
+                                                }
+                                            } else {
+                                                if (period <= PlayoffPeriod.THIRD) {
+                                                    return `Period ${period}`;
+                                                } else {
+                                                    const otNumber = period - PlayoffPeriod.THIRD;
+                                                    return `OT${otNumber}`;
+                                                }
+                                            }
+                                        };
 
-                                {positionGroups.map((group) => (
-                                    group.players.length > 0 && (
-                                        <div key={group.title}>
-                                            <h4 className={styles.filterTitle}>{group.title}</h4>
-                                            <div className={styles.tableContainer}>
-                                                <table className={styles.statsTable}>
-                                                    <TableHeader/>
-                                                    <tbody>
-                                                    {group.players.map((player) => (
-                                                        <tr
-                                                            key={player.id}
-                                                            className={`${styles.playerRow} ${selectedPlayer === player.id ? styles.selectedRow : ''}`}
-                                                            onClick={() => {
-                                                                if (selectedPlayer === player.id) {
-                                                                    setSelectedPlayer(null);
-                                                                } else {
-                                                                    setSelectedPlayer(player.id);
-                                                                }
-                                                            }}
-                                                        >
-                                                            <td>{player.name}</td>
-                                                            <td>{player.jerseyNumber}</td>
-                                                            <td>{player.position}</td>
-                                                            <td>{player.goals}</td>
-                                                            <td>{player.shots}</td>
-                                                            <td>{player.turnovers}</td>
-                                                        </tr>
-                                                    ))}
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    )
-                                ))}
-
-                                {uniqueNonRoster.length > 0 && (
-                                    <>
-                                        <h4 className={styles.nonRosterTitle}>Non-Roster Players</h4>
-                                        <ul className={styles.nonRosterList}>
-                                            {uniqueNonRoster.map(player => (
-                                                <li className={styles.nonRosterItem} key={player.id}>
-                                                    {player.name} (#{player.jerseyNumber})
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </>
-                                )}
+                                        return (
+                                            <button
+                                                key={period}
+                                                className={`${styles.periodButton} ${
+                                                    selectedPeriods.has(period) ? styles.periodButtonActive : ''
+                                                }`}
+                                                onClick={() => togglePeriod(period)}
+                                                disabled={isTimeFilterActive}
+                                            >
+                                                {getPeriodLabel()}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             </div>
 
-                            {selectedActionDetails && (
-                                <IconDataModal
-                                    action={selectedActionDetails}
-                                    onClose={() => setSelectedActionDetails(null)}
-                                    gameType={gameData.type}
+                            <div className={styles.filterGroup}>
+                                <h3 className={styles.filterTitle}>Action Types</h3>
+                                <div className={styles.buttonGroup}>
+                                    {availableActionTypes.map((type) => (
+                                        <button
+                                            key={type}
+                                            className={`${styles.periodButton} ${
+                                                selectedActionTypes.has(type) ? styles.periodButtonActive : ''
+                                            }`}
+                                            onClick={() => toggleActionType(type)}
+                                        >
+                                            {type}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className={styles.gameVisualization}>
+                            <div className={styles.timeFilterContainer}>
+                                <div className={styles.timeSliderLabels}>
+                                    <span>{formatTime(timeFilter[0])}</span>
+                                    <span>{formatTime(timeFilter[1])}</span>
+                                </div>
+                                <ReactSlider
+                                    className={styles.horizontalSlider}
+                                    thumbClassName={styles.timeSliderThumb}
+                                    trackClassName={styles.timeSliderTrack}
+                                    value={timeFilter}
+                                    onChange={setTimeFilter}
+                                    min={minTime}
+                                    max={maxTime}
+                                    pearling
+                                    minDistance={1}
                                 />
+                            </div>
+
+                            <div className={styles.visualizationImageWrapper}>
+                                <img
+                                    ref={visualizationImageRef}  // Changed from fieldImageRef
+                                    src={gameData.selectedImage}
+                                    alt="gamePage"
+                                    className={styles.gameImage}
+                                />
+                                {filteredActions.map((action: IGameAction, index: number) => (
+                                    <div
+                                        key={index}
+                                        className={styles.actionIcon}
+                                        style={{
+                                            left: `${action.x * 100}%`,
+                                            top: `${action.y * 100}%`,
+                                        }}
+                                    >
+                                        <Icon
+                                            type={action.type}
+                                            teamType={action.team.id === gameData.teams.home.id ? 'HOME' : 'AWAY'}
+                                            teamColors={action.team.id === gameData.teams.home.id ? gameData.teams.home.homeColor : gameData.teams.away.homeColor}
+                                            size={iconSize}
+                                            // onClick={() => handleIconClick(action)}
+                                            onClick={(e: React.MouseEvent<Element, MouseEvent>) => handleIconClick(action, e)}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className={styles.visualGuides}>
+                                <div
+                                    className={`${styles.visualGuideLine} ${styles.horizontalGuide}`}
+                                    style={{top: `${zoneFilter.y[0]}%`}}
+                                />
+                                <div
+                                    className={`${styles.visualGuideLine} ${styles.horizontalGuide}`}
+                                    style={{top: `${zoneFilter.y[1]}%`}}
+                                />
+                                <div
+                                    className={`${styles.visualGuideLine} ${styles.verticalGuide}`}
+                                    style={{left: `${zoneFilter.x[0]}%`}}
+                                />
+                                <div
+                                    className={`${styles.visualGuideLine} ${styles.verticalGuide}`}
+                                    style={{left: `${zoneFilter.x[1]}%`}}
+                                />
+                            </div>
+
+                            {/* Horizontal (X-axis) Slider */}
+                            <div className={styles.sliderXContainer}>
+                                <ReactSlider
+                                    className={styles.horizontalSlider}
+                                    thumbClassName={styles.sliderThumb}
+                                    trackClassName={styles.sliderTrack}
+                                    value={zoneFilter.x}
+                                    onChange={(value: any) => setZoneFilter({...zoneFilter, x: value})}
+                                    min={0}
+                                    max={100}
+                                    pearling
+                                    step={1}
+                                    minDistance={5}
+                                />
+                            </div>
+
+                            {/* Vertical (Y-axis) Slider */}
+                            <div className={styles.sliderYContainer}>
+                                <ReactSlider
+                                    className={styles.verticalSlider}
+                                    thumbClassName={styles.sliderThumb}
+                                    trackClassName={styles.sliderTrack}
+                                    value={zoneFilter.y}
+                                    onChange={(value: any) => setZoneFilter({...zoneFilter, y: value})}
+                                    min={0}
+                                    max={100}
+                                    pearling
+                                    step={1}
+                                    minDistance={5}
+                                    orientation="vertical"
+                                />
+                            </div>
+                        </div>
+
+                        <div className={styles.filterGroup}>
+                            <h3 className={styles.filterTitle}>Player Statistics</h3>
+
+                            {positionGroups.map((group) => (
+                                group.players.length > 0 && (
+                                    <div key={group.title}>
+                                        <h4 className={styles.filterTitle}>{group.title}</h4>
+                                        <div className={styles.tableContainer}>
+                                            <table className={styles.statsTable}>
+                                                <TableHeader/>
+                                                <tbody>
+                                                {group.players.map((player) => (
+                                                    <tr
+                                                        key={player.id}
+                                                        className={`${styles.playerRow} ${selectedPlayer === player.id ? styles.selectedRow : ''}`}
+                                                        onClick={() => {
+                                                            if (selectedPlayer === player.id) {
+                                                                setSelectedPlayer(null);
+                                                            } else {
+                                                                setSelectedPlayer(player.id);
+                                                            }
+                                                        }}
+                                                    >
+                                                        <td>{player.name}</td>
+                                                        <td>{player.jerseyNumber}</td>
+                                                        <td>{player.position}</td>
+                                                        <td>{player.goals}</td>
+                                                        <td>{player.shots}</td>
+                                                        <td>{player.turnovers}</td>
+                                                    </tr>
+                                                ))}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                )
+                            ))}
+
+                            {uniqueNonRoster.length > 0 && (
+                                <>
+                                    <h4 className={styles.nonRosterTitle}>Non-Roster Players</h4>
+                                    <ul className={styles.nonRosterList}>
+                                        {uniqueNonRoster.map(player => (
+                                            <li className={styles.nonRosterItem} key={player.id}>
+                                                {player.name} (#{player.jerseyNumber})
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </>
                             )}
                         </div>
+
+                        {selectedActionDetails && (
+                            <IconDataModal
+                                action={selectedActionDetails}
+                                onClose={() => setSelectedActionDetails(null)}
+                                gameType={gameData.type}
+                            />
+                        )}
+
                     </div>
                 )}
             </div>
