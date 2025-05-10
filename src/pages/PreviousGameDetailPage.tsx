@@ -3,8 +3,6 @@ import {useLocation, useNavigate} from "react-router-dom";
 import {ActionType} from "../OOP/enums/ActionType";
 import {PlayoffPeriod, RegularPeriod} from "../OOP/enums/Period";
 // @ts-ignore
-import ReactSlider from 'react-slider';
-// @ts-ignore
 import styles from './PreviousGameDetailPage.module.css';
 import {IGame} from "../OOP/interfaces/IGame";
 import {IGameAction} from "../OOP/interfaces/IGameAction";
@@ -76,11 +74,6 @@ const PreviousGameDetailPage = () => {
     // const maxTime = initialMaxTime;
     const [maxTime, setMaxTime] = useState(defaultMaxTime);
 
-    const [zoneFilter, setZoneFilter] = useState<{ x: [number, number], y: [number, number] }>({
-        x: [0, 100],
-        y: [0, 100]
-    });
-
     const isTimeFilterActive = timeFilter[0] > minTime || timeFilter[1] < maxTime;
 
     const filteredActions = gameData.actions.filter(action => {
@@ -91,15 +84,13 @@ const PreviousGameDetailPage = () => {
         // const periodFilter = selectedPeriods.has(action.period);
         const typeFilter = selectedActionTypes.has(action.type);
         const playerFilter = !selectedPlayer || action.player.id === selectedPlayer;
-        const zoneXFilter = action.x * 100 >= zoneFilter.x[0] && action.x * 100 <= zoneFilter.x[1];
-        const zoneYFilter = action.y * 100 >= zoneFilter.y[0] && action.y * 100 <= zoneFilter.y[1];
 
         const actionTimeSeconds = calculateActionTimeSeconds(action);
         const timeFilterPass = actionTimeSeconds >= timeFilter[0] &&
             actionTimeSeconds <= timeFilter[1];
         const periodFilter = isTimeFilterActive ? true : selectedPeriods.has(action.period);
 
-        return teamFilter && periodFilter && typeFilter && playerFilter && zoneXFilter && zoneYFilter && timeFilterPass;
+        return teamFilter && periodFilter && typeFilter && playerFilter && timeFilterPass;
     });
 
     const [selectedActionDetails, setSelectedActionDetails] = useState<IGameAction | null>(null);
