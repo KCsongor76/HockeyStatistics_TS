@@ -17,7 +17,7 @@
 
 .mainWrapper {
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     gap: 24px;
     padding: 16px;
     /*max-width: 1600px;*/
@@ -78,6 +78,10 @@
     .gameContainer,
     .actualDataContainer {
         max-width: calc(50% - 12px);
+    }
+
+    .gameContainer.fullWidth {
+        max-width: 1200px !important; /* Override the 50% width when alone */
     }
 
     .statsTable {

@@ -694,7 +694,7 @@ const GamePage = () => {
             )}
 
             <div className={styles.mainWrapper}>
-                <div className={styles.gameContainer}>
+                <div className={`${styles.gameContainer} ${!showDetails ? styles.fullWidth : ''}`}>
                     <div
                         className={styles.fieldContainer}
                         onClick={handleClick}
