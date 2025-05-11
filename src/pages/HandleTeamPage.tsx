@@ -1,24 +1,37 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useLocation, useNavigate} from "react-router-dom";
 import {TeamService} from "../OOP/services/TeamService";
 // @ts-ignore
 import styles from './HandleTeamPage.module.css';
 import {ITeam} from "../OOP/interfaces/ITeam";
+import {GameService} from "../OOP/services/GameService";
+import {IGame} from "../OOP/interfaces/IGame";
+import PreviousGamesPage from "./PreviousGamesPage";
+import {GameType} from "../OOP/enums/GameType";
 
-// todo: buttons in middle
-// todo: show games in which they played (a list of the games, as PreviousGamesPage)
-// todo: both player and games list, make them dropdown styled
-// todo: add stats to player table from all the games they played (Games played, goals, shots, turnovers etc.)
 // todo: edit team: unify styling with start page
+
+interface TeamStats {
+    gamesPlayed: number;
+    wins: number;
+    losses: number;
+    goalsFor: number;
+    goalsAgainst: number;
+    shots: number;
+    turnovers: number;
+    shootingPercentage: number;
+}
 
 const HandleTeamPage = () => {
     const location = useLocation();
     const initialTeam = location.state.team as ITeam;
-
     const [team, setTeam] = useState(initialTeam);
     const [name, setName] = useState(initialTeam.name);
     const [logo, setLogo] = useState<File | null>(null);
     const [isEditing, setIsEditing] = useState(false);
+    const [games, setGames] = useState<IGame[]>([]);
+    const [showPlayers, setShowPlayers] = useState(false);
+    const [showGames, setShowGames] = useState(false);
 
     const navigate = useNavigate();
 
@@ -99,6 +112,100 @@ const HandleTeamPage = () => {
         setIsEditing(false);
     }
 
+    const calculateStats = (games: IGame[]): TeamStats => {
+        let stats: TeamStats = {
+            gamesPlayed: 0,
+            wins: 0,
+            losses: 0,
+            goalsFor: 0,
+            goalsAgainst: 0,
+            shots: 0,
+            turnovers: 0,
+            shootingPercentage: 0
+        };
+
+        games.forEach(game => {
+            const isHomeTeam = game.teams.home.id === team.id;
+            const teamSide = isHomeTeam ? 'home' : 'away';
+            const opponentSide = isHomeTeam ? 'away' : 'home';
+
+            stats.gamesPlayed++;
+            stats.goalsFor += game.score[teamSide].goals;
+            stats.goalsAgainst += game.score[opponentSide].goals;
+            stats.shots += game.score[teamSide].shots;
+            stats.turnovers += game.score[teamSide].turnovers;
+
+            // Determine win/loss
+            if (game.score[teamSide].goals > game.score[opponentSide].goals) {
+                stats.wins++;
+            } else {
+                stats.losses++;
+            }
+        });
+
+        stats.shootingPercentage = stats.shots > 0
+            ? (stats.goalsFor / stats.shots) * 100
+            : 0;
+
+        return stats;
+    };
+
+    const teamGames = games.filter(game =>
+        game.teams?.home.id === team.id ||
+        game.teams?.away.id === team.id
+    );
+
+    const regularSeasonGames = teamGames.filter(game => game.type === GameType.REGULAR);
+    const playoffGames = teamGames.filter(game => game.type === GameType.PLAYOFF);
+
+    const regularStats = calculateStats(regularSeasonGames);
+    const playoffStats = calculateStats(playoffGames);
+
+    useEffect(() => {
+        const fetchGames = async () => {
+            try {
+                const gamesData = await GameService.getAllGames();
+                setGames(gamesData);
+            } catch (error) {
+                console.error("Error fetching games:", error);
+            }
+        };
+        fetchGames();
+    }, []);
+
+
+    const StatsTable: React.FC<{ stats: TeamStats }> = ({ stats }) => (
+        <div className={styles.tableContainer}>
+            <table>
+                <thead>
+                <tr>
+                    <th>GP</th>
+                    <th>W</th>
+                    <th>L</th>
+                    <th>GF</th>
+                    <th>GA</th>
+                    <th>Shots</th>
+                    <th>TO</th>
+                    <th>SH%</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>{stats.gamesPlayed}</td>
+                    <td>{stats.wins}</td>
+                    <td>{stats.losses}</td>
+                    <td>{stats.goalsFor}</td>
+                    <td>{stats.goalsAgainst}</td>
+                    <td>{stats.shots}</td>
+                    <td>{stats.turnovers}</td>
+                    <td>{stats.shootingPercentage.toFixed(1)}%</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    );
+
+
     return (
         <div className={styles.container}>
 
@@ -139,36 +246,68 @@ const HandleTeamPage = () => {
                 </div>
             )}
 
-            {team.players && team.players.length > 0 ? (
-                <div className={styles.tableContainer}>
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>#</th>
-                            <th>Position</th>
-                            <th></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {team.players.map((player) => (
-                            <tr key={player.id}>
-                                <td>{player.name}</td>
-                                <td>{player.jerseyNumber}</td>
-                                <td>{player.position}</td>
-                                <td>
-                                    <button className={styles.editButton}
-                                            onClick={() => navigate(`../../handlePlayers/${player.id}`, {state: {player}})}>View Player
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
+            <div className={styles.playersDropdown}>
+                <div className={styles.dropdownHeader} onClick={() => setShowPlayers(!showPlayers)}>
+                    <h3>Players</h3>
+                    <span>{showPlayers ? '▲' : '▼'}</span>
                 </div>
-            ) : (
-                <p className={styles.noPlayers}>No players</p>
-            )}
+                {showPlayers && (
+                    <>
+                        {team.players && team.players.length > 0 ? (
+                            <div className={styles.tableContainer}>
+                                <table>
+                                    <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>#</th>
+                                        <th>Position</th>
+                                        <th></th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {team.players.map((player) => (
+                                        <tr key={player.id}>
+                                            <td>{player.name}</td>
+                                            <td>{player.jerseyNumber}</td>
+                                            <td>{player.position}</td>
+                                            <td>
+                                                <button className={styles.editButton}
+                                                        onClick={() => navigate(`../../handlePlayers/${player.id}`, {state: {player}})}>View
+                                                    Player
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        ) : (
+                            <p className={styles.noPlayers}>No players</p>
+                        )}
+                    </>
+                )}
+            </div>
+
+            <div className={styles.statsSection}>
+                <h3 className={styles.subHeader}>Regular Season Stats</h3>
+                <StatsTable stats={regularStats}/>
+
+                <h3 className={styles.subHeader} style={{marginTop: '2rem'}}>Playoff Stats</h3>
+                <StatsTable stats={playoffStats}/>
+            </div>
+
+            <div className={styles.gamesDropdown}>
+                <div className={styles.dropdownHeader} onClick={() => setShowGames(!showGames)}>
+                    <h3>Team Games</h3>
+                    <span>{showGames ? '▲' : '▼'}</span>
+                </div>
+                {showGames && (
+                    <PreviousGamesPage
+                        playerGames={teamGames}
+                        showFilters={false}
+                    />
+                )}
+            </div>
 
             <div className={styles.buttonGroup}>
                 <button className={styles.backButton} onClick={goBackHandler}>Go Back</button>
