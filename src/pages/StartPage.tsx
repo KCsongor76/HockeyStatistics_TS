@@ -12,8 +12,7 @@ import {IPlayer} from "../OOP/interfaces/IPlayer";
 import {ITeam} from "../OOP/interfaces/ITeam";
 import ContinueOrStartOverModal from '../modals/ContinueOrStartOverModal';
 import {IChampionship} from "../OOP/interfaces/IChampionship";
-
-// todo: roster selection - have different sections for goalies, defenders and forwards
+import {Position} from "../OOP/enums/Position";
 
 type FormState = {
     championship: IChampionship;
@@ -230,6 +229,33 @@ const StartPage: React.FC = () => {
         });
     };
 
+    const validateRosterLimits = (roster: IPlayer[], isHome: boolean) => {
+        const isErste = formData.championship.name.toLowerCase().includes('erste');
+        const maxSkaters = isErste ? 19 : 20;
+        const maxGoalies = 2;
+
+        const goalies = roster.filter(p => p.position === 'Goalie').length;
+        const skaters = roster.length - goalies;
+
+        if (goalies > maxGoalies) {
+            alert(`${isHome ? 'Home' : 'Away'} team cannot have more than ${maxGoalies} goalies`);
+            return false;
+        }
+
+        if (skaters > maxSkaters) {
+            alert(`${isHome ? 'Home' : 'Away'} team cannot have more than ${maxSkaters} skaters`);
+            return false;
+        }
+
+        return true;
+    };
+
+    const validateMinimumPlayers = (roster: IPlayer[]) => {
+        const goalies = roster.filter(p => p.position === 'Goalie').length;
+        const skaters = roster.length - goalies;
+        return skaters >= 15 && goalies >= 2;
+    };
+
     const submitHandler = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
@@ -260,6 +286,17 @@ const StartPage: React.FC = () => {
             return;
         }
 
+        // todo:
+        // if (!validateMinimumPlayers(formData.homeRoster)) {
+        //     alert("Home team needs at least 15 skaters and 2 goalies");
+        //     return;
+        // }
+        //
+        // if (!validateMinimumPlayers(formData.awayRoster)) {
+        //     alert("Away team needs at least 15 skaters and 2 goalies");
+        //     return;
+        // }
+
         localStorage.setItem("formData", JSON.stringify(formData));
         navigate("/game", {state: {formData}});
     };
@@ -280,9 +317,29 @@ const StartPage: React.FC = () => {
         setShowContinueModal(false);
     };
 
-    function addPlayerToRosterHandler(player: IPlayer, isHome: boolean) {
+    const addPlayerToRosterHandler = (player: IPlayer, isHome: boolean) => {
         setFormData(prev => {
             if (!prev) return prev;
+
+            const currentRoster = isHome ? prev.homeRoster : prev.awayRoster;
+            const isGoalie = player.position === 'Goalie';
+
+            const currentGoalies = currentRoster.filter(p => p.position === Position.GOALIE).length;
+            const currentSkaters = currentRoster.filter(p => p.position !== Position.GOALIE).length;
+
+            const isErste = prev.championship.name.toLowerCase().includes('erste');
+            const maxSkaters = isErste ? 19 : 20;
+            const maxGoalies = 2;
+
+            if (isGoalie && currentGoalies >= maxGoalies) {
+                alert(`Maximum ${maxGoalies} goalies allowed`);
+                return prev;
+            }
+
+            if (!isGoalie && currentSkaters >= maxSkaters) {
+                alert(`Maximum ${maxSkaters} skaters allowed`);
+                return prev;
+            }
 
             if (isHome) {
                 const newHomeRosterOut = prev.homeRosterOut.filter(p => p.id !== player.id);
@@ -302,9 +359,9 @@ const StartPage: React.FC = () => {
                 };
             }
         });
-    }
+    };
 
-    function removePlayerFromRosterHandler(player: IPlayer, isHome: boolean) {
+    const removePlayerFromRosterHandler = (player: IPlayer, isHome: boolean) => {
         setFormData(prev => {
             if (!prev) return prev;
 
@@ -326,7 +383,41 @@ const StartPage: React.FC = () => {
                 };
             }
         });
-    }
+    };
+
+    const renderPositionSection = (players: IPlayer[], position: Position, isHome: boolean) => (
+        <>
+            <h4>{position}s</h4>
+            <table className={styles.table}>
+                <thead>
+                <tr className={styles.tr}>
+                    <th className={styles.th}>#</th>
+                    <th className={styles.th}>Name</th>
+                    <th className={styles.th}></th>
+                </tr>
+                </thead>
+                <tbody>
+                {players
+                    .filter(player => player.position === position)
+                    .map(player => (
+                        <tr key={player.id} className={styles.tr}>
+                            <td className={styles.td}>{player.jerseyNumber}</td>
+                            <td className={styles.td}>{player.name}</td>
+                            <td className={styles.td}>
+                                <button
+                                    className={`${styles.rosterButton} ${styles.addButton}`}
+                                    type="button"
+                                    onClick={() => addPlayerToRosterHandler(player, isHome)}
+                                >
+                                    Add
+                                </button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </>
+    );
 
     return (
         <form className={styles.formContainer} onSubmit={submitHandler}>
@@ -499,32 +590,9 @@ const StartPage: React.FC = () => {
             {isDropDownOpen && (
                 <div>
                     <h3>Home Team Roster</h3>
-                    <table className={styles.table}>
-                        <thead>
-                        <tr className={styles.tr}>
-                            <th className={styles.th}>#</th>
-                            <th className={styles.th}>Name</th>
-                            <th className={styles.th}></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {formData.homeRosterOut.map((player) => (
-                            <tr key={player.id} className={styles.tr}>
-                                <td className={styles.td}>{player.jerseyNumber}</td>
-                                <td className={styles.td}>{player.name}</td>
-                                <td className={styles.td}>
-                                    <button
-                                        className={`${styles.rosterButton} ${styles.addButton}`}
-                                        type="button"
-                                        onClick={() => addPlayerToRosterHandler(player, true)}
-                                    >
-                                        Add
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
+                    {renderPositionSection(formData.homeRosterOut, Position.GOALIE, true)}
+                    {renderPositionSection(formData.homeRosterOut, Position.DEFENDER, true)}
+                    {renderPositionSection(formData.homeRosterOut, Position.FORWARD, true)}
 
                     <h4>Selected Home Roster</h4>
                     <table className={styles.table}>
@@ -532,14 +600,16 @@ const StartPage: React.FC = () => {
                         <tr className={styles.tr}>
                             <th className={styles.th}>#</th>
                             <th className={styles.th}>Name</th>
+                            <th className={styles.th}>Position</th>
                             <th className={styles.th}></th>
                         </tr>
                         </thead>
                         <tbody>
-                        {formData.homeRoster.map((player) => (
+                        {formData.homeRoster.map(player => (
                             <tr key={player.id} className={styles.tr}>
                                 <td className={styles.td}>{player.jerseyNumber}</td>
                                 <td className={styles.td}>{player.name}</td>
+                                <td className={styles.td}>{player.position}</td>
                                 <td className={styles.td}>
                                     <button
                                         className={`${styles.rosterButton} ${styles.removeButton}`}
@@ -554,34 +624,10 @@ const StartPage: React.FC = () => {
                         </tbody>
                     </table>
 
-                    {/* Away Team Roster Selection */}
                     <h3>Away Team Roster</h3>
-                    <table className={styles.table}>
-                        <thead>
-                        <tr className={styles.tr}>
-                            <th className={styles.th}>#</th>
-                            <th className={styles.th}>Name</th>
-                            <th className={styles.th}></th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {formData.awayRosterOut.map((player) => (
-                            <tr key={player.id} className={styles.tr}>
-                                <td className={styles.td}>{player.jerseyNumber}</td>
-                                <td className={styles.td}>{player.name}</td>
-                                <td className={styles.td}>
-                                    <button
-                                        className={`${styles.rosterButton} ${styles.addButton}`}
-                                        type="button"
-                                        onClick={() => addPlayerToRosterHandler(player, false)}
-                                    >
-                                        Add
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
+                    {renderPositionSection(formData.awayRosterOut, Position.GOALIE, false)}
+                    {renderPositionSection(formData.awayRosterOut, Position.DEFENDER, false)}
+                    {renderPositionSection(formData.awayRosterOut, Position.FORWARD, false)}
 
                     <h4>Selected Away Roster</h4>
                     <table className={styles.table}>
@@ -589,14 +635,16 @@ const StartPage: React.FC = () => {
                         <tr className={styles.tr}>
                             <th className={styles.th}>#</th>
                             <th className={styles.th}>Name</th>
+                            <th className={styles.th}>Position</th>
                             <th className={styles.th}></th>
                         </tr>
                         </thead>
                         <tbody>
-                        {formData.awayRoster.map((player) => (
+                        {formData.awayRoster.map(player => (
                             <tr key={player.id} className={styles.tr}>
                                 <td className={styles.td}>{player.jerseyNumber}</td>
                                 <td className={styles.td}>{player.name}</td>
+                                <td className={styles.td}>{player.position}</td>
                                 <td className={styles.td}>
                                     <button
                                         className={`${styles.rosterButton} ${styles.removeButton}`}
