@@ -4,7 +4,7 @@ import ReactSlider from 'react-slider';
 import {GameType} from "../OOP/enums/GameType";
 import {PlayoffPeriod, RegularPeriod} from "../OOP/enums/Period";
 import {ITeamColor} from "../OOP/interfaces/ITeamColor";
-import {useLocation} from "react-router-dom";
+import { useBlocker, useLocation } from 'react-router-dom';
 import {ActionType} from "../OOP/enums/ActionType";
 import Icon from "../components/Icon";
 import {IChampionship} from "../OOP/interfaces/IChampionship";
@@ -557,6 +557,23 @@ const GamePage = () => {
         {title: 'Defenders', players: defenders},
         {title: 'Forwards', players: forwards}
     ];
+
+    const blocker = useBlocker(({ currentLocation, nextLocation }) => {
+        return currentLocation.pathname === '/game' && nextLocation.pathname !== '/game';
+    });
+
+    useEffect(() => {
+        if (blocker.state === 'blocked') {
+            const shouldProceed = window.confirm(
+                'Are you sure you want to leave? Any unsaved progress will be lost.'
+            );
+            if (shouldProceed) {
+                blocker.proceed();
+            } else {
+                blocker.reset();
+            }
+        }
+    }, [blocker.state]);
 
     const TableHeader = () => (
         <thead>
