@@ -62,3 +62,41 @@
     border-bottom: 2px solid #666;
     padding-bottom: 0.5rem;
 }
+
+.statsSection {
+    margin: 2rem 0;
+}
+
+.subHeader {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+}
+
+.tableContainer {
+    margin: 1rem 0;
+    overflow-x: auto;
+}
+
+.tableContainer table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tableContainer th,
+.tableContainer td {
+    padding: 0.75rem;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+.tableContainer th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.tableContainer tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
