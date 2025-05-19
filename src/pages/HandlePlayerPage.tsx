@@ -31,6 +31,7 @@ const HandlePlayerPage = () => {
     const [games, setGames] = useState<IGame[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [showGames, setShowGames] = useState(false);
 
     const navigate = useNavigate();
 
@@ -173,7 +174,6 @@ const HandlePlayerPage = () => {
             <p className={styles.jerseyNumber}>Jersey number: #{player.jerseyNumber}</p>
             <button className={styles.button} onClick={transferNavigate}>Transfer</button>
             <button className={styles.button} onClick={goBackNavigate}>Go Back</button>
-            <h3 className={styles.subHeader}>Games Played In:</h3>
 
             <div className={styles.statsSection}>
                 <h3 className={styles.subHeader}>Regular Season Stats</h3>
@@ -183,10 +183,20 @@ const HandlePlayerPage = () => {
                 <PlayerStatsTable stats={playoffStats}/>
             </div>
 
-            <PreviousGamesPage
-                playerGames={playerGames}
-                showFilters={false}
-            />
+            <h3 className={styles.subHeader}>Games Played In:</h3>
+
+            <div className={styles.gamesDropdown}>
+                <div className={styles.dropdownHeader} onClick={() => setShowGames(!showGames)}>
+                    <h3>Player Games</h3>
+                    <span>{showGames ? '▲' : '▼'}</span>
+                </div>
+                {showGames && (
+                    <PreviousGamesPage
+                        playerGames={playerGames}
+                        showFilters={false}
+                    />
+                )}
+            </div>
         </div>
     );
 };

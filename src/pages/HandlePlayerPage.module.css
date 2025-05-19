@@ -100,3 +100,19 @@
 .tableContainer tr:nth-child(even) {
     background-color: #f9f9f9;
 }
+
+.gamesDropdown {
+    margin-top: 2rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.dropdownHeader {
+    padding: 1rem;
+    background-color: #f7fafc;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}

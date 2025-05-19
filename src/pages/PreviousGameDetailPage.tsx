@@ -100,7 +100,7 @@ const PreviousGameDetailPage = () => {
         if (fieldImageRef.current) {
             const imageWidth = fieldImageRef.current.offsetWidth;
             // Calculate icon size as a percentage of image width (3% in this example)
-            const newSize = Math.max(Math.floor(imageWidth * 0.03), 20);
+            const newSize = Math.max(Math.floor(imageWidth * 0.01), 20);
             setIconSize(newSize);
         }
     };

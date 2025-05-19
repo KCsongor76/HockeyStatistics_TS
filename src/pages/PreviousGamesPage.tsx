@@ -8,6 +8,10 @@ import {ChampionshipService} from "../OOP/services/ChampionshipService";
 import {TeamService} from "../OOP/services/TeamService";
 import {ITeam} from "../OOP/interfaces/ITeam";
 import {IChampionship} from "../OOP/interfaces/IChampionship";
+import {GameType} from "../OOP/enums/GameType";
+
+// todo: as it loads, it first shows: no games found, then it shows the games.
+//  maybe show a loading screen and then show the games.
 
 // todo: make smaller components
 // todo: scrap styling, unify
@@ -25,6 +29,7 @@ const PreviousGamesPage: React.FC<PreviousGamesPageProps> = ({playerGames: playe
     const [homeTeamFilter, setHomeTeamFilter] = useState('');
     const [awayTeamFilter, setAwayTeamFilter] = useState('');
     const [championshipFilter, setChampionshipFilter] = useState('');
+    const [gameTypeFilter, setGameTypeFilter] = useState('');
     const [sortOrder, setSortOrder] = useState('newest');
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
@@ -84,7 +89,8 @@ const PreviousGamesPage: React.FC<PreviousGamesPageProps> = ({playerGames: playe
         const homeMatch = homeTeamFilter ? game.teams?.home.id === homeTeamFilter : true;
         const awayMatch = awayTeamFilter ? game.teams?.away.id === awayTeamFilter : true;
         const championshipMatch = championshipFilter ? game.championship.id === championshipFilter : true;
-        return homeMatch && awayMatch && championshipMatch;
+        const gameTypeMatch = gameTypeFilter ? game.type === gameTypeFilter : true;
+        return homeMatch && awayMatch && championshipMatch && gameTypeMatch;
     });
 
     const sortedGames = [...filteredGames].sort((a, b) => {
@@ -112,74 +118,80 @@ const PreviousGamesPage: React.FC<PreviousGamesPageProps> = ({playerGames: playe
 
             {showFilters && (
                 <div className={styles.controlsContainer}>
-                    {/* ... existing filter controls ... */}
+                    <select
+                        className={styles.selectFilter}
+                        value={homeTeamFilter}
+                        onChange={(e) => setHomeTeamFilter(e.target.value)}
+                    >
+                        <option value="">All Home Teams</option>
+                        {teams.map(team => (
+                            <option key={team.id} value={team.id}>
+                                {team.name}
+                            </option>
+                        ))}
+                    </select>
+
+                    <select
+                        className={styles.selectFilter}
+                        value={awayTeamFilter}
+                        onChange={(e) => setAwayTeamFilter(e.target.value)}
+                    >
+                        <option value="">All Away Teams</option>
+                        {teams.map(team => (
+                            <option key={team.id} value={team.id}>
+                                {team.name}
+                            </option>
+                        ))}
+                    </select>
+
+                    <select
+                        className={styles.selectFilter}
+                        value={championshipFilter}
+                        onChange={(e) => setChampionshipFilter(e.target.value)}
+                    >
+                        <option value="">All Championships</option>
+                        {championships.map(championship => (
+                            <option key={championship.id} value={championship.id}>
+                                {championship.name}
+                            </option>
+                        ))}
+                    </select>
+
+                    <select
+                        className={styles.selectFilter}
+                        value={gameTypeFilter}
+                        onChange={(e) => setGameTypeFilter(e.target.value)}
+                    >
+                        <option value="">All types</option>
+                        <option value={GameType.REGULAR}>{GameType.REGULAR}</option>
+                        <option value={GameType.PLAYOFF}>{GameType.PLAYOFF}</option>
+                    </select>
+
+                    <select
+                        className={styles.selectFilter}
+                        value={sortOrder}
+                        onChange={(e) => setSortOrder(e.target.value)}
+                    >
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                    </select>
+
+                    <select
+                        className={styles.selectFilter}
+                        value={itemsPerPage}
+                        onChange={(e) => {
+                            setItemsPerPage(Number(e.target.value));
+                            setCurrentPage(1);
+                        }}
+                    >
+                        <option value={10}>10 per page</option>
+                        <option value={25}>25 per page</option>
+                        <option value={50}>50 per page</option>
+                        <option value={75}>75 per page</option>
+                        <option value={100}>100 per page</option>
+                    </select>
                 </div>
             )}
-
-            <div className={styles.controlsContainer}>
-                <select
-                    className={styles.selectFilter}
-                    value={homeTeamFilter}
-                    onChange={(e) => setHomeTeamFilter(e.target.value)}
-                >
-                    <option value="">All Home Teams</option>
-                    {teams.map(team => (
-                        <option key={team.id} value={team.id}>
-                            {team.name}
-                        </option>
-                    ))}
-                </select>
-
-                <select
-                    className={styles.selectFilter}
-                    value={awayTeamFilter}
-                    onChange={(e) => setAwayTeamFilter(e.target.value)}
-                >
-                    <option value="">All Away Teams</option>
-                    {teams.map(team => (
-                        <option key={team.id} value={team.id}>
-                            {team.name}
-                        </option>
-                    ))}
-                </select>
-
-                <select
-                    className={styles.selectFilter}
-                    value={championshipFilter}
-                    onChange={(e) => setChampionshipFilter(e.target.value)}
-                >
-                    <option value="">All Championships</option>
-                    {championships.map(championship => (
-                        <option key={championship.id} value={championship.id}>
-                            {championship.name}
-                        </option>
-                    ))}
-                </select>
-
-                <select
-                    className={styles.selectFilter}
-                    value={sortOrder}
-                    onChange={(e) => setSortOrder(e.target.value)}
-                >
-                    <option value="newest">Newest First</option>
-                    <option value="oldest">Oldest First</option>
-                </select>
-
-                <select
-                    className={styles.selectFilter}
-                    value={itemsPerPage}
-                    onChange={(e) => {
-                        setItemsPerPage(Number(e.target.value));
-                        setCurrentPage(1);
-                    }}
-                >
-                    <option value={10}>10 per page</option>
-                    <option value={25}>25 per page</option>
-                    <option value={50}>50 per page</option>
-                    <option value={75}>75 per page</option>
-                    <option value={100}>100 per page</option>
-                </select>
-            </div>
 
             <div className={styles.listContainer}>
                 <ul className={styles.list}>
@@ -190,7 +202,7 @@ const PreviousGamesPage: React.FC<PreviousGamesPageProps> = ({playerGames: playe
                             onClick={() => navigate(`/previous_games/${game.id}`, {state: game})}
                         >
                             <div className={styles.gameContent}>
-                                <div className={styles.teamSection}>
+                            <div className={styles.teamSection}>
                                     <img className={styles.teamLogo}
                                          src={game.teams?.home.logo}
                                          alt={game.teams?.home.name}/>

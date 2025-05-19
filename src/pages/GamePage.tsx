@@ -1,6 +1,4 @@
 import React, {useEffect, useRef, useState} from 'react';
-// @ts-ignore
-import ReactSlider from 'react-slider';
 import {GameType} from "../OOP/enums/GameType";
 import {PlayoffPeriod, RegularPeriod} from "../OOP/enums/Period";
 import {ITeamColor} from "../OOP/interfaces/ITeamColor";
@@ -922,6 +920,7 @@ const GamePage = () => {
                                             type={action.type}
                                             teamType={action.team.id === gameData.teams.home.id ? 'HOME' : 'AWAY'}
                                             teamColors={action.team.id === gameData.teams.home.id ? gameData.teams.home.homeColor : gameData.teams.away.homeColor}
+                                            // teamColors={action.team.id === formData.homeTeam.id ? formData.homeColor : formData.awayColor /* oop - .equals method*/}
                                             size={iconSize}
                                             onClick={(e: React.MouseEvent<Element, MouseEvent>) => handleIconClick(action, e)}
                                         />

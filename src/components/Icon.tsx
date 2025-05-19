@@ -23,19 +23,20 @@ const Icon = ({type, teamType, teamColors, size = 50, onClick}: IconProps) => {
         justifyContent: 'center',
         position: 'relative',
         cursor: 'pointer',
+        // border: '1px solid #000', // Hardcoded black border
     };
 
     const shapeStyle = {
         ...style,
-        borderRadius: type === ActionType.SHOT ? '50%' : type === ActionType.GOAL ? '12px' : '0',
-        transform: type === ActionType.GOAL ? 'rotate(45deg)' : 'none'
+        borderRadius: type === ActionType.SHOT ? '50%' : '0',
+        clipPath: type === ActionType.GOAL
+            ? 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
+            : 'none'
     };
 
     return (
         <div style={shapeStyle} onClick={onClick}>
-            <div style={{transform: type === ActionType.GOAL ? 'rotate(-45deg)' : 'none'}}>
-                {type[0]}
-            </div>
+            {type[0]}
         </div>
     );
 };
