@@ -23,11 +23,12 @@ import {loader as CreatePlayerPageLoader} from "./pages/CreatePlayerPage";
 import {loader as playerCRUDPageLoader} from "./pages/PlayerCRUDPage";
 import HandlePlayerPage from "./pages/HandlePlayerPage";
 
-// todo: switch to oop classes
+// todo: switch to oop classes - merge main/interface-branch
 // todo: services: oop/atomic/batch writes/etc
 // todo: make all files typescript correct
 // todo: suspense?
 // todo: reset styling, unify in the entire app
+// todo: instead of window.confirm(), use maybe custom modals?
 
 function App() {
     const [isLoaded, setIsLoaded] = useState<boolean>(false);

@@ -4,10 +4,8 @@ import {TeamService} from "../OOP/services/TeamService";
 // @ts-ignore
 import styles from './TransferPlayerPage.module.css';
 import {IPlayer} from "../OOP/interfaces/IPlayer";
-import {ITeam} from "../OOP/interfaces/ITeam"; // Import the CSS module
-
-// todo: button color
-// todo: team sorting, maybe filtering by championship
+import {ITeam} from "../OOP/interfaces/ITeam";
+import TransferForm from "../components/forms/TransferForm"; // Import the CSS module
 
 const TransferPlayerPage = () => {
     const player = useLocation().state.player as IPlayer;
@@ -69,24 +67,17 @@ const TransferPlayerPage = () => {
             <h2 className={styles.header}>Transfer Player</h2>
             <p>Player: {player.name}</p>
             <p>From: {teams.find(team => team.id === player.teamId)?.name}</p>
-            <form className={styles.form} onSubmit={submitHandler}>
-                <label className={styles.label} htmlFor="team">To team:</label>
-                <select
-                    id="team"
-                    className={styles.select}
-                    value={transferToTeam.id || ''} // Default to an empty string if no team is selected
-                    onChange={(e) => setTransferToTeam(teams.find(team => team.id === e.target.value) ?? {} as ITeam)}
-                >
-                    <option value="" disabled>Select a team</option>
-                    {teams.filter(team => team.id !== player.teamId).map((team) => (
-                        <option key={team.id} value={team.id}>
-                            {team.name}
-                        </option>
-                    ))}
-                </select>
-                <button className={styles.button} type="submit">Transfer</button>
-                <button className={styles.button} type="button" onClick={() => navigate(-1)}>Go Back</button>
-            </form>
+            <TransferForm
+                styles={styles}
+                onSubmitHandler={submitHandler}
+                selectedTeamId={transferToTeam?.id}
+                onTeamChange={(teamId) =>
+                    setTransferToTeam(teams.find(team => team.id === teamId) || {} as ITeam)
+                }
+                teams={teams}
+                player={player}
+                onGoBack={() => navigate(-1)}
+            />
         </div>
     );
 };
