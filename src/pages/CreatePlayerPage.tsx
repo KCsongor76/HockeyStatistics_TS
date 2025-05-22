@@ -40,8 +40,6 @@ const CreatePlayerPage = () => {
             return;
         }
 
-        // Creating the player object
-        // const newPlayer = new Player("0", name, position, jerseyNumber, teamId);
 
         const newPlayer = {
             id: "0",

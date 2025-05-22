@@ -1,5 +1,4 @@
 import React, {useEffect, useState} from 'react';
-import {useNavigate} from "react-router-dom";
 // @ts-ignore
 import styles from './PreviousGamesPage.module.css';
 import {IGame} from "../OOP/interfaces/IGame";
@@ -8,10 +7,9 @@ import {ChampionshipService} from "../OOP/services/ChampionshipService";
 import {TeamService} from "../OOP/services/TeamService";
 import {ITeam} from "../OOP/interfaces/ITeam";
 import {IChampionship} from "../OOP/interfaces/IChampionship";
-import {GameType} from "../OOP/enums/GameType";
-
-// todo: as it loads, it first shows: no games found, then it shows the games.
-//  maybe show a loading screen and then show the games.
+import FilterControls from '../components/FilterControls';
+import GameListItem from '../components/GameListItem';
+import Pagination from '../components/Pagination';
 
 // todo: make smaller components
 // todo: scrap styling, unify
@@ -33,16 +31,6 @@ const PreviousGamesPage: React.FC<PreviousGamesPageProps> = ({playerGames: playe
     const [sortOrder, setSortOrder] = useState('newest');
     const [itemsPerPage, setItemsPerPage] = useState(10);
     const [currentPage, setCurrentPage] = useState(1);
-    const navigate = useNavigate();
-
-    const formatTime = (timestamp: string) => {
-        const date = new Date(timestamp);
-        return date.toLocaleDateString('en-CA', {
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit'
-        });
-    }
 
     useEffect(() => {
         const fetchGames = async () => {
@@ -104,152 +92,55 @@ const PreviousGamesPage: React.FC<PreviousGamesPageProps> = ({playerGames: playe
     const currentGames = sortedGames.slice(indexOfFirstGame, indexOfLastGame);
     const totalPages = Math.ceil(sortedGames.length / itemsPerPage);
 
-    if (loading) {
-        return <div className={styles.container}>Loading...</div>;
-    }
+    const handlePageChange = (newPage: number) => {
+        setCurrentPage(newPage);
+    };
 
-    if (games.length === 0) {
-        return <div className={styles.container}>No games found.</div>;
-    }
+    if (loading) return <div className={styles.container}>Loading...</div>;
+    if (games.length === 0) return <div className={styles.container}>No games found.</div>;
 
     return (
         <div className={styles.container}>
             <h1 className={styles.header}>Previous Games</h1>
 
             {showFilters && (
-                <div className={styles.controlsContainer}>
-                    <select
-                        className={styles.selectFilter}
-                        value={homeTeamFilter}
-                        onChange={(e) => setHomeTeamFilter(e.target.value)}
-                    >
-                        <option value="">All Home Teams</option>
-                        {teams.map(team => (
-                            <option key={team.id} value={team.id}>
-                                {team.name}
-                            </option>
-                        ))}
-                    </select>
-
-                    <select
-                        className={styles.selectFilter}
-                        value={awayTeamFilter}
-                        onChange={(e) => setAwayTeamFilter(e.target.value)}
-                    >
-                        <option value="">All Away Teams</option>
-                        {teams.map(team => (
-                            <option key={team.id} value={team.id}>
-                                {team.name}
-                            </option>
-                        ))}
-                    </select>
-
-                    <select
-                        className={styles.selectFilter}
-                        value={championshipFilter}
-                        onChange={(e) => setChampionshipFilter(e.target.value)}
-                    >
-                        <option value="">All Championships</option>
-                        {championships.map(championship => (
-                            <option key={championship.id} value={championship.id}>
-                                {championship.name}
-                            </option>
-                        ))}
-                    </select>
-
-                    <select
-                        className={styles.selectFilter}
-                        value={gameTypeFilter}
-                        onChange={(e) => setGameTypeFilter(e.target.value)}
-                    >
-                        <option value="">All types</option>
-                        <option value={GameType.REGULAR}>{GameType.REGULAR}</option>
-                        <option value={GameType.PLAYOFF}>{GameType.PLAYOFF}</option>
-                    </select>
-
-                    <select
-                        className={styles.selectFilter}
-                        value={sortOrder}
-                        onChange={(e) => setSortOrder(e.target.value)}
-                    >
-                        <option value="newest">Newest First</option>
-                        <option value="oldest">Oldest First</option>
-                    </select>
-
-                    <select
-                        className={styles.selectFilter}
-                        value={itemsPerPage}
-                        onChange={(e) => {
-                            setItemsPerPage(Number(e.target.value));
-                            setCurrentPage(1);
-                        }}
-                    >
-                        <option value={10}>10 per page</option>
-                        <option value={25}>25 per page</option>
-                        <option value={50}>50 per page</option>
-                        <option value={75}>75 per page</option>
-                        <option value={100}>100 per page</option>
-                    </select>
-                </div>
+                <FilterControls
+                    teams={teams}
+                    championships={championships}
+                    homeTeamFilter={homeTeamFilter}
+                    awayTeamFilter={awayTeamFilter}
+                    championshipFilter={championshipFilter}
+                    gameTypeFilter={gameTypeFilter}
+                    sortOrder={sortOrder}
+                    itemsPerPage={itemsPerPage}
+                    onHomeTeamChange={setHomeTeamFilter}
+                    onAwayTeamChange={setAwayTeamFilter}
+                    onChampionshipChange={setChampionshipFilter}
+                    onGameTypeChange={setGameTypeFilter}
+                    onSortOrderChange={setSortOrder}
+                    onItemsPerPageChange={(value) => {
+                        setItemsPerPage(value);
+                        setCurrentPage(1);
+                    }}
+                />
             )}
 
             <div className={styles.listContainer}>
                 <ul className={styles.list}>
-                    {currentGames.length > 0 ? currentGames.map((game: IGame, index: number) => (
-                        <li
-                            className={styles.listItem}
-                            key={game.id || index}
-                            onClick={() => navigate(`/previous_games/${game.id}`, {state: game})}
-                        >
-                            <div className={styles.gameContent}>
-                            <div className={styles.teamSection}>
-                                    <img className={styles.teamLogo}
-                                         src={game.teams?.home.logo}
-                                         alt={game.teams?.home.name}/>
-                                    <span>{game.teams?.home.name}</span>
-                                </div>
-
-                                <div className={styles.scoreSection}>
-                                    {game.score?.home.goals} - {game.score?.away.goals}
-                                </div>
-
-                                <div className={styles.teamSection}>
-                                    <img className={styles.teamLogo}
-                                         src={game.teams?.away.logo}
-                                         alt={game.teams?.away.name}/>
-                                    <span>{game.teams?.away.name}</span>
-                                </div>
-
-                                <div className={styles.dateSection}>
-                                    {formatTime(game.timestamp)}
-                                </div>
-                            </div>
-                        </li>
-                    )) : <p>No games found.</p>}
+                    {currentGames.length > 0 ?
+                        currentGames.map((game, index) => (
+                            <GameListItem key={game.id || index} game={game} index={index}/>
+                        )) :
+                        <p>No games found.</p>
+                    }
                 </ul>
             </div>
 
-            <div style={{
-                display: 'flex',
-                gap: '1rem',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginTop: '1rem'
-            }}>
-                <button
-                    onClick={() => setCurrentPage(currentPage - 1)}
-                    disabled={currentPage === 1}
-                >
-                    Previous
-                </button>
-                <span>Page {currentPage} of {totalPages}</span>
-                <button
-                    onClick={() => setCurrentPage(currentPage + 1)}
-                    disabled={currentPage >= totalPages}
-                >
-                    Next
-                </button>
-            </div>
+            <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={handlePageChange}
+            />
         </div>
     );
 };
