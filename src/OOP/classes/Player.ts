@@ -1,64 +1,65 @@
+import {Team} from "./Team";
 import {Position} from "../enums/Position";
+import {TeamService} from "../services/TeamService";
+import {IPlayer} from "../interfaces/IPlayer";
+import {IGameAction} from "../interfaces/IGameAction";
+import {ActionType} from "../enums/ActionType";
+
 
 export class Player {
+    id: string;
+    name: string;
+    position: Position;
+    jerseyNumber: number;
+    teamId: string;
 
-    private readonly _id: string;
-    private _name: string;
-    private _position: Position;
-    private _jerseyNumber: number;
-    private _teamId: string;
-
-    constructor(id: string = "", name: string = "", position: Position = Position.GOALIE, jerseyNumber: number = 1, teamId: string = "") {
-        this._id = id;
-        this._name = name;
-        this._position = position;
-        this._jerseyNumber = jerseyNumber;
-        this._teamId = teamId;
+    constructor(name: string, position: Position, jerseyNumber: number, teamId: string, id?: string) {
+        this.id = id || "0";
+        this.name = name;
+        this.position = position;
+        this.jerseyNumber = jerseyNumber;
+        this.teamId = teamId;
     }
 
-    get id(): string {
-        return this._id;
+    async transferToTeam(newTeam: Team): Promise<void> {
+        const oldTeamId = this.teamId;
+        this.teamId = newTeam.id;
+        await TeamService.transferPlayer(oldTeamId, newTeam.id, this as unknown as IPlayer);
     }
 
-    get name(): string {
-        return this._name;
+    static getPlayerStats(players: IPlayer[], actions: IGameAction[], teamId?: string) {
+        return players.map(player => {
+            const playerActions = actions.filter(a =>
+                a.player.id === player.id &&
+                (!teamId || a.team.id === teamId)
+            );
+
+            return {
+                ...player,
+                goals: playerActions.filter(a => a.type === ActionType.GOAL).length,
+                shots: playerActions.filter(a => [ActionType.SHOT, ActionType.GOAL].includes(a.type)).length,
+                turnovers: playerActions.filter(a => a.type === ActionType.TURNOVER).length
+            };
+        });
     }
 
-    set name(value: string) {
-        this._name = value;
+    static fromPlain(player: IPlayer): Player {
+        return new Player(
+            player.name,
+            player.position as Position,
+            player.jerseyNumber,
+            player.teamId,
+            player.id
+        )
     }
 
-    get position(): Position {
-        return this._position;
-    }
-
-    set position(value: Position) {
-        this._position = value;
-    }
-
-    get jerseyNumber(): number {
-        return this._jerseyNumber;
-    }
-
-    set jerseyNumber(value: number) {
-        this._jerseyNumber = value;
-    }
-
-    get teamId(): string {
-        return this._teamId;
-    }
-
-    set teamId(value: string) {
-        this._teamId = value;
-    }
-
-    toPlainObject = () => {
+    toPlainObject(): IPlayer {
         return {
             id: this.id,
             name: this.name,
             position: this.position,
             jerseyNumber: this.jerseyNumber,
-            teamId: this.teamId
+            teamId: this.teamId,
         }
     }
 }

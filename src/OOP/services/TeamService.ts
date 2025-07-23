@@ -2,18 +2,23 @@ import {
     addDoc, collection, collectionGroup, deleteDoc, doc,
     getDoc, getDocs, query, setDoc, updateDoc, where
 } from "firebase/firestore";
-import {getDownloadURL, ref, uploadBytes} from "firebase/storage";
+import {deleteObject, getDownloadURL, ref, uploadBytes} from "firebase/storage";
 import {db, storage} from "../../firebaseConfig";
 import {TeamAlreadyExistsError} from "../errors/TeamAlreadyExistsError";
 import {IPlayer} from "../interfaces/IPlayer";
 import {ITeam} from "../interfaces/ITeam";
+import {Team} from "../classes/Team";
 
 // todo: arrow functions, atomic operations, batch writes?
 
 export class TeamService {
     private static collectionRef = collection(db, 'teams');
 
-    static createTeam = async (team: ITeam) => {
+    private static toTeam(teamData: ITeam): Team {
+        return Team.fromPlain(teamData);
+    }
+
+    static createTeam = async (team: Team) => {
         // Check for existing team name using a query (faster than fetching all)
         const q = query(this.collectionRef, where('name', '==', team.name));
         if (!(await getDocs(q)).empty) {
@@ -32,7 +37,12 @@ export class TeamService {
         return docSnap.exists() ? {id: docSnap.id, ...docSnap.data()} as ITeam : null;
     }
 
-    static async updateTeam(id: string, team: Partial<ITeam>) {
+    // static async getTeamById(id: string): Promise<Team | null> {
+    //     const teamData = await this.getTeamById(id);
+    //     return teamData ? this.toTeam(teamData) : null;
+    // }
+
+    static async updateTeam(id: string, team: Team) {
         const docRef = doc(this.collectionRef, id);
         console.log(team)
         // @ts-ignore
@@ -100,34 +110,40 @@ export class TeamService {
         return await getDownloadURL(logoRef);
     };
 
-    static transferPlayer = async (fromTeam: ITeam, toTeam: ITeam, player: IPlayer): Promise<void> => {
+    static deleteLogo = async (logoUrl: string) => {
+        if (!logoUrl) return;
+        try {
+            const storageRef = ref(storage, logoUrl);
+            await deleteObject(storageRef);
+        } catch (error) {
+            console.error("Error deleting logo:", error);
+            throw error;
+        }
+    };
+
+    static transferPlayer = async (fromTeamId: string, toTeamId: string, player: IPlayer): Promise<void> => {
         try {
             // Reference to the player's document in the `fromTeam`'s players subcollection
-            const fromTeamPlayerRef = doc(db, `teams/${fromTeam.id}/players`, player.id);
+            const fromTeamPlayerRef = doc(db, `teams/${fromTeamId}/players`, player.id);
             // Remove the player from the `fromTeam`'s players subcollection
-
             await deleteDoc(fromTeamPlayerRef);
-            // Reference to the player's document in the `toTeam`'s players subcollection
-            const toTeamPlayerRef = doc(db, `teams/${toTeam.id}/players`, player.id);
 
-            // Create the player object with the updated teamId using toPlainObject() for consistency
+            // Reference to the player's document in the `toTeam`'s players subcollection
+            const toTeamPlayerRef = doc(db, `teams/${toTeamId}/players`, player.id);
+
+            // Create the player object with the updated teamId
             const updatedPlayerData = {
                 ...player,
-                teamId: toTeam.id,
+                teamId: toTeamId,
             };
 
-            console.log(updatedPlayerData);
-
             // Add the player to the `toTeam`'s players subcollection
-            console.log(5)
             await setDoc(toTeamPlayerRef, updatedPlayerData);
 
-            console.log(`Player ${player.name} transferred from team ${fromTeam.name} to team ${toTeam.name}`);
+            console.log(`Player ${player.name} transferred from team ${fromTeamId} to team ${toTeamId}`);
         } catch (error) {
             console.error('Error transferring player:', error);
             throw new Error('Failed to transfer player');
         }
     }
-
-
 }

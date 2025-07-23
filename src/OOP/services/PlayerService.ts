@@ -4,11 +4,23 @@ import {
 } from "firebase/firestore";
 import {db} from "../../firebaseConfig";
 import {IPlayer} from "../interfaces/IPlayer";
+import {Player} from "../classes/Player";
+import {Position} from "../enums/Position";
 
 // todo: arrow functions, atomic operations, batch writes?
 
 export class PlayerService {
-    static async addPlayerToTeam(teamId: string, player: IPlayer) {
+    private static toPlayer(playerData: IPlayer): Player {
+        return new Player(
+            playerData.name,
+            playerData.position as Position,
+            playerData.jerseyNumber,
+            playerData.teamId,
+            playerData.id
+        );
+    }
+
+    static async addPlayerToTeam(teamId: string, player: Player) {
         const docRef = doc(collection(db, `teams/${teamId}/players`)); // Generate ID
         const playerWithId = {...player, id: docRef.id, teamId}; // Include teamId
         await setDoc(docRef, playerWithId); // Single write
@@ -55,6 +67,11 @@ export class PlayerService {
 
         return allPlayers;
     }
+
+    // static async getPlayerById(playerId: string): Promise<Player | null> {
+    //     const playerData = await this.getPlayerById(playerId);
+    //     return playerData ? this.toPlayer(playerData) : null;
+    // }
 
     static async getPlayerById(playerId: string): Promise<IPlayer | null> {
         // Direct query by player ID using collection group

@@ -1,25 +1,34 @@
-import React, { useEffect, useState } from 'react';
-import { useLoaderData, useNavigate } from 'react-router-dom';
-import { ChampionshipService } from '../OOP/services/ChampionshipService';
-import { TeamService } from '../OOP/services/TeamService';
+import React, {useState, useEffect} from 'react';
+import {useLoaderData, useNavigate} from 'react-router-dom';
+import {ChampionshipService} from '../OOP/services/ChampionshipService';
+import {TeamService} from '../OOP/services/TeamService';
 // @ts-ignore
 import styles from './TeamCRUDPage.module.css';
-import { storage } from "../firebaseConfig";
-import { ref, deleteObject } from "firebase/storage";
 import {IChampionship} from "../OOP/interfaces/IChampionship";
 import {ITeam} from "../OOP/interfaces/ITeam";
 
-type LoaderData = {
-    championships: IChampionship[];
-    teams: ITeam[];
-};
-
 const TeamCrudPage = () => {
-    const loaderData = useLoaderData() as LoaderData;
-    const [championships, setChampionships] = useState<IChampionship[]>(loaderData?.championships ?? []);
-    const [teams, setTeams] = useState(loaderData?.teams ?? []);
-    const [selectedChampionship, setSelectedChampionship] = useState<string>("");
+    const loaderData = useLoaderData() as { championships: IChampionship[], teams: ITeam[] } | undefined;
     const navigate = useNavigate();
+    const [teams, setTeams] = useState<ITeam[]>([]);
+    const [championships, setChampionships] = useState<IChampionship[]>([]);
+    const [selectedChampionship, setSelectedChampionship] = useState<string>("");
+
+    useEffect(() => {
+        if (loaderData) {
+            setTeams(loaderData.teams);
+            setChampionships(loaderData.championships);
+        } else {
+            // Fallback: Fetch data directly if loaderData is undefined
+            const fetchData = async () => {
+                const champs = await ChampionshipService.getAllChampionships();
+                const teamsData = await TeamService.getAllTeams();
+                setChampionships(champs);
+                setTeams(teamsData);
+            };
+            fetchData();
+        }
+    }, [loaderData]);
 
     const createNavigateHandler = () => {
         navigate("create", { state: { championships } });
@@ -29,23 +38,24 @@ const TeamCrudPage = () => {
         navigate(`${team.id}`, { state: { team } });
     };
 
+    // todo: team.delete()?
     const deleteHandler = async (team: ITeam) => {
-        const isConfirmed = window.confirm("Are you sure you want to delete this team?");
+        const isConfirmed = window.confirm(`Are you sure you want to delete ${team.name}?`);
         if (isConfirmed) {
             try {
                 await TeamService.deleteTeam(team.id);
                 if (team.logo) {
                     try {
-                        const storageRef = ref(storage, team.logo);
-                        await deleteObject(storageRef);
+                        await TeamService.deleteLogo(team.logo);
                     } catch (storageError) {
                         console.error("Error deleting team logo:", storageError);
                         alert("Team deleted but logo cleanup failed");
                     }
                 }
-                alert("Team deleted successfully");
                 setTeams(teams.filter(t => t.id !== team.id));
+                alert("Team deleted successfully");
             } catch (error) {
+                console.error("Error deleting team:", error);
                 alert("Failed to delete the team. Please try again.");
             }
         }
@@ -59,26 +69,18 @@ const TeamCrudPage = () => {
         ? teams.filter(team => team.championships?.some(ch => ch.id === selectedChampionship))
         : teams;
 
-    useEffect(() => {
-        if (teams.length === 0 || championships.length === 0) {
-            ChampionshipService.getAllChampionships().then(setChampionships);
-            TeamService.getAllTeams().then(setTeams);
-        }
-    }, []);
-
     return (
-        <div className={styles.pageContainer}>
-            <button className={styles.createButton} onClick={createNavigateHandler}>
+        <div>
+            <button onClick={createNavigateHandler}>
                 Create New Team
             </button>
 
-            <div className={styles.filterContainer}>
-                <label className={styles.filterLabel} htmlFor="championship-select">
+            <div>
+                <label htmlFor="championship-select">
                     Filter by Championship
                 </label>
                 <select
                     id="championship-select"
-                    className={styles.filterSelect}
                     value={selectedChampionship}
                     onChange={handleChampionshipChange}
                 >
@@ -91,20 +93,20 @@ const TeamCrudPage = () => {
                 </select>
             </div>
 
-            <div className={styles.teamList}>
+            <div>
                 {filteredTeams.map((team) => (
-                    <div key={team.id} className={styles.teamItem}>
-                        <div className={styles.teamHeader}>
-                            <div className={styles.teamName}>{team.name}</div>
+                    <div key={team.id}>
+                        <div>
+                            <div>{team.name}</div>
                         </div>
-                        <div className={styles.championshipList}>
+                        <div>
                             {team.championships?.map((ch) => ch.name).join(", ") || "No championships"}
                         </div>
-                        <div className={styles.buttonGroup}>
-                            <button className={styles.viewButton} onClick={() => viewNavigateHandler(team)}>
+                        <div>
+                            <button onClick={() => viewNavigateHandler(team)}>
                                 View Details
                             </button>
-                            <button className={styles.deleteButton} onClick={() => deleteHandler(team)}>
+                            <button onClick={() => deleteHandler(team)}>
                                 Delete Team
                             </button>
                         </div>
@@ -120,5 +122,5 @@ export default TeamCrudPage;
 export const loader = async () => {
     const championships = await ChampionshipService.getAllChampionships();
     const teams = await TeamService.getAllTeams();
-    return { championships, teams };
+    return {championships, teams};
 };

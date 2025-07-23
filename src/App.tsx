@@ -22,6 +22,8 @@ import {loader as teamCRUDPageLoader} from "./pages/TeamCRUDPage";
 import {loader as CreatePlayerPageLoader} from "./pages/CreatePlayerPage";
 import {loader as playerCRUDPageLoader} from "./pages/PlayerCRUDPage";
 import HandlePlayerPage from "./pages/HandlePlayerPage";
+import StartPage2 from "./pages/StartPage2";
+import GamePage2 from "./pages/GamePage2";
 
 // todo: switch to oop classes - merge main/interface-branch
 // todo: services: oop/atomic/batch writes/etc
@@ -51,8 +53,8 @@ function App() {
             errorElement: <ErrorPage/>,
             children: [
                 {index: true, element: <HomePage isSignedIn={isSignedIn}/>},
-                {path: "start", element: <StartPage/>, loader: startPageLoader},
-                {path: "game", element: <GamePage/>},
+                {path: "start", element: <StartPage2/>, loader: startPageLoader},
+                {path: "game", element: <GamePage2/>},
                 {path: "previous_games", element: <PreviousGamesPage/>},
                 {path: "previous_games/:gameId", element: <PreviousGameDetailPage/>},
                 {

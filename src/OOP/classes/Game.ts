@@ -1,20 +1,29 @@
 import {IGameAction} from "../interfaces/IGameAction";
 import {IScoreData} from "../interfaces/IScoreData";
+import {GameType} from "../enums/GameType";
+import {TeamWithRoster} from "./TeamWithRoster";
+import {ITeamColor} from "../interfaces/ITeamColor";
+import {IGame} from "../interfaces/IGame";
+import {Team} from "./Team";
+import {GameAction} from "./GameAction";
 import {ITeam} from "../interfaces/ITeam";
+import {ScoreData} from "./ScoreData";
+import {Championship} from "./Championship";
 
 export class Game {
-    private _id: string = "";
-    private _timestamp: string = "";
-    private _actions: IGameAction[] = [];
-    private _teams: {
-        home: ITeam,
-        away: ITeam
+    id: string = "";
+    timestamp: string = "";
+    championship: Championship = new Championship("", "");
+    actions: IGameAction[] = [];
+    teams: {
+        home: TeamWithRoster,
+        away: TeamWithRoster
     } = {
-        home: {} as ITeam,
-        away: {} as ITeam
+        home: new TeamWithRoster("", "", {} as ITeamColor, {} as ITeamColor, [], [], [], ""),
+        away: new TeamWithRoster("", "", {} as ITeamColor, {} as ITeamColor, [], [], [], ""),
     };
 
-    private _score: {
+    score: {
         home: IScoreData,
         away: IScoreData
     } = {
@@ -29,60 +38,63 @@ export class Game {
             turnovers: 0
         } as IScoreData,
     };
-    private _selectedImage: string = "";
+    type: GameType;
+    selectedImage: string = "";
 
 
-    constructor(id: string, timestamp: string, actions: IGameAction[], teams: { home: ITeam; away: ITeam }, score: {
+    constructor(id: string, timestamp: string, championship: Championship, actions: IGameAction[], teams: {
+        home: TeamWithRoster;
+        away: TeamWithRoster
+    }, score: {
         home: IScoreData;
         away: IScoreData
-    }, selectedImage: string = "") {
-        this._id = id;
-        this._timestamp = timestamp;
-        this._actions = actions;
-        this._teams = teams;
-        this._score = score;
-        this._selectedImage = selectedImage;
+    }, type: GameType, selectedImage: string = "") {
+        this.id = id;
+        this.timestamp = timestamp;
+        this.championship = championship;
+        this.actions = actions;
+        this.teams = teams;
+        this.score = score;
+        this.type = type;
+        this.selectedImage = selectedImage;
     }
 
-
-    get id(): string {
-        return this._id;
-    }
-
-    get timestamp(): string {
-        return this._timestamp;
-    }
-
-    get actions(): IGameAction[] {
-        return this._actions;
-    }
-
-    get Teams(): { home: ITeam; away: ITeam } {
-        return this._teams;
-    }
-
-    get score(): { home: IScoreData; away: IScoreData } {
-        return this._score;
-    }
-
-    get selectedImage(): string {
-        return this._selectedImage;
-    }
-
-    /*static fromInterface(game: IGame): Game {
+    static fromPlain(plain: IGame): Game {
         return new Game(
-            game.id,
-            game.timestamp,
-            game.actions.map((action: IGameAction) => GameAction.fromInterface(action as unknown as IGameAction)),
+            plain.id,
+            plain.timestamp,
+            Championship.fromPlain(plain.championship),
+            plain.actions.map(action => GameAction.fromPlain(action)),
             {
-                home: Team.fromInterface(game.teams.home as ITeam),
-                away: Team.fromInterface(game.teams.away as ITeam)
+                home: TeamWithRoster.fromPlain(plain.teams.home),
+                away: TeamWithRoster.fromPlain(plain.teams.away)
             },
             {
-                home: IScoreData.fromInterface(game.score.home),
-                away: IScoreData.fromInterface(game.score.away)
+                home: plain.score.home,
+                away: plain.score.away
             },
-            game.selectedImage
+            plain.type,
+            plain.selectedImage
         );
-    }*/
+    }
+
+    toPlainObject(): IGame {
+        return {
+            id: this.id,
+            championship: this.championship.toPlainObject(),
+            timestamp: this.timestamp,
+            actions: this.actions.map(action => GameAction.fromPlain(action).toPlainObject()),
+            teams: {
+                home: this.teams.home.toPlainObject(),
+                away: this.teams.away.toPlainObject()
+            },
+            score: {
+                home: this.score.home,
+                away: this.score.away
+            },
+            type: this.type,
+            selectedImage: this.selectedImage
+        };
+    }
+
 }

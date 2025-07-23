@@ -1,31 +1,30 @@
 import React, {useEffect, useState} from 'react';
 import {useLocation, useNavigate} from "react-router-dom";
-import {TeamService} from "../OOP/services/TeamService";
 // @ts-ignore
 import styles from './HandleTeamPage.module.css';
-import {ITeam} from "../OOP/interfaces/ITeam";
 import {GameService} from "../OOP/services/GameService";
 import {IGame} from "../OOP/interfaces/IGame";
 import PreviousGamesPage from "./PreviousGamesPage";
 import {GameType} from "../OOP/enums/GameType";
+import {Team} from "../OOP/classes/Team";
+import {TeamStats} from "../OOP/classes/TeamStats";
 
-// todo: edit team: unify styling with start page
+// todo: when editing, it works. But if I refresh the page after editing,
+//  then it gets back to the original data. But if I "Go Back", then the team shows up updated.
+//  so there's a small - temporary bug when refreshing right after editing.
 
-interface TeamStats {
-    gamesPlayed: number;
-    wins: number;
-    losses: number;
-    goalsFor: number;
-    goalsAgainst: number;
-    shots: number;
-    turnovers: number;
-    shootingPercentage: number;
-}
+// todo: when editing team, and we change the logo, delete the old logo from storage.
+
+// todo: show more stats on players - sorting table.
 
 const HandleTeamPage = () => {
+    // const { teamId } = useParams<{ teamId: string }>();
+    // const navigate = useNavigate();
+    // const [team, setTeam] = useState<Team | null>(null);
+
     const location = useLocation();
-    const initialTeam = location.state.team as ITeam;
-    const [team, setTeam] = useState(initialTeam);
+    const initialTeam = Team.fromPlain(location.state.team); // Convert to Team instance
+    const [team, setTeam] = useState<Team>(initialTeam);
     const [name, setName] = useState(initialTeam.name);
     const [logo, setLogo] = useState<File | null>(null);
     const [isEditing, setIsEditing] = useState(false);
@@ -35,9 +34,22 @@ const HandleTeamPage = () => {
 
     const navigate = useNavigate();
 
-    const goBackHandler = () => {
-        navigate("/handleTeams");
+    const filterGames = (type?: GameType) => {
+        return games.filter(game => {
+            const isTeamGame = game.teams?.home.id === team.id || game.teams?.away.id === team.id;
+            return type ? isTeamGame && game.type === type : isTeamGame;
+        });
     };
+
+    const teamGames = filterGames();
+    const regularSeasonGames = filterGames(GameType.REGULAR);
+    const playoffGames = filterGames(GameType.PLAYOFF);
+
+    // Calculate stats using TeamStats class
+    const regularStats = new TeamStats(team.id, regularSeasonGames);
+    const playoffStats = new TeamStats(team.id, playoffGames);
+
+    const goBackHandler = () => navigate("/handleTeams");
 
     const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         setName(event.target.value);
@@ -76,90 +88,22 @@ const HandleTeamPage = () => {
 
     const handleSave = async () => {
         try {
-            let logoURL = team.logo; // Use existing logo URL if no new file is uploaded
-
-            if (logo) {
-                // If a new logo file is uploaded, upload it and get the new URL
-                logoURL = await TeamService.uploadLogo(logo);
-            }
-
-            // const updatedTeam = new Team(team.id, name, logoURL, team.homeColor, team.awayColor, team.championships, team.players);
-            const updatedTeam = {
-                id: team.id,
-                name: name,
-                logo: logoURL,
-                homeColor: team.homeColor,
-                awayColor: team.awayColor,
-                championships: team.championships,
-                players: team.players,
-            } as ITeam;
-            console.log(updatedTeam);
-            await TeamService.updateTeam(updatedTeam.id, updatedTeam);
+            const updatedTeam = await team.update(name, logo);
             setTeam(updatedTeam);
-            setIsEditing(false); // Disable editing after saving
+            setIsEditing(false);
         } catch (error) {
             console.error("Error updating team:", error);
             alert("Something went wrong");
         }
     };
 
-    const handleEdit = () => {
-        setIsEditing(true);
-    };
+    const handleEdit = () => setIsEditing(true);
 
-    function handleDiscard() {
+    const handleDiscard = () => {
         setTeam(initialTeam);
+        setName(initialTeam.name);
         setIsEditing(false);
-    }
-
-    const calculateStats = (games: IGame[]): TeamStats => {
-        let stats: TeamStats = {
-            gamesPlayed: 0,
-            wins: 0,
-            losses: 0,
-            goalsFor: 0,
-            goalsAgainst: 0,
-            shots: 0,
-            turnovers: 0,
-            shootingPercentage: 0
-        };
-
-        games.forEach(game => {
-            const isHomeTeam = game.teams.home.id === team.id;
-            const teamSide = isHomeTeam ? 'home' : 'away';
-            const opponentSide = isHomeTeam ? 'away' : 'home';
-
-            stats.gamesPlayed++;
-            stats.goalsFor += game.score[teamSide].goals;
-            stats.goalsAgainst += game.score[opponentSide].goals;
-            stats.shots += game.score[teamSide].shots;
-            stats.turnovers += game.score[teamSide].turnovers;
-
-            // Determine win/loss
-            if (game.score[teamSide].goals > game.score[opponentSide].goals) {
-                stats.wins++;
-            } else {
-                stats.losses++;
-            }
-        });
-
-        stats.shootingPercentage = stats.shots > 0
-            ? (stats.goalsFor / stats.shots) * 100
-            : 0;
-
-        return stats;
     };
-
-    const teamGames = games.filter(game =>
-        game.teams?.home.id === team.id ||
-        game.teams?.away.id === team.id
-    );
-
-    const regularSeasonGames = teamGames.filter(game => game.type === GameType.REGULAR);
-    const playoffGames = teamGames.filter(game => game.type === GameType.PLAYOFF);
-
-    const regularStats = calculateStats(regularSeasonGames);
-    const playoffStats = calculateStats(playoffGames);
 
     useEffect(() => {
         const fetchGames = async () => {
@@ -174,49 +118,18 @@ const HandleTeamPage = () => {
     }, []);
 
 
-    const StatsTable: React.FC<{ stats: TeamStats }> = ({ stats }) => (
-        <div className={styles.tableContainer}>
-            <table>
-                <thead>
-                <tr>
-                    <th>GP</th>
-                    <th>W</th>
-                    <th>L</th>
-                    <th>GF</th>
-                    <th>GA</th>
-                    <th>Shots</th>
-                    <th>TO</th>
-                    <th>SH%</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td>{stats.gamesPlayed}</td>
-                    <td>{stats.wins}</td>
-                    <td>{stats.losses}</td>
-                    <td>{stats.goalsFor}</td>
-                    <td>{stats.goalsAgainst}</td>
-                    <td>{stats.shots}</td>
-                    <td>{stats.turnovers}</td>
-                    <td>{stats.shootingPercentage.toFixed(1)}%</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-    );
-
 
     return (
-        <div className={styles.container}>
+        <div>
 
-            <div className={styles.teamInfo}>
-                <p className={styles.teamName}>{team.name}</p>
-                <img src={team.logo} alt={team.name} className={styles.teamLogo}/>
+            <div>
+                <p>{team.name}</p>
+                <img src={team.logo} alt={team.name}/>
             </div>
 
             {isEditing ? (
                 <>
-                    <div className={styles.formGroup}>
+                    <div>
                         <label htmlFor="name">Team name:</label>
                         <input
                             type="text"
@@ -226,7 +139,7 @@ const HandleTeamPage = () => {
                         />
                     </div>
 
-                    <div className={styles.formGroup}>
+                    <div>
                         <label htmlFor="logo">Upload new logo:</label>
                         <input
                             type="file"
@@ -235,26 +148,26 @@ const HandleTeamPage = () => {
                         />
                     </div>
 
-                    <div className={styles.buttonGroup}>
-                        <button className={styles.saveButton} onClick={handleSave}>Save Changes</button>
-                        <button className={styles.backButton} onClick={handleDiscard}>Discard Changes</button>
+                    <div>
+                        <button onClick={handleSave}>Save Changes</button>
+                        <button onClick={handleDiscard}>Discard Changes</button>
                     </div>
                 </>
             ) : (
-                <div className={styles.buttonGroup}>
-                    <button className={styles.editButton} onClick={handleEdit}>Edit Team</button>
+                <div>
+                    <button onClick={handleEdit}>Edit Team</button>
                 </div>
             )}
 
-            <div className={styles.playersDropdown}>
-                <div className={styles.dropdownHeader} onClick={() => setShowPlayers(!showPlayers)}>
+            <div>
+                <div onClick={() => setShowPlayers(!showPlayers)}>
                     <h3>Players</h3>
                     <span>{showPlayers ? '▲' : '▼'}</span>
                 </div>
                 {showPlayers && (
                     <>
                         {team.players && team.players.length > 0 ? (
-                            <div className={styles.tableContainer}>
+                            <div>
                                 <table>
                                     <thead>
                                     <tr>
@@ -271,7 +184,7 @@ const HandleTeamPage = () => {
                                             <td>{player.jerseyNumber}</td>
                                             <td>{player.position}</td>
                                             <td>
-                                                <button className={styles.editButton}
+                                                <button
                                                         onClick={() => navigate(`../../handlePlayers/${player.id}`, {state: {player}})}>View
                                                     Player
                                                 </button>
@@ -282,22 +195,77 @@ const HandleTeamPage = () => {
                                 </table>
                             </div>
                         ) : (
-                            <p className={styles.noPlayers}>No players</p>
+                            <p>No players</p>
                         )}
                     </>
                 )}
             </div>
 
-            <div className={styles.statsSection}>
-                <h3 className={styles.subHeader}>Regular Season Stats</h3>
-                <StatsTable stats={regularStats}/>
+            <div>
+                <h3>Regular Season Stats</h3>
+                <div>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>GP</th>
+                            <th>W</th>
+                            <th>L</th>
+                            <th>GF</th>
+                            <th>GA</th>
+                            <th>Shots</th>
+                            <th>TO</th>
+                            <th>S%</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>{regularStats.gamesPlayed}</td>
+                            <td>{regularStats.wins}</td>
+                            <td>{regularStats.losses}</td>
+                            <td>{regularStats.goalsFor}</td>
+                            <td>{regularStats.goalsAgainst}</td>
+                            <td>{regularStats.shots}</td>
+                            <td>{regularStats.turnovers}</td>
+                            <td>{regularStats.shootingPercentage.toFixed(1)}%</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
 
-                <h3 className={styles.subHeader} style={{marginTop: '2rem'}}>Playoff Stats</h3>
-                <StatsTable stats={playoffStats}/>
+                <h3 style={{marginTop: '2rem'}}>Playoff Stats</h3>
+                <div>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>GP</th>
+                            <th>W</th>
+                            <th>L</th>
+                            <th>GF</th>
+                            <th>GA</th>
+                            <th>Shots</th>
+                            <th>TO</th>
+                            <th>S%</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>{playoffStats.gamesPlayed}</td>
+                            <td>{playoffStats.wins}</td>
+                            <td>{playoffStats.losses}</td>
+                            <td>{playoffStats.goalsFor}</td>
+                            <td>{playoffStats.goalsAgainst}</td>
+                            <td>{playoffStats.shots}</td>
+                            <td>{playoffStats.turnovers}</td>
+                            <td>{playoffStats.shootingPercentage.toFixed(1)}%</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+
             </div>
 
-            <div className={styles.gamesDropdown}>
-                <div className={styles.dropdownHeader} onClick={() => setShowGames(!showGames)}>
+            <div>
+                <div onClick={() => setShowGames(!showGames)}>
                     <h3>Team Games</h3>
                     <span>{showGames ? '▲' : '▼'}</span>
                 </div>
@@ -309,8 +277,8 @@ const HandleTeamPage = () => {
                 )}
             </div>
 
-            <div className={styles.buttonGroup}>
-                <button className={styles.backButton} onClick={goBackHandler}>Go Back</button>
+            <div>
+                <button onClick={goBackHandler}>Go Back</button>
             </div>
         </div>
     );

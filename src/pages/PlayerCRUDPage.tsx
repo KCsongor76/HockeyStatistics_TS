@@ -1,181 +1,137 @@
-import React, {useState, useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useLoaderData, useNavigate} from "react-router-dom";
 import {PlayerService} from "../OOP/services/PlayerService";
 import {TeamService} from "../OOP/services/TeamService";
 // @ts-ignore
 import styles from './PlayerCRUDPage.module.css';
 import {Position} from "../OOP/enums/Position";
-import {IPlayer} from "../OOP/interfaces/IPlayer";
+import {Player} from "../OOP/classes/Player";
+import {Team} from "../OOP/classes/Team";
 
-type LoaderData = {
-    players: { player: IPlayer, teamName: string }[];
-    teams: any[];
-};
+// todo: if the (filtered) player list is empty, show: "No players."
+// todo: jersey number filter: make sure only 1-99 can be written-selected
 
 const PlayerCRUDPage = () => {
-    console.log("page");
-    const loaderData = useLoaderData() as LoaderData;
     const navigate = useNavigate();
-
-    // Initialize with empty arrays and update when loaderData is available
-    const [playersWithTeamNames, setPlayersWithTeamNames] = useState<{ player: IPlayer, teamName: string }[]>([]);
-    const [teams, setTeams] = useState<any[]>([]);
-
-    // Use useEffect to safely update state when loaderData is available
-    useEffect(() => {
-        if (loaderData) {
-            setPlayersWithTeamNames(loaderData.players || []);
-            setTeams(loaderData.teams || []);
-        }
-    }, [loaderData]);
-
-    // New state variables
-    const [teamFilter, setTeamFilter] = useState('');
-    const [positionFilter, setPositionFilter] = useState('');
-    const [jerseyNrFilter, setJerseyNrFilter] = useState('');
-    const [searchQuery, setSearchQuery] = useState('');
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(10);
-
-    const filteredPlayers = playersWithTeamNames.filter(({player, teamName}) => {
-        const matchesTeam = teamFilter ? player.teamId === teamFilter : true;
-        const matchesPosition = positionFilter ? player.position === positionFilter : true;
-        const matchesJersey = jerseyNrFilter ? player.jerseyNumber.toString().includes(jerseyNrFilter) : true;
-        const matchesSearch = searchQuery ? player.name.toLowerCase().includes(searchQuery.toLowerCase()) : true;
-        return matchesTeam && matchesPosition && matchesJersey && matchesSearch;
+    const loaderData = useLoaderData() as { players: Player[], teams: Team[] } | undefined;
+    const [players, setPlayers] = useState<Player[]>([]);
+    const [teams, setTeams] = useState<Team[]>([]);
+    const [filters, setFilters] = useState({
+        team: '',
+        position: '',
+        jerseyNr: '',
+        search: ''
     });
+    const [pagination, setPagination] = useState({page: 1, perPage: 10});
 
-    // Pagination
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentPlayers = filteredPlayers.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(filteredPlayers.length / itemsPerPage);
+    const filteredPlayers = players.filter(player =>
+        (!filters.team || player.teamId === filters.team) &&
+        (!filters.position || player.position === filters.position) &&
+        (!filters.jerseyNr || player.jerseyNumber.toString().includes(filters.jerseyNr)) &&
+        (!filters.search || player.name.toLowerCase().includes(filters.search.toLowerCase()))
+    );
 
-    const deleteHandler = async (player: IPlayer) => {
-        if (window.confirm("Are you sure you want to delete this player?")) {
-            try {
-                await PlayerService.deletePlayer(player.teamId, player.id);
-                setPlayersWithTeamNames(prev => prev.filter(p => p.player.id !== player.id));
-            } catch (error) {
-                alert("Failed to delete player");
-            }
+    const paginatedPlayers = filteredPlayers.slice(
+        (pagination.page - 1) * pagination.perPage,
+        pagination.page * pagination.perPage
+    );
+
+    const deleteHandler = async (player: Player) => {
+        if (window.confirm(`Delete ${player.name}?`)) {
+            await PlayerService.deletePlayer(player.teamId, player.id);
+            // Update local state to remove deleted player
+            setPlayers(prev => prev.filter(p => p.id !== player.id));
         }
     };
 
-    return (
-        <div className={styles.container}>
-            <button className={styles.createButton} onClick={() => navigate("create")}>
-                Create New Player
-            </button>
+    useEffect(() => {
+        if (loaderData) {
+            setPlayers(loaderData.players);
+            setTeams(loaderData.teams);
+        }
+    }, [loaderData]);
 
-            <div className={styles.filterContainer}>
+    return (
+        <div>
+            <button onClick={() => navigate("create")}>Create New Player</button>
+
+            <div>
                 <input
-                    type="text"
                     placeholder="Search name..."
-                    className={styles.filterInput}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    value={filters.search}
+                    onChange={e => setFilters(f => ({...f, search: e.target.value}))}
                 />
 
                 <select
-                    className={styles.filterInput}
-                    value={teamFilter}
-                    onChange={(e) => setTeamFilter(e.target.value)}
+                    value={filters.team}
+                    onChange={e => setFilters(f => ({...f, team: e.target.value}))}
                 >
                     <option value="">All Teams</option>
                     {teams.map(team => (
-                        <option key={team.id} value={team.id}>
-                            {team.name}
-                        </option>
+                        <option key={team.id} value={team.id}>{team.name}</option>
                     ))}
                 </select>
 
                 <select
-                    className={styles.filterInput}
-                    value={positionFilter}
-                    onChange={(e) => setPositionFilter(e.target.value)}
+                    value={filters.position}
+                    onChange={e => setFilters(f => ({...f, position: e.target.value}))}
                 >
-                    <option value="">All Positions</option>
-                    <option value={Position.GOALIE}>{Position.GOALIE}</option>
-                    <option value={Position.FORWARD}>{Position.FORWARD}</option>
-                    <option value={Position.DEFENDER}>{Position.DEFENDER}</option>
+                    <option key={0} value="">All Positions</option>
+                    {Object.values(Position).map((pos, index) => (
+                        <option key={index + 1} value={pos}>{pos}</option>
+                    ))}
                 </select>
 
                 <input
                     type="number"
-                    placeholder="Jersey Number"
-                    className={styles.filterInput}
-                    value={jerseyNrFilter}
-                    onChange={(e) => setJerseyNrFilter(e.target.value)}
+                    placeholder="Jersey #"
+                    value={filters.jerseyNr}
+                    onChange={e => setFilters(f => ({...f, jerseyNr: e.target.value}))}
                 />
 
-                <select
-                    className={styles.filterInput}
-                    value={itemsPerPage}
-                    onChange={(e) => {
-                        setItemsPerPage(Number(e.target.value));
-                        setCurrentPage(1);
-                    }}
-                >
-                    <option value={10}>10 per page</option>
-                    <option value={25}>25 per page</option>
-                    <option value={50}>50 per page</option>
-                </select>
             </div>
 
-            <div className={styles.playerList}>
-                {currentPlayers.map(({player, teamName}) => (
-                    <div key={player.id} className={styles.playerItem}>
-                        <div className={styles.playerHeader}>
-                            <div className={styles.playerName}>{player.name}</div>
-                            <div className={styles.detailItem}>
-                                <span className={styles.detailLabel}>#</span>
-                                {player.jerseyNumber}
-                            </div>
+            <div>
+                {paginatedPlayers.map(player => {
+                    const playerTeam = teams.find(t => t.id === player.teamId);
+
+                    return <div key={player.id}>
+                        <div>
+                            <div>{player.name}</div>
+                            <div>#{player.jerseyNumber}</div>
                         </div>
 
-                        <div className={styles.playerDetails}>
-                            <div className={styles.detailItem}>
-                                <span className={styles.detailLabel}>Position:</span>
-                                {player.position}
-                            </div>
-                            <div className={styles.detailItem}>
-                                <span className={styles.detailLabel}>Team:</span>
-                                {teamName}
-                            </div>
+                        <div>
+                            <div>Position: {player.position}</div>
+                            <div>Team: {playerTeam?.name || 'Unknown'}</div>
                         </div>
 
-                        <div className={styles.actions}>
-                            <button
-                                className={styles.viewButton}
-                                onClick={() => navigate(`${player.id}`, {state: {player}})}
-                            >
+                        <div>
+                            <button onClick={() => navigate(`${player.id}`, {state: {player}})}>
                                 View
                             </button>
-                            <button
-                                className={styles.deleteButton}
-                                onClick={() => deleteHandler(player)}
-                            >
+                            <button onClick={() => deleteHandler(player)}>
                                 Delete
                             </button>
                         </div>
+
                     </div>
-                ))}
+                })}
             </div>
 
-            <div className={styles.paginationContainer}>
+            <div>
                 <button
-                    className={styles.paginationButton}
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
+                    disabled={pagination.page === 1}
+                    onClick={() => setPagination(p => ({...p, page: p.page - 1}))}
                 >
                     Previous
                 </button>
-                <span>Page {currentPage} of {totalPages || 1}</span>
+
+                <span>Page {pagination.page}</span>
+
                 <button
-                    className={styles.paginationButton}
-                    onClick={() => setCurrentPage(p => Math.min(totalPages || 1, p + 1))}
-                    disabled={currentPage >= (totalPages || 1)}
+                    disabled={pagination.page * pagination.perPage >= filteredPlayers.length}
+                    onClick={() => setPagination(p => ({...p, page: p.page + 1}))}
                 >
                     Next
                 </button>
@@ -188,25 +144,12 @@ export default PlayerCRUDPage;
 
 export const loader = async () => {
     try {
-        // Parallelize initial data fetching
         const [players, teams] = await Promise.all([
             PlayerService.getAllPlayers(),
             TeamService.getAllTeams()
         ]);
 
-        // Create team lookup map (O(1) access)
-        const teamMap = new Map(teams.map(team => [team.id, team]));
-
-        // Process players in-memory (no async operations)
-        const playersWithTeams = players.map(player => ({
-            player,
-            teamName: teamMap.get(player.teamId)?.name || "Unknown Team"
-        }));
-
-        return {
-            players: playersWithTeams,
-            teams
-        };
+        return {players, teams};
     } catch (error) {
         console.error("Error in loader:", error);
         return {players: [], teams: []};

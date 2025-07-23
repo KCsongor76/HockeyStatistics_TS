@@ -1,121 +1,167 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {Position} from "../OOP/enums/Position";
 import {TeamService} from "../OOP/services/TeamService";
 import {useLoaderData, useNavigate} from "react-router-dom";
 import {PlayerService} from "../OOP/services/PlayerService";
 // @ts-ignore
 import styles from './CreatePlayerPage.module.css';
-import {IPlayer} from "../OOP/interfaces/IPlayer";
-import {ITeam} from "../OOP/interfaces/ITeam";
+import {Team} from "../OOP/classes/Team";
+import {Player} from "../OOP/classes/Player";
 
-// todo: wider, buttons in middle
-// todo: unify styling with start page
+// todo: don't let the user create eg. player with #888...
+// todo: handle empty values "server" side
 
 const CreatePlayerPage = () => {
-    const loaderData = useLoaderData() as ITeam[];
-    const teams = loaderData ?? [];
-
-    // State management for form inputs
-    const [name, setName] = useState('');
-    const [position, setPosition] = useState(Position.GOALIE);
-    const [jerseyNumber, setJerseyNumber] = useState(1);
-    const [teamId, setTeamId] = useState(teams.length > 0 ? teams[0].id : '');
-
+    const loadedTeams = useLoaderData() as Team[] | undefined;
+    const [teams, setTeams] = useState<Team[]>([]);
     const navigate = useNavigate();
+    const [playerData, setPlayerData] = useState({
+        name: '',
+        position: Position.GOALIE,
+        jerseyNumber: 1,
+        teamId: ''
+    });
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const goBackHandler = () => {
-        navigate("/handlePlayers");
+    // Initialize teams and set default teamId
+    useEffect(() => {
+        if (loadedTeams && loadedTeams.length > 0) {
+            setTeams(loadedTeams);
+            setPlayerData(prev => ({
+                ...prev,
+                teamId: loadedTeams[0].id
+            }));
+        }
+    }, [loadedTeams]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setPlayerData(prev => ({
+            ...prev,
+            [name]: name === 'jerseyNumber' ? parseInt(value) : value
+        }));
     };
 
     const submitHandler = async (event: React.FormEvent) => {
         event.preventDefault();
+        setIsSubmitting(true);
 
-        if (!name || !position || !teamId) {
-            alert('Please fill in all required fields.');
-            return;
-        }
-
-        if (jerseyNumber < 1 || jerseyNumber > 99) {
-            alert('Jersey number must be between 1 and 99.');
-            return;
-        }
-
-
-        const newPlayer = {
-            id: "0",
-            name,
-            position,
-            jerseyNumber,
-            teamId
-        } as IPlayer
-        console.log('New player:', newPlayer);
-
-        // Submit the new player (e.g., sending the newPlayer object to an API)
         try {
-            await PlayerService.addPlayerToTeam(newPlayer.teamId, newPlayer);
+            // Check for duplicate jersey number
+            const existingPlayers = await PlayerService.getPlayersByTeam(playerData.teamId);
+            const duplicatePlayer = existingPlayers.find(p =>
+                p.jerseyNumber === playerData.jerseyNumber
+            );
+
+            if (duplicatePlayer) {
+                alert(`Error: Jersey number ${playerData.jerseyNumber} is already used by ${duplicatePlayer.name}`);
+                setIsSubmitting(false);
+                return;
+            }
+
+            const player = new Player(
+                playerData.name,
+                playerData.position,
+                playerData.jerseyNumber,
+                playerData.teamId
+            );
+
+            await PlayerService.addPlayerToTeam(player.teamId, player);
             alert('Player created successfully!');
-            setName("");
-            setPosition(Position.GOALIE);
-            setJerseyNumber(1);
-            setTeamId(teams.length > 0 ? teams[0].id : '');
+            setPlayerData({
+                name: '',
+                position: Position.GOALIE,
+                jerseyNumber: 1,
+                teamId: teams.length > 0 ? teams[0].id : ''
+            });
         } catch (error) {
-            console.error('Error creating player:', error);
+            console.error('Failed to create player:', error);
             alert('Failed to create player. Please try again.');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
+    const goBackHandler = () => {
+        navigate(-1);
+    };
+
     return (
-        <form className={styles.formContainer} onSubmit={submitHandler}>
-            <div className={styles.formGroup}>
+        <form onSubmit={submitHandler}>
+            <div>
                 <label>Name:</label>
                 <input
                     type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
+                    name="name"
+                    value={playerData.name}
+                    onChange={handleChange}
                     required
+                    disabled={isSubmitting}
                 />
             </div>
 
-            <div className={styles.formGroup}>
+            <div>
                 <label>Position:</label>
                 <select
-                    value={position}
-                    onChange={(e) => setPosition(e.target.value as Position)}
+                    name="position"
+                    value={playerData.position}
+                    onChange={handleChange}
                     required
+                    disabled={isSubmitting}
                 >
-                    <option value={Position.GOALIE}>{Position.GOALIE}</option>
-                    <option value={Position.DEFENDER}>{Position.DEFENDER}</option>
-                    <option value={Position.FORWARD}>{Position.FORWARD}</option>
-                </select>
-            </div>
-
-            <div className={styles.formGroup}>
-                <label>Jersey Number:</label>
-                <input
-                    type="number"
-                    value={jerseyNumber}
-                    min={1}
-                    max={99}
-                    onChange={(e) => setJerseyNumber(parseInt(e.target.value))}
-                    required
-                />
-            </div>
-
-            <div className={styles.formGroup}>
-                <label>Team:</label>
-                <select
-                    value={teamId}
-                    onChange={(e) => setTeamId(e.target.value)}
-                    required
-                >
-                    {teams.length > 0 && teams.map((team) => (
-                        <option key={team.id} value={team.id}>{team.name}</option>
+                    {Object.values(Position).map(pos => (
+                        <option key={pos} value={pos}>{pos}</option>
                     ))}
                 </select>
             </div>
 
-            <button className={styles.submitButton} type="submit">Create</button>
-            <button className={styles.backButton} type="button" onClick={goBackHandler}>Go back</button>
+            <div>
+                <label>Jersey Number:</label>
+                <input
+                    type="number"
+                    name="jerseyNumber"
+                    value={playerData.jerseyNumber}
+                    min={1}
+                    max={99}
+                    onChange={handleChange}
+                    required
+                    disabled={isSubmitting}
+                />
+            </div>
+
+            <div>
+                <label>Team:</label>
+                <select
+                    name="teamId"
+                    value={playerData.teamId}
+                    onChange={handleChange}
+                    required
+                    disabled={isSubmitting || teams.length === 0}
+                >
+                    {teams.length === 0 ? (
+                        <option value="">Loading teams...</option>
+                    ) : (
+                        teams.map((team) => (
+                            <option key={team.id} value={team.id}>{team.name}</option>
+                        ))
+                    )}
+                </select>
+            </div>
+
+            <button
+                type="submit"
+                disabled={isSubmitting}
+            >
+                {isSubmitting ? 'Creating...' : 'Create'}
+            </button>
+
+            <button
+                type="button"
+                onClick={goBackHandler}
+                disabled={isSubmitting}
+            >
+                Go back
+            </button>
         </form>
     );
 };

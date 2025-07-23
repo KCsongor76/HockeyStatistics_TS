@@ -1,18 +1,18 @@
 import React, {useEffect, useState} from 'react';
-import {GameType} from "../OOP/enums/GameType";
-import {useLoaderData, useNavigate} from "react-router-dom";
-import {ITeamColor} from "../OOP/interfaces/ITeamColor";
+import {storage} from "../firebaseConfig";
 import {getDownloadURL, ref} from "firebase/storage";
+import {useLoaderData, useNavigate} from "react-router-dom";
 // @ts-ignore
 import styles from './StartPage.module.css';
-import {ChampionshipService} from "../OOP/services/ChampionshipService";
-import {TeamService} from "../OOP/services/TeamService";
-import {storage} from "../firebaseConfig";
 import {IPlayer} from "../OOP/interfaces/IPlayer";
 import {ITeam} from "../OOP/interfaces/ITeam";
-import ContinueOrStartOverModal from '../modals/ContinueOrStartOverModal';
 import {IChampionship} from "../OOP/interfaces/IChampionship";
+import {ITeamColor} from "../OOP/interfaces/ITeamColor";
+import {GameType} from "../OOP/enums/GameType";
 import {Position} from "../OOP/enums/Position";
+import {ChampionshipService} from "../OOP/services/ChampionshipService";
+import {TeamService} from "../OOP/services/TeamService";
+import ContinueOrStartOverModal from '../modals/ContinueOrStartOverModal';
 
 type FormState = {
     championship: IChampionship;

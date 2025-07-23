@@ -4,31 +4,22 @@ import {PlayerService} from '../OOP/services/PlayerService';
 import {TeamService} from "../OOP/services/TeamService";
 // @ts-ignore
 import styles from './HandlePlayerPage.module.css';
-import {IGame} from "../OOP/interfaces/IGame";
 import {GameService} from "../OOP/services/GameService";
 import PreviousGamesPage from "./PreviousGamesPage";
-import {IPlayer} from "../OOP/interfaces/IPlayer";
-import {ITeam} from "../OOP/interfaces/ITeam";
-import {ActionType} from "../OOP/enums/ActionType";
-import {GameType} from "../OOP/enums/GameType";  // Import the CSS module
+import {GameType} from "../OOP/enums/GameType";
+import {Player} from "../OOP/classes/Player";
+import {Team} from "../OOP/classes/Team";
+import {Game} from "../OOP/classes/Game";
+import {PlayerStats} from "../OOP/classes/PlayerStats";
+import {IGame} from "../OOP/interfaces/IGame";
 
-// todo: button colors
-
-interface PlayerStats {
-    gamesPlayed: number;
-    goals: number;
-    assists: number;
-    points: number;
-    shots: number;
-    shootingPercentage: number;
-}
-
+// todo: add player editing: "Edit" button, dropdown (can be edited: position, jersey number, name)
+//  similar to HandleTeamPage
 const HandlePlayerPage = () => {
     const {id: playerId} = useParams<{ id: string }>();
-    // console.log(playerId);
-    const [player, setPlayer] = useState<IPlayer | null>(null);
-    const [team, setTeam] = useState<ITeam>({} as ITeam);
-    const [games, setGames] = useState<IGame[]>([]);
+    const [player, setPlayer] = useState<Player | null>(null);
+    const [team, setTeam] = useState<Team>({} as Team);
+    const [games, setGames] = useState<Game[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [showGames, setShowGames] = useState(false);
@@ -40,106 +31,41 @@ const HandlePlayerPage = () => {
     }
 
     const goBackNavigate = () => {
-        // navigate("/handlePlayers");
         navigate(-1);
     }
-
-    const calculateStats = (games: IGame[]): PlayerStats => {
-        let stats: PlayerStats = {
-            gamesPlayed: games.length,
-            goals: 0,
-            assists: 0,
-            points: 0,
-            shots: 0,
-            shootingPercentage: 0,
-        };
-
-        games.forEach(game => {
-            game.actions.forEach(action => {
-                if (action.player.id === player?.id) {
-                    switch (action.type) {
-                        case ActionType.GOAL:
-                            stats.goals++;
-                            stats.shots++;
-                            break;
-                        case ActionType.ASSIST:
-                            stats.assists++;
-                            break;
-                        case ActionType.SHOT:
-                            stats.shots++;
-                            break;
-                    }
-                }
-            });
-        });
-
-        stats.points = stats.goals + stats.assists;
-        stats.shootingPercentage = stats.shots > 0
-            ? (stats.goals / stats.shots) * 100
-            : 0;
-
-        return stats;
-    };
 
     const playerGames = games.filter(game => {
         if (!player?.id) return false;
 
+        // @ts-ignore
         return (
-            game.teams.home.roster?.some(p => p.id === player.id) ||
-            game.teams.away.roster?.some(p => p.id === player.id)
+            game.teams.home.roster?.some((p: { id: string; }) => p.id === player.id) ||
+            game.teams.away.roster?.some((p: { id: string; }) => p.id === player.id)
         );
     });
 
     const regularGames = playerGames.filter(game => game.type === GameType.REGULAR);
     const playoffGames = playerGames.filter(game => game.type === GameType.PLAYOFF);
 
-    const regularStats = calculateStats(regularGames);
-    const playoffStats = calculateStats(playoffGames);
+    console.log(regularGames);
+    console.log(playoffGames);
 
-    const PlayerStatsTable: React.FC<{ stats: PlayerStats }> = ({stats}) => (
-        <div className={styles.tableContainer}>
-            <table>
-                <thead>
-                <tr>
-                    <th>GP</th>
-                    <th>G</th>
-                    <th>A</th>
-                    <th>P</th>
-                    <th>S</th>
-                    <th>S%</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td>{stats.gamesPlayed}</td>
-                    <td>{stats.goals}</td>
-                    <td>{stats.assists}</td>
-                    <td>{stats.points}</td>
-                    <td>{stats.shots}</td>
-                    <td>{stats.shootingPercentage.toFixed(1)}%</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-    );
+    const regularStats = player ? new PlayerStats(player.id, regularGames as unknown as IGame[]) : null;
+    const playoffStats = player ? new PlayerStats(player.id, playoffGames as unknown as IGame[]) : null;
 
     useEffect(() => {
         const fetchPlayerAndTeamAndGames = async () => {
             try {
-                const playerData = await PlayerService.getPlayerById(playerId as string) as IPlayer;
+                const playerData = await PlayerService.getPlayerById(playerId as string) as unknown as Player;
                 setPlayer(playerData);
-                console.log("playerData", playerData);
 
                 if (playerData && playerData.teamId) {
-                    const teamData = await TeamService.getTeamById(playerData.teamId) as ITeam;
+                    const teamData = await TeamService.getTeamById(playerData.teamId) as unknown as Team;
                     setTeam(teamData);
-                    console.log("teamData", teamData);
                 }
 
-                // Fetch all games
                 const gamesData = await GameService.getAllGames();
-                setGames(gamesData);
-                console.log("gamesData", gamesData);
+                setGames(gamesData as unknown as Game[]);
             } catch (err) {
                 console.error(err)
                 setError('Failed to fetch player, team, or games data.');
@@ -150,9 +76,6 @@ const HandlePlayerPage = () => {
 
         fetchPlayerAndTeamAndGames();
     }, [playerId]);
-
-    // console.log(games)
-
 
     if (loading) {
         return <div className={styles.loading}>Loading...</div>;
@@ -167,36 +90,87 @@ const HandlePlayerPage = () => {
     }
 
     return (
-        <div className={styles.container}>
-            <h2 className={styles.header}>{player.name}</h2>
-            <p className={styles.teamName}>Team: {team.name}</p>
-            <p className={styles.position}>Position: {player.position}</p>
-            <p className={styles.jerseyNumber}>Jersey number: #{player.jerseyNumber}</p>
-            <button className={styles.button} onClick={transferNavigate}>Transfer</button>
-            <button className={styles.button} onClick={goBackNavigate}>Go Back</button>
+        <div>
+            <h2>{player.name}</h2>
+            <p>Team: {team.name}</p>
+            <p>Position: {player.position}</p>
+            <p>Jersey number: #{player.jerseyNumber}</p>
 
-            <div className={styles.statsSection}>
-                <h3 className={styles.subHeader}>Regular Season Stats</h3>
-                <PlayerStatsTable stats={regularStats}/>
+            <div>
+                <h3>Regular Season Stats</h3>
+                <div>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>GP</th>
+                            <th>G</th>
+                            <th>A</th>
+                            <th>P</th>
+                            <th>S</th>
+                            <th>S%</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {regularStats && (
+                            <tr>
+                                <td>{regularStats.gamesPlayed}</td>
+                                <td>{regularStats.goals}</td>
+                                <td>{regularStats.assists}</td>
+                                <td>{regularStats.points}</td>
+                                <td>{regularStats.shots}</td>
+                                <td>{regularStats.shootingPercentage.toFixed(1)}%</td>
+                            </tr>
+                        )}
+                        </tbody>
+                    </table>
+                </div>
 
-                <h3 className={styles.subHeader} style={{marginTop: '2rem'}}>Playoff Stats</h3>
-                <PlayerStatsTable stats={playoffStats}/>
+                <h3 style={{marginTop: '2rem'}}>Playoff Stats</h3>
+                <div>
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>GP</th>
+                            <th>G</th>
+                            <th>A</th>
+                            <th>P</th>
+                            <th>S</th>
+                            <th>S%</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {playoffStats && (
+                            <tr>
+                                <td>{playoffStats.gamesPlayed}</td>
+                                <td>{playoffStats.goals}</td>
+                                <td>{playoffStats.assists}</td>
+                                <td>{playoffStats.points}</td>
+                                <td>{playoffStats.shots}</td>
+                                <td>{playoffStats.shootingPercentage.toFixed(1)}%</td>
+                            </tr>
+                        )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
-            <h3 className={styles.subHeader}>Games Played In:</h3>
+            <h3>Games Played In:</h3>
 
-            <div className={styles.gamesDropdown}>
-                <div className={styles.dropdownHeader} onClick={() => setShowGames(!showGames)}>
+            <div>
+                <div onClick={() => setShowGames(!showGames)}>
                     <h3>Player Games</h3>
                     <span>{showGames ? '▲' : '▼'}</span>
                 </div>
                 {showGames && (
                     <PreviousGamesPage
-                        playerGames={playerGames}
+                        playerGames={playerGames as unknown as IGame[]}
                         showFilters={false}
                     />
                 )}
             </div>
+            <button onClick={transferNavigate}>Transfer</button>
+            <button onClick={goBackNavigate}>Go Back</button>
+
         </div>
     );
 };

@@ -11,9 +11,6 @@ import FilterControls from '../components/FilterControls';
 import GameListItem from '../components/GameListItem';
 import Pagination from '../components/Pagination';
 
-// todo: make smaller components
-// todo: scrap styling, unify
-
 interface PreviousGamesPageProps {
     playerGames?: IGame[];
     showFilters?: boolean;

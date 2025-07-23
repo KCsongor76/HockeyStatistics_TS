@@ -1,29 +1,22 @@
+import {IChampionship} from "../interfaces/IChampionship";
+
 export class Championship {
-    private _name: string
-    private readonly _id: string;
+    id: string;
+    name: string;
 
-
-    constructor(name: string = "", id: string = "") {
-        this._name = name;
-        this._id = id;
+    constructor(id: string, name: string) {
+        this.id = id;
+        this.name = name;
     }
 
-    get id(): string {
-        return this._id;
+    toPlainObject(): IChampionship {
+        return {
+            id: this.id,
+            name: this.name
+        }
     }
 
-    get name(): string {
-        return this._name;
+    static fromPlain(plain: IChampionship): Championship {
+        return new Championship(plain.id, plain.name);
     }
-
-    set name(value: string) {
-        this._name = value;
-    }
-
-    /*equals(other: Championship): boolean {
-        return other != null && this.id === other.id;
-    }*/
-
-
-
 }

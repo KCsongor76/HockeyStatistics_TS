@@ -1,15 +1,16 @@
 import {addDoc, collection, deleteDoc, doc, getDoc, getDocs, setDoc} from "firebase/firestore";
 import {db} from "../../firebaseConfig";
 import {IGame} from "../interfaces/IGame";
+import {Game} from "../classes/Game";
 
 // todo: arrow functions, atomic operations, batch writes?
 
 export class GameService {
     private static collectionRef = collection(db, 'games');
 
-    static saveGame = async (game: IGame) => {
+    static saveGame = async (game: Game) => {
         const docRef = doc(this.collectionRef); // Generate ID upfront
-        const gameWithId = {...game, id: docRef.id};
+        const gameWithId = {...game.toPlainObject(), id: docRef.id};
         await setDoc(docRef, gameWithId); // Single write operation
         return gameWithId as IGame;
     }
