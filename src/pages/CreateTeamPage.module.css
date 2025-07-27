@@ -1,106 +1,100 @@
-/* CreateTeamPage.module.css */
-
-.formContainer {
-    max-width: 600px;
-    margin: 20px auto;
-    padding: 20px;
-    background-color: #f7f7f7;
+.form {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #f8f9fa;
     border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    font-family: Arial, sans-serif;
-}
-
-.formContainer label {
-    font-weight: bold;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .formGroup {
-    margin-bottom: 20px;
+    margin-bottom: 1.5rem;
 }
 
-.formGroup label {
+.label {
     display: block;
-    font-weight: bold;
-    margin-bottom: 8px;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #343a40;
 }
 
-.formGroup input[type="text"],
-.formGroup input[type="file"] {
+.input {
     width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid #ccc;
+    padding: 0.75rem;
+    border: 1px solid #ced4da;
     border-radius: 4px;
-    box-sizing: border-box;
-}
-
-.colorContainer {
-    display: flex;
-    justify-content: left;
-    gap: 50px;
-    margin-bottom: 20px;
+    font-size: 1rem;
 }
 
 .colorGroup {
     display: flex;
-    flex-direction: column;
+    gap: 1rem;
+    margin-top: 0.5rem;
 }
 
-.colorGroup p {
+.colorInputGroup {
+    flex: 1;
+}
+
+.colorLabel {
     display: block;
+    margin-bottom: 0.25rem;
+    font-size: 0.875rem;
 }
 
-.colorGroup input {
+.colorInput {
     width: 100%;
+    height: 40px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
 }
 
-.formGroup p {
-    margin: 0 0 5px;
-    font-weight: bold;
+.championshipGroup {
+    margin-top: 1rem;
 }
 
-.championshipContainer {
-    margin-bottom: 20px;
-}
-
-.championshipContainer div {
+.championshipItem {
     display: flex;
     align-items: center;
-    margin: 10px 0;
-}
-
-.championshipContainer input[type="checkbox"] {
-    margin-right: 10px;
+    margin-bottom: 0.5rem;
 }
 
 .buttonGroup {
     display: flex;
-    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 2rem;
 }
 
-.submitButton,
-.backButton {
-    padding: 10px 20px;
+.button {
+    padding: 0.75rem 1.5rem;
     border: none;
     border-radius: 4px;
+    font-size: 1rem;
     cursor: pointer;
-    font-size: 16px;
+    transition: background-color 0.2s;
 }
 
-.submitButton {
-    background-color: #4CAF50;
+.primaryButton {
+    background-color: #007bff;
     color: white;
 }
 
-.submitButton:hover {
-    background-color: #45a049;
+.primaryButton:hover {
+    background-color: #0069d9;
 }
 
-.backButton {
-    background-color: #f44336;
+.secondaryButton {
+    background-color: #6c757d;
     color: white;
 }
 
-.backButton:hover {
-    background-color: #da190b;
+.secondaryButton:hover {
+    background-color: #5a6268;
+}
+
+.error {
+    display: block;
+    margin-top: 0.5rem;
+    color: #dc3545;
+    font-size: 0.875rem;
 }

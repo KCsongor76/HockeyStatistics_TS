@@ -53,6 +53,4 @@ export class GameState {
     addAction(action: IGameAction) {
         this.actions.push(action);
     }
-
-    // Other state management methods...
 }

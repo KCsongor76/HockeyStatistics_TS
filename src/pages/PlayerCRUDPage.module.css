@@ -1,152 +1,186 @@
-/* PlayerCRUDPage.module.css */
-
 .container {
     max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #f8f9fa;
-    border-radius: 8px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
-.createButton {
-    background-color: #17a2b8;
-    color: white;
-    padding: 12px 20px;
-    margin-bottom: 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
-    width: 100%;
-}
-
-.createButton:hover {
-    background-color: #138496;
-}
-
-.playerList {
-    display: grid;
-    gap: 15px;
-    grid-template-columns: repeat(1, 1fr);
-}
-
-@media (min-width: 768px) {
-    .playerList {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-@media (min-width: 1200px) {
-    .playerList {
-        grid-template-columns: repeat(5, 1fr);
-    }
-}
-
-.playerItem {
-    background-color: white;
-    border: 1px solid #dee2e6;
-    border-radius: 8px;
-    padding: 15px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-}
-
-.playerHeader {
+.header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 2rem;
+}
+
+.createButton {
+    padding: 0.8rem 1.5rem;
+    background: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.createButton:hover {
+    background: #219653;
+}
+
+.filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.filterGroup {
+    display: flex;
+    flex-direction: column;
+}
+
+.filterLabel {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.filterInput, .filterSelect {
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: white;
+}
+
+.playersGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.playerCard {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s;
+}
+
+.playerCard:hover {
+    transform: translateY(-5px);
+}
+
+.playerHeader {
+    padding: 1.2rem;
+    background: #3498db;
+    color: white;
+    display: flex;
+    justify-content: space-between;
 }
 
 .playerName {
+    font-weight: 600;
+    font-size: 1.2rem;
+}
+
+.playerNumber {
     font-weight: bold;
-    font-size: 1.1rem;
-    color: #333;
+    font-size: 1.3rem;
 }
 
-.playerDetails {
-    display: grid;
-    gap: 8px;
-    margin-bottom: 12px;
+.playerBody {
+    padding: 1.2rem;
 }
 
-.detailItem {
+.playerInfo {
+    margin-bottom: 0.8rem;
     display: flex;
     justify-content: space-between;
-    color: #666;
-    font-size: 0.9rem;
 }
 
-.detailLabel {
-    font-weight: 500;
-    margin-right: 10px;
-}
-
-.actions {
+.playerActions {
     display: flex;
-    gap: 10px;
-    margin-top: 10px;
+    gap: 0.8rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
 }
 
-.viewButton, .deleteButton {
-    padding: 10px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
+.actionButton {
     flex: 1;
-    transition: opacity 0.2s;
+    padding: 0.6rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s;
 }
 
 .viewButton {
-    background-color: #28a745;
+    background: #3498db;
     color: white;
 }
 
 .viewButton:hover {
-    opacity: 0.9;
+    background: #2980b9;
 }
 
 .deleteButton {
-    background-color: #dc3545;
+    background: #e74c3c;
     color: white;
 }
 
 .deleteButton:hover {
-    opacity: 0.9;
+    background: #c0392b;
 }
 
-.filterContainer {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-    margin-bottom: 2rem;
-}
-
-.filterInput {
-    padding: 0.5rem;
-    border-radius: 4px;
-    border: 1px solid #ddd;
-    width: 100%;
-}
-
-.paginationContainer {
+.pagination {
     display: flex;
-    gap: 1rem;
     justify-content: center;
-    margin: 2rem 0;
     align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
 }
 
 .paginationButton {
-    padding: 0.5rem 1rem;
-    border: 1px solid #ddd;
-    background: white;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: 6px;
+    background: #3498db;
+    color: white;
     cursor: pointer;
-    border-radius: 4px;
+    font-weight: 500;
+    transition: background 0.3s;
 }
 
 .paginationButton:disabled {
-    background: #f0f0f0;
+    background: #bdc3c7;
     cursor: not-allowed;
 }
 
+.pageInfo {
+    font-weight: 600;
+}
+
+.noPlayers {
+    text-align: center;
+    padding: 2rem;
+    color: #7f8c8d;
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .filters {
+        grid-template-columns: 1fr;
+    }
+
+    .playersGrid {
+        grid-template-columns: 1fr;
+    }
+}

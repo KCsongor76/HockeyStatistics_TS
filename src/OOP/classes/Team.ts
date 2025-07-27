@@ -8,6 +8,7 @@ import {ITeam} from "../interfaces/ITeam";
 import {IChampionship} from "../interfaces/IChampionship";
 import {IPlayer} from "../interfaces/IPlayer";
 import {Position} from "../enums/Position";
+import {Season} from "../enums/Season";
 
 export class Team {
     id: string;
@@ -17,14 +18,16 @@ export class Team {
     awayColor: ITeamColor;
     championships: Championship[];
     players: Player[];
+    seasons: Season[];
 
     constructor(
         name: string,
         logo: string,
         homeColor: ITeamColor,
         awayColor: ITeamColor,
+        seasons: Season[],
         championships: Championship[],
-        players: Player[] = [],
+        players?: Player[],
         id?: string
     ) {
         this.id = id || "0";
@@ -32,8 +35,9 @@ export class Team {
         this.logo = logo;
         this.homeColor = homeColor;
         this.awayColor = awayColor;
+        this.seasons = seasons;
         this.championships = championships;
-        this.players = players;
+        this.players = players || [];
     }
 
     static fromPlain(plain: ITeam): Team {
@@ -42,6 +46,7 @@ export class Team {
             plain.logo,
             plain.homeColor,
             plain.awayColor,
+            plain.seasons as Season[] || [],
             plain.championships.map((c: IChampionship) => new Championship(c.id, c.name)),
             plain.players.map((p: IPlayer) => new Player(p.name, p.position as Position, p.jerseyNumber, p.teamId, p.id)),
             plain.id
@@ -56,6 +61,7 @@ export class Team {
             logo: this.logo,
             homeColor: this.homeColor,
             awayColor: this.awayColor,
+            seasons: this.seasons,
             championships: this.championships.map((c: Championship) => c.toPlainObject()),
             players: this.players.map((p: Player) => p.toPlainObject()),
         };
@@ -77,6 +83,7 @@ export class Team {
     }
 
     async update(name: string, logoFile: File | null): Promise<Team> {
+        const oldLogoUrl = this.logo;
         let newLogo = this.logo;
 
         if (logoFile) {
@@ -88,12 +95,23 @@ export class Team {
             newLogo,
             this.homeColor,
             this.awayColor,
+            this.seasons,
             this.championships,
             this.players,
             this.id
         );
 
-        await TeamService.updateTeam(this.id, updatedTeam/*.toPlainObject()*/);
+        await TeamService.updateTeam(this.id, updatedTeam);
+
+        // Delete old logo after successful update
+        if (logoFile && oldLogoUrl) {
+            try {
+                await TeamService.deleteLogo(oldLogoUrl);
+            } catch (error) {
+                console.error("Error deleting old logo:", error);
+            }
+        }
+
         return updatedTeam;
     }
 }

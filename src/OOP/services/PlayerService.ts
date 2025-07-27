@@ -6,6 +6,7 @@ import {db} from "../../firebaseConfig";
 import {IPlayer} from "../interfaces/IPlayer";
 import {Player} from "../classes/Player";
 import {Position} from "../enums/Position";
+import {TeamService} from "./TeamService";
 
 // todo: arrow functions, atomic operations, batch writes?
 
@@ -50,6 +51,8 @@ export class PlayerService {
 
     static async getAllPlayers(): Promise<IPlayer[]> {
         // Single query for all players across teams
+        await TeamService.createFreeAgentTeamIfNotExists();
+
         const playersCollectionGroup = collectionGroup(db, 'players');
         const querySnapshot = await getDocs(playersCollectionGroup);
         const allPlayers = querySnapshot.docs.map(doc => {

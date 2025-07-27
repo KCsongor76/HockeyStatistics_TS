@@ -1,195 +1,168 @@
-/* HandleTeamPage.module.css */
-
 .container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    font-family: Arial, sans-serif;
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
 }
 
-.header {
-    font-size: 2em;
-    margin-bottom: 20px;
-    text-align: center;
-}
-
-.teamInfo {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.teamName {
-    font-size: 1.5em;
-    font-weight: bold;
+.teamHeader {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #eee;
 }
 
 .teamLogo {
-    width: 200px;
-    height: 200px;
-    border-radius: 8px;
-    object-fit: cover;
-    margin-top: 10px;
+    width: 120px;
+    height: 120px;
+    object-fit: contain;
+    border-radius: 50%;
+    background: #f8f9fa;
+    padding: 0.5rem;
+    border: 2px solid #3498db;
 }
 
-.formGroup {
-    margin-bottom: 20px;
+.teamInfo {
+    flex: 1;
 }
 
-.formGroup label {
+.teamName {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+}
+
+.editSection {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+}
+
+.editGroup {
+    margin-bottom: 1.2rem;
+}
+
+.editLabel {
     display: block;
-    margin-bottom: 0.75rem;
-    font-size: 1rem;
+    margin-bottom: 0.5rem;
     font-weight: 600;
-    color: #2d3748;
-    text-transform: uppercase; /* Match StartPage */
-    letter-spacing: 0.05em;
 }
 
-.formGroup input[type="text"],
-.formGroup input[type="file"] {
+.editInput {
     width: 100%;
-    padding: 0.75rem;
-    border: 2px solid #e2e8f0; /* Match StartPage */
+    padding: 0.8rem;
+    border: 1px solid #ddd;
     border-radius: 8px;
-    background-color: white;
     font-size: 1rem;
-    transition: all 0.2s ease;
 }
 
-.formGroup input:focus {
-    outline: none;
-    border-color: #4299e1;
-    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
-}
-
-.buttonGroup {
+.editActions {
     display: flex;
-    justify-content: center; /* Changed from space-between */
-    gap: 1rem; /* Add spacing between buttons */
-    margin-top: 20px;
-}
-
-.editButton,
-.saveButton,
-.backButton {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 16px;
+    gap: 1rem;
 }
 
 .editButton {
-    background-color: #008cba;
-    color: white;
-}
-
-.editButton:hover {
-    background-color: #007bb5;
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
 }
 
 .saveButton {
-    background-color: #4CAF50;
+    background: #27ae60;
     color: white;
 }
 
-.saveButton:hover {
-    background-color: #45a049;
-}
-
-.backButton {
-    background-color: #f44336;
+.discardButton {
+    background: #e74c3c;
     color: white;
 }
 
-.backButton:hover {
-    background-color: #da190b;
+.sectionToggle {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 1rem;
+    background: #e3f2fd;
+    border-radius: 8px;
+    margin: 1.5rem 0;
+    cursor: pointer;
 }
 
-.tableContainer {
-    margin-top: 30px;
+.statsSection {
+    margin-bottom: 2rem;
 }
 
-.tableContainer table {
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.statsCard {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.statsTitle {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 2px solid #3498db;
+}
+
+.statsTable {
     width: 100%;
     border-collapse: collapse;
 }
 
-.tableContainer thead th {
-    background-color: #f2f2f2;
-    padding: 10px;
+.statsTable th {
     text-align: left;
-}
-
-.tableContainer tbody td {
-    padding: 10px;
-    border-top: 1px solid #ddd;
-}
-
-.tableContainer tbody tr:hover {
-    background-color: #f1f1f1;
-}
-
-.noPlayers {
-    text-align: center;
-    color: #666;
-    font-style: italic;
-    margin-top: 20px;
-}
-
-.gamesDropdown {
-    margin-top: 2rem;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.dropdownHeader {
-    padding: 1rem;
-    background-color: #f7fafc;
+    padding: 0.8rem;
+    background: #f8f9fa;
     cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
 }
 
-.gamesList {
-    padding: 1rem;
-    background: white;
+.statsTable th:hover {
+    background: #e3f2fd;
 }
 
-.playersDropdown {
-    margin-top: 2rem;
-    border: 1px solid #e2e8f0;
+.statsTable td {
+    padding: 0.8rem;
+    border-bottom: 1px solid #eee;
+}
+
+.statsTable tr:last-child td {
+    border-bottom: none;
+}
+
+.backButton {
+    padding: 0.8rem 1.5rem;
+    background: #7f8c8d;
+    color: white;
+    border: none;
     border-radius: 8px;
-    overflow: hidden;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 1.5rem;
 }
 
-.gameItem {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    padding: 1rem;
-    border-bottom: 1px solid #e2e8f0;
-}
+@media (max-width: 768px) {
+    .teamHeader {
+        flex-direction: column;
+        text-align: center;
+    }
 
-.gameItem img {
-    width: 40px;
-    height: 40px;
-    object-fit: contain;
-}
-
-.statsSection {
-    margin: 2rem 0;
-}
-
-.subHeader {
-    color: #2c3e50;
-    margin-bottom: 1rem;
-    font-size: 1.25rem;
-    border-bottom: 2px solid #e2e8f0;
-    padding-bottom: 0.5rem;
+    .statsGrid {
+        grid-template-columns: 1fr;
+    }
 }

@@ -1,4 +1,5 @@
 import {IChampionship} from "../interfaces/IChampionship";
+import {Season} from "../enums/Season";
 
 export class Championship {
     id: string;
@@ -12,11 +13,14 @@ export class Championship {
     toPlainObject(): IChampionship {
         return {
             id: this.id,
-            name: this.name
+            name: this.name,
         }
     }
 
     static fromPlain(plain: IChampionship): Championship {
-        return new Championship(plain.id, plain.name);
+        return new Championship(
+            plain.id,
+            plain.name,
+        );
     }
 }

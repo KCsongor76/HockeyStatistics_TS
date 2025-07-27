@@ -7,20 +7,32 @@ import styles from './PlayerCRUDPage.module.css';
 import {Position} from "../OOP/enums/Position";
 import {Player} from "../OOP/classes/Player";
 import {Team} from "../OOP/classes/Team";
+import {GameService} from "../OOP/services/GameService";
+import {Season} from "../OOP/enums/Season";
 
-// todo: if the (filtered) player list is empty, show: "No players."
-// todo: jersey number filter: make sure only 1-99 can be written-selected
+// Define a new type that extends Player with seasons
+interface PlayerWithSeasons extends Player {
+    seasons: string[];
+}
 
 const PlayerCRUDPage = () => {
     const navigate = useNavigate();
-    const loaderData = useLoaderData() as { players: Player[], teams: Team[] } | undefined;
-    const [players, setPlayers] = useState<Player[]>([]);
+    const loaderData = useLoaderData() as {
+        players: PlayerWithSeasons[],
+        teams: Team[],
+        seasons: string[]
+    } | undefined;
+
+    const [players, setPlayers] = useState<PlayerWithSeasons[]>([]);
     const [teams, setTeams] = useState<Team[]>([]);
+    const seasons = Object.values(Season);
+    const [selectedSeason, setSelectedSeason] = useState<Season | "">("");
     const [filters, setFilters] = useState({
         team: '',
         position: '',
         jerseyNr: '',
-        search: ''
+        search: '',
+        season: ''
     });
     const [pagination, setPagination] = useState({page: 1, perPage: 10});
 
@@ -28,7 +40,8 @@ const PlayerCRUDPage = () => {
         (!filters.team || player.teamId === filters.team) &&
         (!filters.position || player.position === filters.position) &&
         (!filters.jerseyNr || player.jerseyNumber.toString().includes(filters.jerseyNr)) &&
-        (!filters.search || player.name.toLowerCase().includes(filters.search.toLowerCase()))
+        (!filters.search || player.name.toLowerCase().includes(filters.search.toLowerCase())) &&
+        (!selectedSeason || player.seasons.includes(selectedSeason))
     );
 
     const paginatedPlayers = filteredPlayers.slice(
@@ -86,13 +99,26 @@ const PlayerCRUDPage = () => {
                     type="number"
                     placeholder="Jersey #"
                     value={filters.jerseyNr}
+                    min={1}
+                    max={99}
                     onChange={e => setFilters(f => ({...f, jerseyNr: e.target.value}))}
                 />
+
+                <label>Season: </label>
+                <select
+                    value={selectedSeason}
+                    onChange={e => setSelectedSeason(e.target.value as Season || "")}
+                >
+                    <option value="">All Seasons</option>
+                    {seasons.map(season => (
+                        <option key={season} value={season}>{season}</option>
+                    ))}
+                </select>
 
             </div>
 
             <div>
-                {paginatedPlayers.map(player => {
+                {paginatedPlayers.length > 0 ? paginatedPlayers.map(player => {
                     const playerTeam = teams.find(t => t.id === player.teamId);
 
                     return <div key={player.id}>
@@ -104,6 +130,7 @@ const PlayerCRUDPage = () => {
                         <div>
                             <div>Position: {player.position}</div>
                             <div>Team: {playerTeam?.name || 'Unknown'}</div>
+                            {/*<div>Seasons: {player.seasons.join(', ')}</div>*/}
                         </div>
 
                         <div>
@@ -116,7 +143,7 @@ const PlayerCRUDPage = () => {
                         </div>
 
                     </div>
-                })}
+                }) : <p>No players.</p>}
             </div>
 
             <div>
@@ -144,14 +171,59 @@ export default PlayerCRUDPage;
 
 export const loader = async () => {
     try {
-        const [players, teams] = await Promise.all([
+        const [players, teams, games] = await Promise.all([
             PlayerService.getAllPlayers(),
-            TeamService.getAllTeams()
+            TeamService.getAllTeams(),
+            GameService.getAllGames()
         ]);
 
-        return {players, teams};
+        // Create a player season map
+        const playerSeasonMap: Record<string, Set<string>> = {};
+
+        games.forEach(game => {
+            const addPlayerSeason = (playerId: string) => {
+                if (!playerSeasonMap[playerId]) {
+                    playerSeasonMap[playerId] = new Set();
+                }
+                if (game.season) {
+                    playerSeasonMap[playerId].add(game.season);
+                }
+            };
+
+            // Process home team roster
+            game.teams?.home?.roster?.forEach(player => {
+                addPlayerSeason(player.id);
+            });
+
+            // Process away team roster
+            game.teams?.away?.roster?.forEach(player => {
+                addPlayerSeason(player.id);
+            });
+        });
+
+        // Add seasons to players
+        const playersWithSeasons = players.map(player => ({
+            ...player,
+            seasons: Array.from(playerSeasonMap[player.id] || [])
+        })) as PlayerWithSeasons[];
+
+        // Get unique seasons
+        // @ts-ignore
+        const allSeasons = [...new Set(
+            Object.values(playerSeasonMap).flatMap(set => Array.from(set))
+        )].sort();
+
+        return {
+            players: playersWithSeasons,
+            teams,
+            seasons: allSeasons
+        };
     } catch (error) {
         console.error("Error in loader:", error);
-        return {players: [], teams: []};
+        return {
+            players: [],
+            teams: [],
+            seasons: []
+        };
     }
 };

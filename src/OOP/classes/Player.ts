@@ -4,6 +4,7 @@ import {TeamService} from "../services/TeamService";
 import {IPlayer} from "../interfaces/IPlayer";
 import {IGameAction} from "../interfaces/IGameAction";
 import {ActionType} from "../enums/ActionType";
+import {PlayerService} from "../services/PlayerService";
 
 
 export class Player {
@@ -19,6 +20,22 @@ export class Player {
         this.position = position;
         this.jerseyNumber = jerseyNumber;
         this.teamId = teamId;
+    }
+
+    static async create(
+        name: string,
+        position: Position,
+        jerseyNumber: number,
+        teamId: string
+    ): Promise<Player> {
+        const player = new Player(name, position, jerseyNumber, teamId);
+        await PlayerService.addPlayerToTeam(teamId, player);
+        return player;
+    }
+
+    static async isJerseyNumberAvailable(teamId: string, jerseyNumber: number): Promise<boolean> {
+        const existingPlayers = await PlayerService.getPlayersByTeam(teamId);
+        return !existingPlayers.some(p => p.jerseyNumber === jerseyNumber);
     }
 
     async transferToTeam(newTeam: Team): Promise<void> {

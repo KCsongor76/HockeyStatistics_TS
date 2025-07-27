@@ -6,21 +6,21 @@ import {ITeamColor} from "../interfaces/ITeamColor";
 import {IGame} from "../interfaces/IGame";
 import {Team} from "./Team";
 import {GameAction} from "./GameAction";
-import {ITeam} from "../interfaces/ITeam";
-import {ScoreData} from "./ScoreData";
 import {Championship} from "./Championship";
+import {Season} from "../enums/Season";
 
 export class Game {
     id: string = "";
     timestamp: string = "";
+    season: Season;
     championship: Championship = new Championship("", "");
     actions: IGameAction[] = [];
     teams: {
         home: TeamWithRoster,
         away: TeamWithRoster
     } = {
-        home: new TeamWithRoster("", "", {} as ITeamColor, {} as ITeamColor, [], [], [], ""),
-        away: new TeamWithRoster("", "", {} as ITeamColor, {} as ITeamColor, [], [], [], ""),
+        home: new TeamWithRoster("", "", {} as ITeamColor, {} as ITeamColor, [], [], [], [], ""),
+        away: new TeamWithRoster("", "", {} as ITeamColor, {} as ITeamColor, [], [], [], [], ""),
     };
 
     score: {
@@ -42,7 +42,7 @@ export class Game {
     selectedImage: string = "";
 
 
-    constructor(id: string, timestamp: string, championship: Championship, actions: IGameAction[], teams: {
+    constructor(id: string, timestamp: string, season: Season, championship: Championship, actions: IGameAction[], teams: {
         home: TeamWithRoster;
         away: TeamWithRoster
     }, score: {
@@ -51,6 +51,7 @@ export class Game {
     }, type: GameType, selectedImage: string = "") {
         this.id = id;
         this.timestamp = timestamp;
+        this.season = season;
         this.championship = championship;
         this.actions = actions;
         this.teams = teams;
@@ -59,10 +60,29 @@ export class Game {
         this.selectedImage = selectedImage;
     }
 
+    // In Game class
+    get homeTeam(): Team {
+        return this.teams.home;
+    }
+
+    get awayTeam(): Team {
+        return this.teams.away;
+    }
+
+    get homeScore(): number {
+        return this.score.home.goals;
+    }
+
+    get awayScore(): number {
+        return this.score.away.goals;
+    }
+
+    // todo
     static fromPlain(plain: IGame): Game {
         return new Game(
             plain.id,
             plain.timestamp,
+            plain.season as Season,
             Championship.fromPlain(plain.championship),
             plain.actions.map(action => GameAction.fromPlain(action)),
             {
@@ -81,6 +101,7 @@ export class Game {
     toPlainObject(): IGame {
         return {
             id: this.id,
+            season: this.season,
             championship: this.championship.toPlainObject(),
             timestamp: this.timestamp,
             actions: this.actions.map(action => GameAction.fromPlain(action).toPlainObject()),

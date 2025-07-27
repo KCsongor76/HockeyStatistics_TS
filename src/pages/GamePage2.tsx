@@ -25,6 +25,10 @@ import {ActionType} from "../OOP/enums/ActionType";
 import {GameType} from "../OOP/enums/GameType";
 import {GameService} from "../OOP/services/GameService";
 
+// todo: on page reload, we should set the unfinishedgame local storage
+// todo: if we save an unfinished game, make sure the timer is stopped,
+//  even if when we exit and save, it's still running, on re-continuing, it should be stopped.
+
 type FormData = {
     championship: IChampionship;
     homeTeam: ITeam;
@@ -49,7 +53,7 @@ interface ITeamRoster extends ITeam {
 
 const GamePage = () => {
     const location = useLocation();
-    const savedGameState = location.state;
+    const { setup, savedGameState } = location.state || {};
 
     const [selectedPosition, setSelectedPosition] = useState<{ x: number, y: number } | null>(null);
     const [selectedAction, setSelectedAction] = useState<{ type: ActionType, team: ITeamRoster } | null>(null);
@@ -65,10 +69,12 @@ const GamePage = () => {
         isGameOver: savedGameState?.isGameOver || false
     }));
 
+    const formData = setup || savedGameState?.setup;
+
     const fieldImageRef = useRef<HTMLImageElement>(null);
     const visualizationImageRef = useRef<HTMLImageElement>(null);
     const [iconSize, setIconSize] = useState(30);
-    const formData = savedGameState ? savedGameState.setup : location.state.setup as FormData;
+    // const formData = savedGameState ? savedGameState.setup : location.state.setup as FormData;
     const [showDetails, setShowDetails] = useState(true);
     const pressTimer = useRef<number | null>(null);
     const [isLongPress, setIsLongPress] = useState(false);
@@ -82,18 +88,21 @@ const GamePage = () => {
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
 
+    console.log("formData", formData);
+
     const gameData: IGame = {
         id: "",
-        type: formData.gameType,
+        type: formData?.gameType || GameType.REGULAR,
         timestamp: new Date().toISOString(),
         actions: gameState.actions,
         teams: {
-            home: {...formData.homeTeam, roster: formData.homeRoster},
-            away: {...formData.awayTeam, roster: formData.awayRoster}
+            home: {...formData?.homeTeam, roster: formData?.homeRoster || []},
+            away: {...formData?.awayTeam, roster: formData?.awayRoster || []}
         },
         score: {home: gameState.homeScore, away: gameState.awayScore},
-        selectedImage: formData.selectedImage,
-        championship: formData.championship
+        selectedImage: formData?.selectedImage || "",
+        season: formData?.season || "",
+        championship: formData?.championship || { id: "", name: "" }
     };
 
     const isPlayoff = gameData.type === GameType.PLAYOFF;
@@ -242,6 +251,7 @@ const GamePage = () => {
         const game = new Game(
             "",
             new Date().toISOString(),
+            gameData.season, // todo check?
             Championship.fromPlain(championship),
             gameState.actions,
             teams,

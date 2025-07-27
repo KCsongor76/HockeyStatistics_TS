@@ -9,6 +9,10 @@ import {ChampionshipService} from "../OOP/services/ChampionshipService";
 import {TeamService} from "../OOP/services/TeamService";
 import {getDownloadURL, ref} from "firebase/storage";
 import {storage} from "../firebaseConfig";
+import ContinueOrStartOverModal from "../modals/ContinueOrStartOverModal";
+import {Season} from "../OOP/enums/Season";
+
+// todo: check filter logic
 
 class GameSetup {
     championship: Championship | null = null;
@@ -22,22 +26,27 @@ class GameSetup {
     awayRoster: Player[] = [];
     awayRosterOut: Player[] = [];
     selectedImage = '';
+    season: Season | string = "";
 
     constructor(init?: Partial<GameSetup>) {
         Object.assign(this, init);
     }
 
     validate() {
-        if (!this.championship) return 'Please select a championship';
-        if (!this.homeTeam || !this.awayTeam) return 'Please select both teams';
-        if (this.homeTeam.id === this.awayTeam.id) return 'Please select different teams';
-        if (!this.selectedImage) return 'Please select a rink image';
-        return null;
+        const errors: Record<string, string> = {};
+        if (!this.championship) errors.championship = 'Please select a championship';
+        if (!this.homeTeam) errors.homeTeam = 'Please select home team';
+        if (!this.awayTeam) errors.awayTeam = 'Please select away team';
+        if (this.homeTeam?.id === this.awayTeam?.id) errors.teams = 'Please select different teams';
+        if (!this.selectedImage) errors.image = 'Please select a rink image';
+        if (!this.season) errors.season = 'Please select a season';
+        return errors;
     }
 }
 
 const StartPage = () => {
 
+    const [errors, setErrors] = useState<Record<string, string>>({});
     const navigate = useNavigate();
     const [setup, setSetup] = useState<GameSetup>(new GameSetup());
     const [championships, setChampionships] = useState<Championship[]>([]);
@@ -45,14 +54,17 @@ const StartPage = () => {
     const [filteredTeams, setFilteredTeams] = useState<Team[]>([]);
     const [rinkImages, setRinkImages] = useState({rinkUp: '', rinkDown: ''});
     const [showRosters, setShowRosters] = useState(false);
+    const [showContinueModal, setShowContinueModal] = useState(false);
+    const [savedGameState, setSavedGameState] = useState<any>(null);
+    const seasons = Object.values(Season);
 
     useEffect(() => {
         const loadData = async () => {
             try {
                 const championshipsData = await ChampionshipService.getAllChampionships();
                 const teamsData = await TeamService.getAllTeams();
-
                 setChampionships(championshipsData.map(c => new Championship(c.id, c.name)));
+
                 setAllTeams(teamsData.map(t => Team.fromPlain(t)));
                 const [rinkDown, rinkUp] = await Promise.all([
                     getDownloadURL(ref(storage, "rink-images/icerink_down.jpg")),
@@ -68,29 +80,61 @@ const StartPage = () => {
     }, []);
 
     useEffect(() => {
-        if (!setup.championship) return;
-
-        const filtered = allTeams.filter(team =>
-            team.championships.some(c => c.id === setup.championship!.id)
-        );
+        const filtered = setup.championship
+            ? allTeams.filter(team =>
+                team.championships.some(c => c.id === setup.championship!.id)
+            )
+            : [] /*allTeams*/;
 
         setFilteredTeams(filtered);
 
-        const home = filtered[0] || null;
-        const away = filtered[1] || filtered[0] || null;
+        // Only reset teams if they're not in the new filtered list (compare by ID)
+        const home = setup.homeTeam && filtered.some(t => t.id === setup.homeTeam!.id)
+            ? setup.homeTeam
+            : filtered[0] || null;
 
-        setSetup(new GameSetup({
-            ...setup,
+        const away = setup.awayTeam && filtered.some(t => t.id === setup.awayTeam!.id)
+            ? setup.awayTeam
+            : filtered[1] || filtered[0] || null;
+
+        setSetup(prev => new GameSetup({
+            ...prev,
             homeTeam: home,
             awayTeam: away,
-            homeColor: home?.homeColor || {primary: '', secondary: ''},
-            awayColor: away?.awayColor || {primary: '', secondary: ''},
+            homeColor: home?.homeColor || prev.homeColor,
+            awayColor: away?.awayColor || prev.awayColor,
             homeRoster: [],
             homeRosterOut: home?.players || [],
             awayRoster: [],
             awayRosterOut: away?.players || []
         }));
+
     }, [setup.championship, allTeams]);
+
+    // Check for saved game
+    useEffect(() => {
+        const savedGame = localStorage.getItem('unfinishedGame');
+        if (savedGame) {
+            setSavedGameState(JSON.parse(savedGame));
+            setShowContinueModal(true);
+        }
+    }, []);
+
+    const handleContinue = () => {
+        navigate('/game', {
+            state: {
+                setup: savedGameState.formData,
+                savedGameState: savedGameState
+            }
+        });
+        setShowContinueModal(false);
+    };
+
+    // Handle Start Over button
+    const handleStartOver = () => {
+        localStorage.removeItem('unfinishedGame');
+        setShowContinueModal(false);
+    };
 
     const handleTeamChange = (teamId: string, isHome: boolean) => {
         const team = filteredTeams.find(t => t.id === teamId) || null;
@@ -113,47 +157,75 @@ const StartPage = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        const error = setup.validate();
-        if (error) return alert(error);
-        console.log(setup)
+        const formErrors = setup.validate();
+        setErrors(formErrors);
+
+        if (Object.keys(formErrors).length > 0) return;
+
         navigate('/game', {state: {setup}});
     };
 
     const addPlayerToRoster = (player: Player, isHome: boolean) => {
+        const rosterKey = isHome ? 'homeRoster' : 'awayRoster';
+        const rosterOutKey = isHome ? 'homeRosterOut' : 'awayRosterOut';
+
+        // Check if player is already in roster
+        if (setup[rosterKey].some(p => p.id === player.id)) return;
+
         setSetup(new GameSetup({
             ...setup,
-            ...(isHome ? {
-                homeRoster: [...setup.homeRoster, player],
-                homeRosterOut: setup.homeRosterOut.filter(p => p.id !== player.id)
-            } : {
-                awayRoster: [...setup.awayRoster, player],
-                awayRosterOut: setup.awayRosterOut.filter(p => p.id !== player.id)
-            })
+            [rosterKey]: [...setup[rosterKey], player],
+            [rosterOutKey]: setup[rosterOutKey].filter(p => p.id !== player.id)
         }));
     };
 
+    // Update the removePlayerFromRoster function
     const removePlayerFromRoster = (player: Player, isHome: boolean) => {
+        const rosterKey = isHome ? 'homeRoster' : 'awayRoster';
+        const rosterOutKey = isHome ? 'homeRosterOut' : 'awayRosterOut';
+
         setSetup(new GameSetup({
             ...setup,
-            ...(isHome ? {
-                homeRoster: setup.homeRoster.filter(p => p.id !== player.id),
-                homeRosterOut: [...setup.homeRosterOut, player]
-            } : {
-                awayRoster: setup.awayRoster.filter(p => p.id !== player.id),
-                awayRosterOut: [...setup.awayRosterOut, player]
-            })
+            [rosterKey]: setup[rosterKey].filter(p => p.id !== player.id),
+            [rosterOutKey]: [...setup[rosterOutKey], player]
         }));
     };
 
     return (
         <form onSubmit={handleSubmit}>
-            {/* Championship Selection */}
+            {showContinueModal && (
+                <ContinueOrStartOverModal
+                    onContinue={handleContinue}
+                    onStartOver={handleStartOver}
+                />
+            )}
+
+            {/* Season Selection */}
+            <div>
+                <label>Season</label>
+                <select
+                    value={setup.season}
+                    onChange={e => setSetup(new GameSetup({
+                        ...setup,
+                        season: e.target.value as Season || ""
+                        // championship: null
+                    }))}
+                >
+                    <option value="">Select Season</option>
+                    {seasons.map(season => (
+                        <option key={season} value={season}>{season}</option>
+                    ))}
+                </select>
+                {errors.season && <span>{errors.season}</span>}
+            </div>
+
+            {/* Championship Selection (now filtered by season) */}
             <div>
                 <label>Championship</label>
                 <select
                     value={setup.championship?.id || ''}
-                    onChange={e => setSetup(new GameSetup({
-                        ...setup,
+                    onChange={e => setSetup(prev => new GameSetup({
+                        ...prev, // Keep existing season
                         championship: championships.find(c => c.id === e.target.value) || null
                     }))}
                 >
@@ -162,6 +234,7 @@ const StartPage = () => {
                         <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
                 </select>
+                {errors.championship && <span>{errors.championship}</span>}
             </div>
 
             {/* Home Team Selection */}
@@ -171,11 +244,12 @@ const StartPage = () => {
                     value={setup.homeTeam?.id || ''}
                     onChange={e => handleTeamChange(e.target.value, true)}
                 >
-                    <option value="">Select Home Team</option>
+                    {!setup.championship && <option value="">Select Home Team</option>}
                     {filteredTeams.map(team => (
                         <option key={team.id} value={team.id}>{team.name}</option>
                     ))}
                 </select>
+                {errors.homeTeam && <span>{errors.homeTeam}</span>}
             </div>
 
             {/* Away Team Selection */}
@@ -185,12 +259,15 @@ const StartPage = () => {
                     value={setup.awayTeam?.id || ''}
                     onChange={e => handleTeamChange(e.target.value, false)}
                 >
-                    <option value="">Select Away Team</option>
+                    { !setup.championship && <option value="">Select Away Team</option>}
                     {filteredTeams.map(team => (
                         <option key={team.id} value={team.id}>{team.name}</option>
                     ))}
                 </select>
+                {errors.awayTeam && <span>{errors.awayTeam}</span>}
             </div>
+
+            {errors.teams && <span>{errors.teams}</span>}
 
             {/* Game Type Selection */}
             <div>
@@ -259,7 +336,8 @@ const StartPage = () => {
                     {/* Home Roster Selection */}
                     <div>
                         <h3>Home Roster</h3>
-                        {setup.homeTeam?.players.map(player => (
+                        <h4>Available Players</h4>
+                        {setup.homeRosterOut.map(player => (
                             <div key={player.id}>
                                 <span>{player.name}</span>
                                 <button
@@ -287,7 +365,8 @@ const StartPage = () => {
                     {/* Away Roster Selection */}
                     <div>
                         <h3>Away Roster</h3>
-                        {setup.awayTeam?.players.map(player => (
+                        <h4>Available Players</h4>
+                        {setup.awayRosterOut.map(player => (
                             <div key={player.id}>
                                 <span>{player.name}</span>
                                 <button
@@ -315,44 +394,37 @@ const StartPage = () => {
             )}
 
             {/* Rink Image Selection */}
-            {/*todo*/}
             <div>
                 <label>Rink Image</label>
-                <div
-                    onClick={() => setSetup(new GameSetup({
-                        ...setup,
-                        selectedImage: rinkImages.rinkUp
-                    }))}
-                >
-                    <input
-                        type="radio"
-                        checked={setup.selectedImage === rinkImages.rinkUp}
-                        // onChange={() => setSetup(new GameSetup({
-                        //     ...setup,
-                        //     selectedImage: rinkImages.rinkUp
-                        // }))}
-                    />
-                    <span>Up</span>
-                    <img src={rinkImages.rinkUp} alt={"Up"} />
+                <div>
+                    <label>
+                        <input
+                            type="radio"
+                            checked={setup.selectedImage === rinkImages.rinkUp}
+                            onChange={() => setSetup(new GameSetup({
+                                ...setup,
+                                selectedImage: rinkImages.rinkUp
+                            }))}
+                        />
+                        <span>Up</span>
+                        <img src={rinkImages.rinkUp} alt="Up" style={{maxWidth: '100px'}}/>
+                    </label>
                 </div>
-
-                <div
-                    onClick={() => setSetup(new GameSetup({
-                        ...setup,
-                        selectedImage: rinkImages.rinkDown
-                    }))}
-                >
-                    <input
-                        type="radio"
-                        checked={setup.selectedImage === rinkImages.rinkDown}
-                        // onChange={() => setSetup(new GameSetup({
-                        //     ...setup,
-                        //     selectedImage: rinkImages.rinkDown
-                        // }))}
-                    />
-                    <span>Down</span>
-                    <img src={rinkImages.rinkDown} alt={"Down"} />
+                <div>
+                    <label>
+                        <input
+                            type="radio"
+                            checked={setup.selectedImage === rinkImages.rinkDown}
+                            onChange={() => setSetup(new GameSetup({
+                                ...setup,
+                                selectedImage: rinkImages.rinkDown
+                            }))}
+                        />
+                        <span>Down</span>
+                        <img src={rinkImages.rinkDown} alt="Down" style={{maxWidth: '100px'}}/>
+                    </label>
                 </div>
+                {errors.image && <span>{errors.image}</span>}
             </div>
 
             <button type="submit">Start Game</button>
