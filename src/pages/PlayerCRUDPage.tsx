@@ -1,14 +1,14 @@
 import React, {useEffect, useState} from 'react';
 import {useLoaderData, useNavigate} from "react-router-dom";
-import {PlayerService} from "../OOP/services/PlayerService";
-import {TeamService} from "../OOP/services/TeamService";
 // @ts-ignore
 import styles from './PlayerCRUDPage.module.css';
-import {Position} from "../OOP/enums/Position";
 import {Player} from "../OOP/classes/Player";
 import {Team} from "../OOP/classes/Team";
-import {GameService} from "../OOP/services/GameService";
+import {Position} from "../OOP/enums/Position";
 import {Season} from "../OOP/enums/Season";
+import {PlayerService} from "../OOP/services/PlayerService";
+import {TeamService} from "../OOP/services/TeamService";
+import {GameService} from "../OOP/services/GameService";
 
 // Define a new type that extends Player with seasons
 interface PlayerWithSeasons extends Player {
@@ -16,7 +16,6 @@ interface PlayerWithSeasons extends Player {
 }
 
 const PlayerCRUDPage = () => {
-    const navigate = useNavigate();
     const loaderData = useLoaderData() as {
         players: PlayerWithSeasons[],
         teams: Team[],
@@ -36,6 +35,10 @@ const PlayerCRUDPage = () => {
     });
     const [pagination, setPagination] = useState({page: 1, perPage: 10});
 
+    const navigate = useNavigate();
+
+    const perPageOptions = [10, 25, 50, 100]
+
     const filteredPlayers = players.filter(player =>
         (!filters.team || player.teamId === filters.team) &&
         (!filters.position || player.position === filters.position) &&
@@ -44,6 +47,7 @@ const PlayerCRUDPage = () => {
         (!selectedSeason || player.seasons.includes(selectedSeason))
     );
 
+    const totalPages = Math.ceil(filteredPlayers.length / pagination.perPage);
     const paginatedPlayers = filteredPlayers.slice(
         (pagination.page - 1) * pagination.perPage,
         pagination.page * pagination.perPage
@@ -69,11 +73,21 @@ const PlayerCRUDPage = () => {
             <button onClick={() => navigate("create")}>Create New Player</button>
 
             <div>
+                <label htmlFor={"name-search"}>
+                    Filter by name
+                </label>
+
                 <input
                     placeholder="Search name..."
                     value={filters.search}
                     onChange={e => setFilters(f => ({...f, search: e.target.value}))}
                 />
+            </div>
+
+            <div>
+                <label htmlFor="team-select">
+                    Filter by team
+                </label>
 
                 <select
                     value={filters.team}
@@ -84,6 +98,12 @@ const PlayerCRUDPage = () => {
                         <option key={team.id} value={team.id}>{team.name}</option>
                     ))}
                 </select>
+            </div>
+
+            <div>
+                <label htmlFor="season-select">
+                    Filter by position
+                </label>
 
                 <select
                     value={filters.position}
@@ -94,6 +114,12 @@ const PlayerCRUDPage = () => {
                         <option key={index + 1} value={pos}>{pos}</option>
                     ))}
                 </select>
+            </div>
+
+            <div>
+                <label htmlFor="jersey-select">
+                    Filter by jersey number
+                </label>
 
                 <input
                     type="number"
@@ -103,6 +129,12 @@ const PlayerCRUDPage = () => {
                     max={99}
                     onChange={e => setFilters(f => ({...f, jerseyNr: e.target.value}))}
                 />
+            </div>
+
+            <div>
+                <label htmlFor="season-select">
+                    Filter by Season
+                </label>
 
                 <label>Season: </label>
                 <select
@@ -114,8 +146,8 @@ const PlayerCRUDPage = () => {
                         <option key={season} value={season}>{season}</option>
                     ))}
                 </select>
-
             </div>
+
 
             <div>
                 {paginatedPlayers.length > 0 ? paginatedPlayers.map(player => {
@@ -130,18 +162,12 @@ const PlayerCRUDPage = () => {
                         <div>
                             <div>Position: {player.position}</div>
                             <div>Team: {playerTeam?.name || 'Unknown'}</div>
-                            {/*<div>Seasons: {player.seasons.join(', ')}</div>*/}
                         </div>
 
                         <div>
-                            <button onClick={() => navigate(`${player.id}`, {state: {player}})}>
-                                View
-                            </button>
-                            <button onClick={() => deleteHandler(player)}>
-                                Delete
-                            </button>
+                            <button onClick={() => navigate(`${player.id}`, {state: {player}})}>View</button>
+                            <button onClick={() => deleteHandler(player)}>Delete</button>
                         </div>
-
                     </div>
                 }) : <p>No players.</p>}
             </div>
@@ -154,17 +180,33 @@ const PlayerCRUDPage = () => {
                     Previous
                 </button>
 
-                <span>Page {pagination.page}</span>
+                <span>Page {pagination.page} of {totalPages}</span>
 
                 <button
-                    disabled={pagination.page * pagination.perPage >= filteredPlayers.length}
+                    disabled={pagination.page >= totalPages}
                     onClick={() => setPagination(p => ({...p, page: p.page + 1}))}
                 >
                     Next
                 </button>
+
+                {/* Per Page Selector */}
+                <select
+                    value={pagination.perPage}
+                    onChange={e => setPagination({
+                        page: 1,
+                        perPage: parseInt(e.target.value)
+                    })}
+                >
+                    {perPageOptions.map(option => (
+                        <option key={option} value={option}>
+                            {option} per page
+                        </option>
+                    ))}
+                </select>
             </div>
         </div>
-    );
+    )
+        ;
 };
 
 export default PlayerCRUDPage;

@@ -1,49 +1,71 @@
-import React, {useState, useEffect, useMemo} from 'react';
+import React, {useEffect, useState} from 'react';
 import {useLoaderData, useNavigate} from 'react-router-dom';
-import {ChampionshipService} from '../OOP/services/ChampionshipService';
-import {TeamService} from '../OOP/services/TeamService';
 // @ts-ignore
 import styles from './TeamCRUDPage.module.css';
 import {IChampionship} from "../OOP/interfaces/IChampionship";
 import {ITeam} from "../OOP/interfaces/ITeam";
-import {PlayerService} from "../OOP/services/PlayerService";
-import {Season} from "../OOP/enums/Season";
 import {IGame} from "../OOP/interfaces/IGame";
+import {Season} from "../OOP/enums/Season";
+import {ChampionshipService} from '../OOP/services/ChampionshipService';
+import {PlayerService} from "../OOP/services/PlayerService";
+import {TeamService} from '../OOP/services/TeamService';
 import {GameService} from "../OOP/services/GameService";
 
 const TeamCrudPage = () => {
-    const loaderData = useLoaderData() as { championships: IChampionship[], teams: ITeam[] } | undefined;
-    const navigate = useNavigate();
+    const loaderData = useLoaderData() as {
+        championships: IChampionship[],
+        teams: ITeam[],
+        games: IGame[]
+    } | undefined;
+
     const [teams, setTeams] = useState<ITeam[]>([]);
     const [championships, setChampionships] = useState<IChampionship[]>([]);
-    const [selectedChampionship, setSelectedChampionship] = useState<string>("");
-    const seasons = Object.values(Season);
-    const [selectedSeason, setSelectedSeason] = useState<Season | "">("");
     const [games, setGames] = useState<IGame[]>([]);
+    const seasons = Object.values(Season);
 
-    useEffect(() => {
-        const fetchGames = async () => {
-            const gamesData = await GameService.getAllGames();
-            setGames(gamesData);
-        };
-        fetchGames();
-    }, []);
+    const [filters, setFilters] = useState({
+        search: '',
+        season: '',
+        championship: ''
+    });
 
-    useEffect(() => {
-        if (loaderData) {
-            setTeams(loaderData.teams);
-            setChampionships(loaderData.championships);
-        } else {
-            // Fallback: Fetch data directly if loaderData is undefined
-            const fetchData = async () => {
-                const champs = await ChampionshipService.getAllChampionships();
-                const teamsData = await TeamService.getAllTeams();
-                setChampionships(champs);
-                setTeams(teamsData);
-            };
-            fetchData();
+    const [pagination, setPagination] = useState({page: 1, perPage: 10});
+    const navigate = useNavigate();
+
+    const perPageOptions = [10, 25, 50, 100];
+
+    const filteredTeams = teams.filter(team => {
+        // Name filter
+        if (filters.search && !team.name.toLowerCase().includes(filters.search.toLowerCase())) {
+            return false;
         }
-    }, [loaderData]);
+
+        // Season filter
+        if (filters.season) {
+            const seasonTeams = new Set<string>();
+            games.forEach(game => {
+                if (game.season === filters.season) {
+                    seasonTeams.add(game.teams.home.id);
+                    seasonTeams.add(game.teams.away.id);
+                }
+            });
+            if (!seasonTeams.has(team.id)) return false;
+        }
+
+        // Championship filter
+        if (filters.championship) {
+            const hasChampionship = team.championships?.some(ch => ch.id === filters.championship) ?? false;
+            if (!hasChampionship) return false;
+        }
+
+        return true;
+    });
+
+    const totalPages = Math.ceil(filteredTeams.length / pagination.perPage);
+    const paginatedTeams = filteredTeams.slice(
+        (pagination.page - 1) * pagination.perPage,
+        pagination.page * pagination.perPage
+    );
 
     const createNavigateHandler = () => {
         navigate("create", {state: {championships}});
@@ -64,7 +86,7 @@ const TeamCrudPage = () => {
 
                 await Promise.all(transferPromises);
                 await TeamService.deleteTeam(team.id);
-                setTeams(teams.filter(t => t.id !== team.id));
+                setTeams(prev => prev.filter(t => t.id !== team.id));
                 alert("Team deleted successfully. Players moved to free agents.");
             } catch (error) {
                 console.error("Error deleting team:", error);
@@ -73,30 +95,29 @@ const TeamCrudPage = () => {
         }
     };
 
-    const handleChampionshipChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-        setSelectedChampionship(event.target.value);
-    };
-
-    const filteredTeams = useMemo(() => {
-        if (!selectedSeason) return teams;
-
-        // Get teams that played in selected season
-        const seasonTeams = new Set<string>();
-        games.forEach(game => {
-            if (game.season === selectedSeason) {
-                seasonTeams.add(game.teams.home.id);
-                seasonTeams.add(game.teams.away.id);
-            }
-        });
-
-        return teams.filter(team => seasonTeams.has(team.id));
-    }, [teams, games, selectedSeason]);
+    useEffect(() => {
+        if (loaderData) {
+            setChampionships(loaderData.championships);
+            setTeams(loaderData.teams);
+            setGames(loaderData.games);
+        }
+    }, [loaderData]);
 
     return (
         <div>
-            <button onClick={createNavigateHandler}>
-                Create New Team
-            </button>
+            <button onClick={createNavigateHandler}>Create New Team</button>
+
+            <div>
+                <label htmlFor={"name-search"}>
+                    Filter by name
+                </label>
+
+                <input
+                    placeholder="Search name..."
+                    value={filters.search}
+                    onChange={e => setFilters(f => ({...f, search: e.target.value}))}
+                />
+            </div>
 
             <div>
                 <label htmlFor="season-select">
@@ -104,8 +125,8 @@ const TeamCrudPage = () => {
                 </label>
                 <select
                     id="season-select"
-                    value={selectedSeason}
-                    onChange={e => setSelectedSeason(e.target.value as Season || "")}
+                    value={filters.season}
+                    onChange={e => setFilters(f => ({...f, season: e.target.value}))}
                 >
                     <option value="">All Seasons</option>
                     {seasons.map(season => (
@@ -122,8 +143,8 @@ const TeamCrudPage = () => {
                 </label>
                 <select
                     id="championship-select"
-                    value={selectedChampionship}
-                    onChange={handleChampionshipChange}
+                    value={filters.championship}
+                    onChange={e => setFilters(f => ({...f, championship: e.target.value}))}
                 >
                     <option value="">All Championships</option>
                     {championships.map((championship) => (
@@ -135,24 +156,54 @@ const TeamCrudPage = () => {
             </div>
 
             <div>
-                {filteredTeams.length > 0 ? filteredTeams.map((team) => (
+                {paginatedTeams.length > 0 ? paginatedTeams.map((team) => (
                     <div key={team.id}>
                         <div>
                             <div>{team.name}</div>
                         </div>
+
                         <div>
                             {team.championships?.map((ch) => ch.name).join(", ") || "No championships"}
                         </div>
+
                         <div>
-                            <button onClick={() => viewNavigateHandler(team)}>
-                                View Details
-                            </button>
-                            <button onClick={() => deleteHandler(team)}>
-                                Delete Team
-                            </button>
+                            <button onClick={() => viewNavigateHandler(team)}>View</button>
+                            <button onClick={() => deleteHandler(team)}>Delete</button>
                         </div>
                     </div>
                 )) : <p>No teams.</p>}
+            </div>
+
+            <div>
+                <button
+                    disabled={pagination.page === 1}
+                    onClick={() => setPagination(p => ({...p, page: p.page - 1}))}
+                >
+                    Previous
+                </button>
+
+                <span>Page {pagination.page} of {totalPages}</span>
+
+                <button
+                    disabled={pagination.page >= totalPages}
+                    onClick={() => setPagination(p => ({...p, page: p.page + 1}))}
+                >
+                    Next
+                </button>
+
+                <select
+                    value={pagination.perPage}
+                    onChange={e => setPagination({
+                        page: 1,
+                        perPage: parseInt(e.target.value)
+                    })}
+                >
+                    {perPageOptions.map(option => (
+                        <option key={option} value={option}>
+                            {option} per page
+                        </option>
+                    ))}
+                </select>
             </div>
         </div>
     );
@@ -163,5 +214,6 @@ export default TeamCrudPage;
 export const loader = async () => {
     const championships = await ChampionshipService.getAllChampionships();
     const teams = await TeamService.getAllTeams();
-    return {championships, teams};
+    const games = await GameService.getAllGames();
+    return {championships, teams, games};
 };

@@ -49,6 +49,22 @@ const HandleTeamPage = () => {
         return uniqueChampionships;
     }, [team.championships, games]);
 
+    // Extract current logo filename from URL for comparison
+    const getCurrentLogoFileName = (): string | null => {
+        if (!team.logo) return null;
+        try {
+            // Extract filename from Firebase Storage URL
+            const url = new URL(team.logo);
+            const pathParts = url.pathname.split('/');
+            const encodedFileName = pathParts[pathParts.length - 1];
+            // Decode the filename (Firebase Storage encodes special characters)
+            return decodeURIComponent(encodedFileName.split('?')[0]);
+        } catch (error) {
+            console.error('Error parsing logo URL:', error);
+            return null;
+        }
+    };
+
     // Filter games by season and championship
     const filterGames = (type?: GameType) => {
         let result = games.filter(game => {
@@ -182,6 +198,19 @@ const HandleTeamPage = () => {
                 return;
             }
 
+            // Check if the new file has the same name as the current logo
+            const currentLogoFileName = getCurrentLogoFileName();
+            console.log(currentLogoFileName);
+            console.log("team-logos/" + file.name);
+            if (currentLogoFileName && ("team-logos/" + file.name) === currentLogoFileName) {
+                alert('Please choose a different file name. The selected file has the same name as the current logo.');
+                const fileInput = document.getElementById("logo") as HTMLInputElement;
+                if (fileInput) {
+                    fileInput.value = "";
+                }
+                return;
+            }
+
             // If valid, set the logo
             setLogo(file);
         }
@@ -210,7 +239,14 @@ const HandleTeamPage = () => {
     const handleDiscard = () => {
         setTeam(initialTeam);
         setName(initialTeam.name);
+        setLogo(null);
         setIsEditing(false);
+
+        // Clear the file input
+        const fileInput = document.getElementById("logo") as HTMLInputElement;
+        if (fileInput) {
+            fileInput.value = "";
+        }
     };
 
     useEffect(() => {

@@ -1,6 +1,5 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {useLocation, useNavigate} from "react-router-dom";
-import {TeamService} from "../OOP/services/TeamService";
 // @ts-ignore
 import styles from './CreateTeamPage.module.css';
 import {Championship} from "../OOP/classes/Championship";
@@ -8,6 +7,7 @@ import {Team} from "../OOP/classes/Team";
 import {TeamAlreadyExistsError} from "../OOP/errors/TeamAlreadyExistsError";
 import {ITeamColor} from "../OOP/interfaces/ITeamColor";
 import {Season} from "../OOP/enums/Season";
+import {TeamService} from "../OOP/services/TeamService";
 
 type TeamColorType = 'homeColor' | 'awayColor';
 
