@@ -136,7 +136,6 @@ const PlayerCRUDPage = () => {
                     Filter by Season
                 </label>
 
-                <label>Season: </label>
                 <select
                     value={selectedSeason}
                     onChange={e => setSelectedSeason(e.target.value as Season || "")}

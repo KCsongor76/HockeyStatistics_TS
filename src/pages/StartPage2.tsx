@@ -12,8 +12,6 @@ import {storage} from "../firebaseConfig";
 import ContinueOrStartOverModal from "../modals/ContinueOrStartOverModal";
 import {Season} from "../OOP/enums/Season";
 
-// todo: check filter logic
-
 class GameSetup {
     championship: Championship | null = null;
     homeTeam: Team | null = null;

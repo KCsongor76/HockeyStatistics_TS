@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {createBrowserRouter, Navigate, RouterProvider} from "react-router-dom";
 import {auth} from "./firebaseConfig";
+import {adminUids} from "./adminConfig";
 import {onAuthStateChanged} from "firebase/auth";
 import "./App.css";
 import RootLayout from "./components/RootLayout";
@@ -38,9 +39,29 @@ function App() {
     const [isSignedIn, setIsSignedIn] = useState<boolean | undefined>(undefined);
     console.log(isLoaded, isSignedIn);
 
+    // useEffect(() => {
+    //     const unsubscribe = onAuthStateChanged(auth, (user) => {
+    //         setIsSignedIn(!!user);
+    //         setIsLoaded(true);
+    //     });
+    //
+    //     return () => unsubscribe();
+    // }, []);
+
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
-            setIsSignedIn(!!user);
+            if (user) {
+                // Verify if user is admin
+                const isAdmin = adminUids.includes(user.uid);
+                setIsSignedIn(isAdmin);
+
+                // Redirect non-admin users to home
+                if (!isAdmin && window.location.pathname.startsWith('/admin')) {
+                    window.location.href = '/';
+                }
+            } else {
+                setIsSignedIn(false);
+            }
             setIsLoaded(true);
         });
 

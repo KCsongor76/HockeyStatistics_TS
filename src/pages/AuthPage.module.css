@@ -48,3 +48,32 @@
     margin-top: 1rem;
     font-size: 0.9rem;
 }
+
+/* Add these to your existing styles */
+.inputContainer {
+    position: relative;
+    width: 100%;
+}
+
+.error {
+    color: #ff4d4f;
+    background-color: #fff2f0;
+    border: 1px solid #ffccc7;
+    padding: 8px 15px;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+.message {
+    margin-bottom: 15px;
+}
+
+datalist {
+    position: absolute;
+    background: white;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    padding: 5px;
+    max-height: 200px;
+    overflow-y: auto;
+}

@@ -28,6 +28,10 @@ import {GameService} from "../OOP/services/GameService";
 // todo: on page reload, we should set the unfinishedgame local storage
 // todo: if we save an unfinished game, make sure the timer is stopped,
 //  even if when we exit and save, it's still running, on re-continuing, it should be stopped.
+// todo: somewhere we should show the season.
+// todo: fix the Start Time button (and their group's) logic: next period shouldn't be accessible,
+//  if game is finished (eg. 3rd period end), and the score is uneven
+
 
 type FormData = {
     championship: IChampionship;
@@ -573,7 +577,7 @@ const GamePage = () => {
                                     className={`${styles.button} ${styles.successButton}`}
                                     onClick={submitGameHandler}
                                 >
-                                    End Game
+                                    Save Game
                                 </button>
                             </div>
                         </div>
