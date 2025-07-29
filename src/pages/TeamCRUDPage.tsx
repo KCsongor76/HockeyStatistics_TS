@@ -10,6 +10,10 @@ import {ChampionshipService} from '../OOP/services/ChampionshipService';
 import {PlayerService} from "../OOP/services/PlayerService";
 import {TeamService} from '../OOP/services/TeamService';
 import {GameService} from "../OOP/services/GameService";
+import Pagination from "../components/Pagination";
+import {TextInput} from "../components/CRUD/TextInput";
+import {Select} from "../components/CRUD/Select";
+import {CustomButton} from '../components/CustomButton';
 
 const TeamCrudPage = () => {
     const loaderData = useLoaderData() as {
@@ -31,8 +35,6 @@ const TeamCrudPage = () => {
 
     const [pagination, setPagination] = useState({page: 1, perPage: 10});
     const navigate = useNavigate();
-
-    const perPageOptions = [10, 25, 50, 100];
 
     const filteredTeams = teams.filter(team => {
         // Name filter
@@ -105,55 +107,32 @@ const TeamCrudPage = () => {
 
     return (
         <div>
-            <button onClick={createNavigateHandler}>Create New Team</button>
+            <CustomButton type="positive" onClick={createNavigateHandler}>
+                Create New Team
+            </CustomButton>
 
-            <div>
-                <label htmlFor={"name-search"}>
-                    Filter by name
-                </label>
+            <TextInput
+                label={"Search by name"}
+                value={filters.search}
+                onChange={value => setFilters(f => ({...f, search: value}))}
+                placeholder={"Search by name"}
+            />
 
-                <input
-                    placeholder="Search name..."
-                    value={filters.search}
-                    onChange={e => setFilters(f => ({...f, search: e.target.value}))}
-                />
-            </div>
+            <Select
+                value={filters.season}
+                options={seasons.map(s => ({value: s, label: s}))}
+                onChange={value => setFilters(f => ({...f, season: value}))}
+                label={"Filter by Season"}
+                allLabel={"All Seasons"}
+            />
 
-            <div>
-                <label htmlFor="season-select">
-                    Filter by Season
-                </label>
-                <select
-                    id="season-select"
-                    value={filters.season}
-                    onChange={e => setFilters(f => ({...f, season: e.target.value}))}
-                >
-                    <option value="">All Seasons</option>
-                    {seasons.map(season => (
-                        <option key={season} value={season}>
-                            {season}
-                        </option>
-                    ))}
-                </select>
-            </div>
-
-            <div>
-                <label htmlFor="championship-select">
-                    Filter by Championship
-                </label>
-                <select
-                    id="championship-select"
-                    value={filters.championship}
-                    onChange={e => setFilters(f => ({...f, championship: e.target.value}))}
-                >
-                    <option value="">All Championships</option>
-                    {championships.map((championship) => (
-                        <option key={championship.id} value={championship.id}>
-                            {championship.name}
-                        </option>
-                    ))}
-                </select>
-            </div>
+            <Select
+                value={filters.championship}
+                options={championships.map(c => ({value: c.id, label: c.name}))}
+                onChange={value => setFilters(f => ({...f, championship: value}))}
+                label={"Filter by Championship"}
+                allLabel={"All Championships"}
+            />
 
             <div>
                 {paginatedTeams.length > 0 ? paginatedTeams.map((team) => (
@@ -167,44 +146,24 @@ const TeamCrudPage = () => {
                         </div>
 
                         <div>
-                            <button onClick={() => viewNavigateHandler(team)}>View</button>
-                            <button onClick={() => deleteHandler(team)}>Delete</button>
+                            <CustomButton
+                                type="neutral"
+                                onClick={() => viewNavigateHandler(team)}
+                            >
+                                View
+                            </CustomButton>
+                            <CustomButton
+                                type="negative"
+                                onClick={() => deleteHandler(team)}
+                            >
+                                Delete
+                            </CustomButton>
                         </div>
                     </div>
                 )) : <p>No teams.</p>}
             </div>
 
-            <div>
-                <button
-                    disabled={pagination.page === 1}
-                    onClick={() => setPagination(p => ({...p, page: p.page - 1}))}
-                >
-                    Previous
-                </button>
-
-                <span>Page {pagination.page} of {totalPages}</span>
-
-                <button
-                    disabled={pagination.page >= totalPages}
-                    onClick={() => setPagination(p => ({...p, page: p.page + 1}))}
-                >
-                    Next
-                </button>
-
-                <select
-                    value={pagination.perPage}
-                    onChange={e => setPagination({
-                        page: 1,
-                        perPage: parseInt(e.target.value)
-                    })}
-                >
-                    {perPageOptions.map(option => (
-                        <option key={option} value={option}>
-                            {option} per page
-                        </option>
-                    ))}
-                </select>
-            </div>
+            <Pagination pagination={pagination} totalPages={totalPages} setPagination={setPagination}/>
         </div>
     );
 };

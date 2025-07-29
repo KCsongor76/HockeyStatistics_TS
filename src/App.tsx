@@ -28,25 +28,16 @@ import GamePage2 from "./pages/GamePage2";
 import PreviousGamesPage2 from "./pages/PreviousGamesPage2";
 import {TeamService} from "./OOP/services/TeamService";
 
-// todo: auth
+// todo: components
+// todo: form - no alerts, but errors
+// todo: instead of window.confirm()/alert, use maybe custom modals?
 // todo: services: oop/atomic/batch writes/etc
 // todo: make all files typescript correct
 // todo: suspense?
-// todo: instead of window.confirm(), use maybe custom modals?
 
 function App() {
     const [isLoaded, setIsLoaded] = useState<boolean>(false);
-    const [isSignedIn, setIsSignedIn] = useState<boolean | undefined>(undefined);
-    console.log(isLoaded, isSignedIn);
-
-    // useEffect(() => {
-    //     const unsubscribe = onAuthStateChanged(auth, (user) => {
-    //         setIsSignedIn(!!user);
-    //         setIsLoaded(true);
-    //     });
-    //
-    //     return () => unsubscribe();
-    // }, []);
+    const [isSignedIn, setIsSignedIn] = useState<boolean | undefined>(undefined); // todo: undefined
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -61,7 +52,7 @@ function App() {
                 }
             } else {
                 setIsSignedIn(false);
-            }
+            } // todo
             setIsLoaded(true);
         });
 

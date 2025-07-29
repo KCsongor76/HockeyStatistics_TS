@@ -15,6 +15,10 @@ import {IGame} from "../OOP/interfaces/IGame";
 import {Position} from "../OOP/enums/Position";
 import {Season} from "../OOP/enums/Season";
 import {GameType} from "../OOP/enums/GameType";
+import {TextInput} from "../components/CRUD/TextInput";
+import {Select} from "../components/CRUD/Select";
+import {JerseyNumberInput} from "../components/JerseyNumberInput";
+import {CustomButton} from "../components/CustomButton";
 
 const HandlePlayerPage = () => {
     const {id: playerId} = useParams<{ id: string }>();
@@ -35,7 +39,7 @@ const HandlePlayerPage = () => {
     const [availableTeams, setAvailableTeams] = useState<Team[]>([]);
     // Add championship filter state
     const [selectedChampionshipFilter, setSelectedChampionshipFilter] = useState<string>('All');
-    const [availableChampionships, setAvailableChampionships] = useState<{id: string, name: string}[]>([]);
+    const [availableChampionships, setAvailableChampionships] = useState<{ id: string, name: string }[]>([]);
 
     const navigate = useNavigate();
 
@@ -81,7 +85,15 @@ const HandlePlayerPage = () => {
     // Get teams player played for in selected season
     useEffect(() => {
         if (selectedSeason === 'All') {
-            setAvailableTeams([]);
+            const teams1 = playerGames
+                .flatMap(game => [game.teams.home, game.teams.away])
+                .filter(team => team.roster?.some(p => p.id === player?.id));
+
+            const teams2 = Array.from(
+                new Map(teams1.map(team => [team.id, team])).values()
+            );
+
+            setAvailableTeams(teams2);
             setSelectedTeamFilter('All');
             return;
         }
@@ -91,9 +103,14 @@ const HandlePlayerPage = () => {
             .flatMap(game => [game.teams.home, game.teams.away])
             .filter(team => team.roster?.some(p => p.id === player?.id));
 
+
         const uniqueTeams = Array.from(
             new Map(teamsInSeason.map(team => [team.id, team])).values()
         );
+
+        console.log("playerGames: ", playerGames);
+        console.log("teamsInSeason", teamsInSeason);
+        console.log("uniqueTeams", uniqueTeams);
 
         setAvailableTeams(uniqueTeams);
         setSelectedTeamFilter(uniqueTeams.length > 0 ? 'All' : '');
@@ -116,49 +133,6 @@ const HandlePlayerPage = () => {
     const regularStats = player ? new PlayerStats(player.id, regularGames as unknown as IGame[]) : null;
     const playoffStats = player ? new PlayerStats(player.id, playoffGames as unknown as IGame[]) : null;
 
-    const renderTeamFilter = () => {
-        if (selectedSeason === 'All' || availableTeams.length <= 1) return null;
-
-        return (
-            <div>
-                <label>Team: </label>
-                <select
-                    value={selectedTeamFilter}
-                    onChange={e => setSelectedTeamFilter(e.target.value)}
-                >
-                    <option value="All">All Teams</option>
-                    {availableTeams.map(team => (
-                        <option key={team.id} value={team.id}>
-                            {team.name}
-                        </option>
-                    ))}
-                </select>
-            </div>
-        );
-    };
-
-    // Add championship filter UI
-    const renderChampionshipFilter = () => {
-        if (availableChampionships.length <= 1) return null;
-
-        return (
-            <div>
-                <label>Championship: </label>
-                <select
-                    value={selectedChampionshipFilter}
-                    onChange={e => setSelectedChampionshipFilter(e.target.value)}
-                >
-                    <option value="All">All Championships</option>
-                    {availableChampionships.map(championship => (
-                        <option key={championship.id} value={championship.id}>
-                            {championship.name}
-                        </option>
-                    ))}
-                </select>
-            </div>
-        );
-    };
-
     const handleSave = async () => {
         if (!player) return;
         setUpdating(true);
@@ -167,7 +141,7 @@ const HandlePlayerPage = () => {
             await PlayerService.updatePlayer(
                 player.teamId,
                 player.id,
-                { name, position, jerseyNumber }
+                {name, position, jerseyNumber}
             );
 
             const updatedPlayer = new Player(name, position, jerseyNumber, team.id, player.id);
@@ -234,75 +208,69 @@ const HandlePlayerPage = () => {
 
             {isEditing ? (
                 <>
-                    <div>
-                        <label htmlFor="name">Player name:</label>
-                        <input
-                            type="text"
-                            id="name"
-                            value={name}
-                            onChange={(e) => {
-                                setName(e.target.value);
-                            }}
-                        />
-                    </div>
+                    <TextInput
+                        label={"Player name:"}
+                        value={name}
+                        onChange={value => setName(value)}
+                    />
 
-                    <div>
-                        <label htmlFor="position">Position:</label>
-                        <select
-                            id="position"
-                            value={position}
-                            onChange={(e) => setPosition(e.target.value as Position)}
-                        >
-                            {Object.values(Position).map((pos) => (
-                                <option key={pos} value={pos}>
-                                    {pos}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                    <Select
+                        value={position}
+                        options={Object.values(Position).map((p) => ({value: p, label: p}))}
+                        onChange={value => setPosition(value as Position)}
+                        label={"Position:"}
+                        includeAll={false}
+                    />
 
-                    <div>
-                        <label htmlFor="jerseyNumber">Jersey number:</label>
-                        <input
-                            type="number"
-                            id="jerseyNumber"
-                            min="1"
-                            value={jerseyNumber}
-                            onChange={(e) => setJerseyNumber(Number(e.target.value))}
-                        />
-                    </div>
-                    <div>
-                        <button onClick={handleSave} disabled={!name.trim()}>
-                            Save Changes
-                        </button>
-                        <button onClick={() => setIsEditing(false)}>
-                            Discard Changes
-                        </button>
-                    </div>
+                    <JerseyNumberInput
+                        label={"Jersey number:"}
+                        value={jerseyNumber}
+                        onChange={value => setJerseyNumber(Number(value))}
+                    />
+
+                    <CustomButton
+                        type="positive"
+                        onClick={handleSave}
+                        disabled={!name.trim() || updating}
+                    >
+                        {updating ? 'Saving...' : 'Save Changes'}
+                    </CustomButton>
+                    <CustomButton type="negative" onClick={() => setIsEditing(false)}>
+                        Discard Changes
+                    </CustomButton>
                 </>
             ) : (
-                <button onClick={() => setIsEditing(true)}>Edit Player</button>
+                <CustomButton type="neutral" onClick={() => setIsEditing(true)}>
+                    Edit Player
+                </CustomButton>
             )}
 
-            {/* Season Filter */}
-            <div>
-                <label>Season: </label>
-                <select
-                    value={selectedSeason}
-                    onChange={e => setSelectedSeason(e.target.value as Season | 'All')}
-                >
-                    <option value="All">All Seasons</option>
-                    {seasons.map(season => (
-                        <option key={season} value={season}>{season}</option>
-                    ))}
-                </select>
-            </div>
+            <Select
+                value={selectedSeason}
+                options={Object.values(Season).map((s) => ({value: s, label: s}))}
+                onChange={value => setSelectedSeason(value as Season | "All")}
+                label={"Season:"}
+                allLabel={"All Seasons"}
+                allValue={"All"}
+            />
 
-            {/* Team Filter */}
-            {renderTeamFilter()}
+            {availableTeams.length > 1 && <Select
+                value={selectedTeamFilter}
+                options={availableTeams.map((t) => ({value: t.id, label: t.name}))}
+                onChange={value => setSelectedTeamFilter(value)}
+                label={"Team:"}
+                allLabel={"All Teams"}
+                allValue={"All"}
+            />}
 
-            {/* Championship Filter */}
-            {renderChampionshipFilter()}
+            {availableChampionships.length > 1 && <Select
+                value={selectedChampionshipFilter}
+                options={availableChampionships.map((c) => ({value: c.id, label: c.name}))}
+                onChange={value => setSelectedChampionshipFilter(value)}
+                label={"Championship:"}
+                allLabel={"All Championships"}
+                allValue={"All"}
+            />}
 
             <div>
                 <h3>Regular Season Stats</h3>
@@ -379,8 +347,12 @@ const HandlePlayerPage = () => {
                     />
                 )}
             </div>
-            <button onClick={transferNavigate}>Transfer</button>
-            <button onClick={goBackNavigate}>Go Back</button>
+            <CustomButton type="neutral" onClick={transferNavigate}>
+                Transfer
+            </CustomButton>
+            <CustomButton type="negative" onClick={goBackNavigate}>
+                Go Back
+            </CustomButton>
         </div>
     );
 };

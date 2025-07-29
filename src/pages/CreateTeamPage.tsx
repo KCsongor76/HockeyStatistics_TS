@@ -8,6 +8,10 @@ import {TeamAlreadyExistsError} from "../OOP/errors/TeamAlreadyExistsError";
 import {ITeamColor} from "../OOP/interfaces/ITeamColor";
 import {Season} from "../OOP/enums/Season";
 import {TeamService} from "../OOP/services/TeamService";
+import {TextInput} from "../components/CRUD/TextInput";
+import {ColorPicker} from "../components/ColorPicker";
+import {FileInput} from "../components/FileInput";
+import {CustomButton} from "../components/CustomButton";
 
 type TeamColorType = 'homeColor' | 'awayColor';
 
@@ -25,40 +29,32 @@ const CreateTeamPage = () => {
         championships: [] as Championship[]
     });
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const {name, value} = e.target;
-        setTeamData(prev => ({...prev, [name]: value}));
+    const handleChange = (value: string) => {
+        setTeamData(prev => ({...prev, name: value}));
     };
 
-    const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            const file = e.target.files[0];
-
-            // Check file type
-            const allowedTypes = ['image/jpeg', 'image/png'];
-            if (!allowedTypes.includes(file.type)) {
-                alert('Only .jpg and .png formats are allowed.');
-                const fileInput = document.getElementById("logo") as HTMLInputElement;
-                if (fileInput) {
-                    fileInput.value = "";
-                }
-                return;
-            }
-
-            // Check file size (10MB in bytes)
-            const maxSize = 10 * 1024 * 1024; // 10MB
-            if (file.size > maxSize) {
-                alert('File size should not exceed 10MB.');
-                const fileInput = document.getElementById("logo") as HTMLInputElement;
-                if (fileInput) {
-                    fileInput.value = "";
-                }
-                return;
-            }
-
-            // If valid, set the logo
-            setTeamData(prev => ({...prev, logo: e.target.files![0]}));
+    const handleLogoChange = (file: File | null) => {
+        if (!file) {
+            setTeamData(prev => ({...prev, logo: null}));
+            return;
         }
+
+        // Check file type
+        const allowedTypes = ['image/jpeg', 'image/png'];
+        if (!allowedTypes.includes(file.type)) {
+            alert('Only .jpg and .png formats are allowed.');
+            return;
+        }
+
+        // Check file size (10MB in bytes)
+        const maxSize = 10 * 1024 * 1024; // 10MB
+        if (file.size > maxSize) {
+            alert('File size should not exceed 10MB.');
+            return;
+        }
+
+        // If valid, set the logo
+        setTeamData(prev => ({...prev, logo: file}));
     };
 
     const handleColorChange = (type: TeamColorType, colorType: keyof ITeamColor, value: string) => {
@@ -141,72 +137,36 @@ const CreateTeamPage = () => {
 
     return (
         <form onSubmit={submitHandler}>
-            <div>
-                <label>Team name:</label>
-                <input
-                    type="text"
-                    name="name"
-                    value={teamData.name}
-                    onChange={handleChange}
-                    required
-                />
-                {errors.name && <span>{errors.name}</span>}
-            </div>
+            <TextInput
+                label="Team name:"
+                value={teamData.name}
+                onChange={handleChange}
+                required
+                error={errors.name}
+            />
 
-            <div>
-                <label>Team logo:</label>
-                <input
-                    type="file"
-                    accept="image/jpeg,image/png"
-                    onChange={handleLogoChange}
-                    required
-                />
-                {errors.logo && <span>{errors.logo}</span>}
-            </div>
+            <FileInput
+                label="Team logo:"
+                onChange={handleLogoChange}
+                required
+                error={errors.logo}
+            />
 
-            <div>
-                <label>Home colors:</label>
-                <div>
-                    <div>
-                        <p>Primary</p>
-                        <input
-                            type="color"
-                            value={teamData.homeColor.primary}
-                            onChange={(e) => handleColorChange('homeColor', 'primary', e.target.value)}
-                        />
-                    </div>
-                    <div>
-                        <p>Secondary</p>
-                        <input
-                            type="color"
-                            value={teamData.homeColor.secondary}
-                            onChange={(e) => handleColorChange('homeColor', 'secondary', e.target.value)}
-                        />
-                    </div>
-                </div>
-            </div>
+            <ColorPicker
+                label={"Home colors"}
+                primaryColor={teamData.homeColor.primary}
+                secondaryColor={teamData.homeColor.secondary}
+                onPrimaryChange={value => handleColorChange('homeColor', 'primary', value)}
+                onSecondaryChange={value => handleColorChange('homeColor', 'secondary', value)}
+            />
 
-            <div>
-                <label>Away colors:</label>
-                <div>
-                    <div>
-                        <p>Primary</p>
-                        <input
-                            type="color"
-                            value={teamData.awayColor.primary}
-                            onChange={(e) => handleColorChange('awayColor', 'primary', e.target.value)}
-                        />
-                    </div>
-                    <div>
-                        <p>Secondary</p>
-                        <input
-                            type="color"
-                            value={teamData.awayColor.secondary}
-                            onChange={(e) => handleColorChange('awayColor', 'secondary', e.target.value)}
-                        />
-                    </div>
-                </div>
-            </div>
+            <ColorPicker
+                label={"Away colors"}
+                primaryColor={teamData.awayColor.primary}
+                secondaryColor={teamData.awayColor.secondary}
+                onPrimaryChange={value => handleColorChange('awayColor', 'primary', value)}
+                onSecondaryChange={value => handleColorChange('awayColor', 'secondary', value)}
+            />
 
             <div>
                 <label>Championship:</label>
@@ -225,8 +185,12 @@ const CreateTeamPage = () => {
 
             {errors.general && <span>{errors.general}</span>}
 
-            <button type="submit">Create team</button>
-            <button type="button" onClick={navigateHandler}>Go back</button>
+            <CustomButton type="positive" buttonType="submit">
+                Create team
+            </CustomButton>
+            <CustomButton type="negative" onClick={navigateHandler}>
+                Go back
+            </CustomButton>
         </form>
     );
 };

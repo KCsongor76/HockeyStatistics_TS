@@ -8,6 +8,8 @@ import {Team} from "../OOP/classes/Team";
 import {GameType} from "../OOP/enums/GameType";
 import {useNavigate} from "react-router-dom";
 import {Season} from "../OOP/enums/Season";
+import {Select} from "../components/CRUD/Select";
+import Pagination from "../components/Pagination";
 
 interface PreviousGamesPageProps {
     playerGames?: Game[];
@@ -26,9 +28,10 @@ const PreviousGamesPage2: React.FC<PreviousGamesPageProps> = ({playerGames, show
     const seasons = Object.values(Season);
     const [seasonFilter, setSeasonFilter] = useState<Season | "">("");
     const [sortOrder, setSortOrder] = useState('newest');
-    const [itemsPerPage, setItemsPerPage] = useState(10);
-    const [currentPage, setCurrentPage] = useState(1);
-
+    const [pagination, setPagination] = useState({
+        page: 1,
+        perPage: 10
+    });
 
     const navigate = useNavigate();
 
@@ -79,14 +82,10 @@ const PreviousGamesPage2: React.FC<PreviousGamesPageProps> = ({playerGames, show
         return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
     });
 
-    const indexOfLastGame = currentPage * itemsPerPage;
-    const indexOfFirstGame = indexOfLastGame - itemsPerPage;
+    const indexOfLastGame = pagination.page * pagination.perPage;
+    const indexOfFirstGame = indexOfLastGame - pagination.perPage;
     const currentGames = sortedGames.slice(indexOfFirstGame, indexOfLastGame);
-    const totalPages = Math.ceil(sortedGames.length / itemsPerPage);
-
-    const handlePageChange = (newPage: number) => {
-        setCurrentPage(newPage);
-    };
+    const totalPages = Math.ceil(sortedGames.length / pagination.perPage);
 
     if (loading) return <div>Loading...</div>;
     if (games.length === 0) return <div>No games found.</div>;
@@ -97,62 +96,40 @@ const PreviousGamesPage2: React.FC<PreviousGamesPageProps> = ({playerGames, show
 
             {showFilters && (
                 <div>
-                    <select
+                    <Select
                         value={homeTeamFilter}
-                        onChange={(e) => setHomeTeamFilter(e.target.value)}
-                    >
-                        <option value="">All Home Teams</option>
-                        {teams.map(team => (
-                            <option key={team.id} value={team.id}>
-                                {team.name}
-                            </option>
-                        ))}
-                    </select>
+                        options={teams.map(team => ({value: team.id, label: team.name}))}
+                        onChange={setHomeTeamFilter}
+                        allLabel={"All Home Teams"}
+                    />
 
-                    <select
+                    <Select
                         value={awayTeamFilter}
-                        onChange={(e) => setAwayTeamFilter(e.target.value)}
-                    >
-                        <option value="">All Away Teams</option>
-                        {teams.map(team => (
-                            <option key={team.id} value={team.id}>
-                                {team.name}
-                            </option>
-                        ))}
-                    </select>
+                        options={teams.map(team => ({value: team.id, label: team.name}))}
+                        onChange={setAwayTeamFilter}
+                        allLabel={"All Away Teams"}
+                    />
 
-                    <select
+                    <Select
                         value={championshipFilter}
-                        onChange={(e) => setChampionshipFilter(e.target.value)}
-                    >
-                        <option value="">All Championships</option>
-                        {championships.map(championship => (
-                            <option key={championship.id} value={championship.id}>
-                                {championship.name}
-                            </option>
-                        ))}
-                    </select>
+                        options={championships.map(c => ({value: c.id, label: c.name}))}
+                        onChange={setChampionshipFilter}
+                        allLabel={"All Championships"}
+                    />
 
-                    <select
+                    <Select
                         value={seasonFilter}
-                        onChange={(e) => setSeasonFilter(e.target.value as Season || "")}
-                    >
-                        <option value="">All Seasons</option>
-                        {seasons.map(season => (
-                            <option key={season} value={season}>
-                                {season}
-                            </option>
-                        ))}
-                    </select>
+                        options={seasons.map(s => ({value: s, label: s}))}
+                        onChange={(s) => setSeasonFilter(s as Season || "")}
+                        allLabel={"All Seasons"}
+                    />
 
-                    <select
+                    <Select
                         value={gameTypeFilter}
-                        onChange={(e) => setGameTypeFilter(e.target.value)}
-                    >
-                        <option value="">All types</option>
-                        <option value={GameType.REGULAR}>{GameType.REGULAR}</option>
-                        <option value={GameType.PLAYOFF}>{GameType.PLAYOFF}</option>
-                    </select>
+                        options={Object.values(GameType).map(gt => ({value: gt, label: gt}))}
+                        onChange={setGameTypeFilter}
+                        allLabel={"All Gametypes"}
+                    />
 
                     <select
                         value={sortOrder}
@@ -160,18 +137,6 @@ const PreviousGamesPage2: React.FC<PreviousGamesPageProps> = ({playerGames, show
                     >
                         <option value="newest">Newest First</option>
                         <option value="oldest">Oldest First</option>
-                    </select>
-
-                    <select
-                        value={itemsPerPage}
-                        onChange={(e) => {
-                            setItemsPerPage(Number(e.target.value));
-                            setCurrentPage(1);
-                        }}
-                    >
-                        <option value={10}>10 per page</option>
-                        <option value={25}>25 per page</option>
-                        <option value={50}>50 per page</option>
                     </select>
                 </div>
             )}
@@ -225,21 +190,11 @@ const PreviousGamesPage2: React.FC<PreviousGamesPageProps> = ({playerGames, show
                 </ul>
             </div>
 
-            <div>
-                <button
-                    onClick={() => handlePageChange(currentPage - 1)}
-                    disabled={currentPage === 1}
-                >
-                    Previous
-                </button>
-                <span>Page {currentPage} of {totalPages}</span>
-                <button
-                    onClick={() => handlePageChange(currentPage + 1)}
-                    disabled={currentPage >= totalPages}
-                >
-                    Next
-                </button>
-            </div>
+            <Pagination
+                pagination={pagination}
+                totalPages={totalPages}
+                setPagination={setPagination}
+            />
         </div>
     );
 };

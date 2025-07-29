@@ -6,6 +6,10 @@ import {useLoaderData, useNavigate} from "react-router-dom";
 import styles from './CreatePlayerPage.module.css';
 import {Team} from "../OOP/classes/Team";
 import {Player} from "../OOP/classes/Player";
+import {JerseyNumberInput} from '../components/JerseyNumberInput';
+import {TextInput} from "../components/CRUD/TextInput";
+import {Select} from "../components/CRUD/Select";
+import {CustomButton} from "../components/CustomButton";
 
 const CreatePlayerPage = () => {
     const loadedTeams = useLoaderData() as Team[] | undefined;
@@ -39,6 +43,30 @@ const CreatePlayerPage = () => {
             [name]: name === 'jerseyNumber' ? parseInt(value) || 0 : value
         }));
         setErrors({}) // Clear errors on change
+    };
+
+    const handleTextInputChange = (value: string, name: string) => {
+        setPlayerData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+        setErrors({});
+    };
+
+    const handleSelectChange = (value: string, name: string) => {
+        setPlayerData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+        setErrors({});
+    };
+
+    const handleJerseyNumberChange = (value: number | string) => {
+        setPlayerData(prev => ({
+            ...prev,
+            jerseyNumber: typeof value === 'string' ? parseInt(value) || 0 : value
+        }));
+        setErrors({});
     };
 
     const validateForm = (): boolean => {
@@ -108,50 +136,45 @@ const CreatePlayerPage = () => {
         navigate(-1);
     };
 
+    const positionOptions = Object.values(Position).map(pos => ({
+        value: pos,
+        label: pos
+    }));
+
+    const teamOptions = teams
+        .filter(team => team.id !== 'free-agent')
+        .map(team => ({
+            value: team.id,
+            label: team.name
+        }));
+
     return (
         <form onSubmit={submitHandler}>
-            <div>
-                <label>Name:</label>
-                <input
-                    type="text"
-                    name="name"
-                    value={playerData.name}
-                    onChange={handleChange}
-                    required
-                    disabled={isSubmitting}
-                />
-                {errors.name && <span className={styles.error}>{errors.name}</span>}
-            </div>
+            <TextInput
+                label="Name:"
+                value={playerData.name}
+                onChange={(value: string) => handleTextInputChange(value, 'name')}
+                disabled={isSubmitting}
+                required
+                error={errors.name}
+            />
 
-            <div>
-                <label>Position:</label>
-                <select
-                    name="position"
-                    value={playerData.position}
-                    onChange={handleChange}
-                    required
-                    disabled={isSubmitting}
-                >
-                    {Object.values(Position).map(pos => (
-                        <option key={pos} value={pos}>{pos}</option>
-                    ))}
-                </select>
-            </div>
+            <Select
+                label="Position:"
+                value={playerData.position}
+                options={positionOptions}
+                onChange={(value: string) => handleSelectChange(value, 'position')}
+                disabled={isSubmitting}
+                includeAll={false}
+            />
 
-            <div>
-                <label>Jersey Number:</label>
-                <input
-                    type="number"
-                    name="jerseyNumber"
-                    value={playerData.jerseyNumber}
-                    min={1}
-                    max={99}
-                    onChange={handleChange}
-                    required
-                    disabled={isSubmitting}
-                />
-                {errors.jerseyNumber && <span className={styles.error}>{errors.jerseyNumber}</span>}
-            </div>
+            <JerseyNumberInput
+                label="Jersey Number:"
+                value={playerData.jerseyNumber}
+                onChange={handleJerseyNumberChange}
+                disabled={isSubmitting}
+                error={errors.jerseyNumber}
+            />
 
             <div>
                 <label>
@@ -166,44 +189,25 @@ const CreatePlayerPage = () => {
             </div>
 
             {!isFreeAgent && (
-                <div>
-                    <label>Team:</label>
-                    <select
-                        name="teamId"
-                        value={playerData.teamId}
-                        onChange={handleChange}
-                        required
-                        disabled={isSubmitting || teams.length === 0}
-                    >
-                        {teams.length === 0 ? (
-                            <option value="">Loading teams...</option>
-                        ) : (
-                            teams
-                                .filter(team => team.id !== 'free-agent')
-                                .map((team) => (
-                                    <option key={team.id} value={team.id}>{team.name}</option>
-                                ))
-                        )}
-                    </select>
-                </div>
+                <Select
+                    label="Team:"
+                    value={playerData.teamId}
+                    options={teamOptions}
+                    onChange={(value: string) => handleSelectChange(value, 'teamId')}
+                    disabled={isSubmitting || teams.length === 0}
+                    includeAll={false}
+                />
             )}
 
             {errors.general && <span className={styles.error}>{errors.general}</span>}
 
-            <button
-                type="submit"
-                disabled={isSubmitting}
-            >
+            <CustomButton type="positive" disabled={isSubmitting} buttonType="submit">
                 {isSubmitting ? 'Creating...' : 'Create'}
-            </button>
+            </CustomButton>
 
-            <button
-                type="button"
-                onClick={goBackHandler}
-                disabled={isSubmitting}
-            >
+            <CustomButton type="negative" onClick={goBackHandler} disabled={isSubmitting}>
                 Go back
-            </button>
+            </CustomButton>
         </form>
     );
 };

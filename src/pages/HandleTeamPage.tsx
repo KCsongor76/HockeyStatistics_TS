@@ -14,6 +14,14 @@ import {Player} from "../OOP/classes/Player";
 import PreviousGamesPage2 from "./PreviousGamesPage2";
 import {Game} from "../OOP/classes/Game";
 import {Season} from "../OOP/enums/Season";
+import {Select} from "../components/CRUD/Select";
+import {TextInput} from "../components/CRUD/TextInput";
+import {FileInput} from "../components/FileInput";
+import {CustomButton} from "../components/CustomButton";
+
+// todo: when editing, it should check whether any team has the same name or same logo, if so, stop, and show an alert
+// todo: when showing players, should show players even if they have 0 games played for that team.
+// todo: if a player was present at a game, but got deleted, it should still be accessible and shown (soft delete?)
 
 const HandleTeamPage = () => {
     const location = useLocation();
@@ -168,52 +176,39 @@ const HandleTeamPage = () => {
 
     const goBackHandler = () => navigate("/handleTeams");
 
-    const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setName(event.target.value);
+    const handleNameChange = (value: string) => {
+        setName(value);
     };
 
-    const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            const file = e.target.files[0];
-
-            // Check file type
-            const allowedTypes = ['image/jpeg', 'image/png'];
-            if (!allowedTypes.includes(file.type)) {
-                alert('Only .jpg and .png formats are allowed.');
-                const fileInput = document.getElementById("logo") as HTMLInputElement;
-                if (fileInput) {
-                    fileInput.value = "";
-                }
-                return;
-            }
-
-            // Check file size (10MB in bytes)
-            const maxSize = 10 * 1024 * 1024; // 10MB
-            if (file.size > maxSize) {
-                alert('File size should not exceed 10MB.');
-                const fileInput = document.getElementById("logo") as HTMLInputElement;
-                if (fileInput) {
-                    fileInput.value = "";
-                }
-                return;
-            }
-
-            // Check if the new file has the same name as the current logo
-            const currentLogoFileName = getCurrentLogoFileName();
-            console.log(currentLogoFileName);
-            console.log("team-logos/" + file.name);
-            if (currentLogoFileName && ("team-logos/" + file.name) === currentLogoFileName) {
-                alert('Please choose a different file name. The selected file has the same name as the current logo.');
-                const fileInput = document.getElementById("logo") as HTMLInputElement;
-                if (fileInput) {
-                    fileInput.value = "";
-                }
-                return;
-            }
-
-            // If valid, set the logo
-            setLogo(file);
+    const handleLogoChange = (file: File | null) => {
+        if (!file) {
+            setLogo(null);
+            return;
         }
+
+        // Check file type
+        const allowedTypes = ['image/jpeg', 'image/png'];
+        if (!allowedTypes.includes(file.type)) {
+            alert('Only .jpg and .png formats are allowed.');
+            return;
+        }
+
+        // Check file size (10MB in bytes)
+        const maxSize = 10 * 1024 * 1024; // 10MB
+        if (file.size > maxSize) {
+            alert('File size should not exceed 10MB.');
+            return;
+        }
+
+        // Check if the new file has the same name as the current logo
+        const currentLogoFileName = getCurrentLogoFileName();
+        if (currentLogoFileName && ("team-logos/" + file.name) === currentLogoFileName) {
+            alert('Please choose a different file name. The selected file has the same name as the current logo.');
+            return;
+        }
+
+        // If valid, set the logo
+        setLogo(file);
     };
 
     const handleSave = async () => {
@@ -241,12 +236,6 @@ const HandleTeamPage = () => {
         setName(initialTeam.name);
         setLogo(null);
         setIsEditing(false);
-
-        // Clear the file input
-        const fileInput = document.getElementById("logo") as HTMLInputElement;
-        if (fileInput) {
-            fileInput.value = "";
-        }
     };
 
     useEffect(() => {
@@ -282,6 +271,7 @@ const HandleTeamPage = () => {
 
     if (!team) return <div>Loading...</div>;
 
+    // todo: custom buttons
     return (
         <div>
             <div>
@@ -291,69 +281,44 @@ const HandleTeamPage = () => {
 
             {isEditing ? (
                 <>
-                    <div>
-                        <label htmlFor="name">Team name:</label>
-                        <input
-                            type="text"
-                            id="name"
-                            value={name}
-                            onChange={handleNameChange}
-                        />
-                    </div>
+                    <TextInput label="Team name:" value={name} onChange={handleNameChange} id="name"/>
+                    <FileInput label="Upload new logo:" onChange={handleLogoChange}/>
 
-                    <div>
-                        <label htmlFor="logo">Upload new logo:</label>
-                        <input
-                            accept="image/jpeg,image/png"
-                            type="file"
-                            id="logo"
-                            onChange={handleLogoChange}
-                        />
-                    </div>
 
-                    <div>
-                        <button onClick={handleSave}>Save Changes</button>
-                        <button onClick={handleDiscard}>Discard Changes</button>
-                    </div>
+                    <CustomButton type="positive" onClick={handleSave}>
+                        Save Changes
+                    </CustomButton>
+                    <CustomButton type="negative" onClick={handleDiscard}>
+                        Discard Changes
+                    </CustomButton>
+
                 </>
             ) : (
-                <div>
-                    <button onClick={handleEdit}>Edit Team</button>
-                </div>
+                <CustomButton type="neutral" onClick={handleEdit}>
+                    Edit Team
+                </CustomButton>
             )}
 
             {/* Filters Section */}
-            <div style={{display: 'flex', gap: '20px', marginBottom: '20px'}}>
-                {/* Season Filter */}
-                <div>
-                    <label>Season: </label>
-                    <select
-                        value={selectedSeason}
-                        onChange={e => setSelectedSeason(e.target.value as Season | 'All')}
-                    >
-                        <option value="All">All Seasons</option>
-                        {seasons.map(season => (
-                            <option key={season} value={season}>{season}</option>
-                        ))}
-                    </select>
-                </div>
 
-                {/* Championship Filter */}
-                <div>
-                    <label>Championship: </label>
-                    <select
-                        value={selectedChampionship}
-                        onChange={e => setSelectedChampionship(e.target.value)}
-                    >
-                        <option value="All">All Championships</option>
-                        {availableChampionships.map(championship => (
-                            <option key={championship.id} value={championship.id}>
-                                {championship.name}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-            </div>
+            <Select
+                value={selectedSeason || "All"}
+                options={seasons.map(s => ({value: s, label: s}))}
+                onChange={value => setSelectedSeason(value as Season | 'All')}
+                label={"Season: "}
+                allLabel={"All Seasons"}
+                allValue={"All"}
+            />
+
+            <Select
+                value={selectedChampionship}
+                options={availableChampionships.map(c => ({value: c.id, label: c.name}))}
+                onChange={value => setSelectedChampionship(value)}
+                label={"Championship: "}
+                allLabel={"All Championships"}
+                allValue={"All"}
+            />
+
 
             <div>
                 <div onClick={() => setShowPlayers(!showPlayers)}>

@@ -9,6 +9,8 @@ import {Team} from "../OOP/classes/Team";
 import {Position} from "../OOP/enums/Position";
 import {ITeamColor} from "../OOP/interfaces/ITeamColor";
 import {PlayerService} from "../OOP/services/PlayerService";
+import {Select} from "../components/CRUD/Select";
+import {CustomButton} from "../components/CustomButton";
 
 const TransferPlayerPage = () => {
 
@@ -44,7 +46,7 @@ const TransferPlayerPage = () => {
                     [],
                     "free-agent"
                 )
-                const freeAgentPlayers = PlayerService.getPlayersByTeam(freeAgentTeam.id)
+                // const freeAgentPlayers = PlayerService.getPlayersByTeam(freeAgentTeam.id)
                 await player.transferToTeam(freeAgentTeam);
 
                 alert("Player is now a free agent");
@@ -91,17 +93,14 @@ const TransferPlayerPage = () => {
             <p>Current Team: {teams.find(t => t.id === player.teamId)?.name}</p>
 
             <form onSubmit={submitHandler}>
-                <label>Transfer to:</label>
-                <select
+                <Select
                     value={selectedTeamId}
-                    onChange={e => setSelectedTeamId(e.target.value)}
-                    required
-                >
-                    <option key={""} value={""} disabled>Select a Team</option>
-                    {teams.filter(t => t.id !== player.teamId).map(team => (
-                        <option key={team.id} value={team.id}>{team.name}</option>
-                    ))}
-                </select>
+                    options={teams.map((team) => ({value: team.id, label: team.name}))}
+                    onChange={setSelectedTeamId}
+                    label={"Transfer to:"}
+                    allLabel={"Select a team"}
+                    allValue={""}
+                />
 
                 {/* Team select */}
                 {errors.team && <span>{errors.team}</span>}
@@ -112,9 +111,17 @@ const TransferPlayerPage = () => {
                 {/* General error */}
                 {errors.general && <span>{errors.general}</span>}
 
-                {!isFreeAgent && <button type="button" onClick={freeAgentHandler}>Set to free agent</button>}
-                <button type="submit">Transfer</button>
-                <button type="button" onClick={() => navigate(-1)}>Cancel</button>
+                {!isFreeAgent && (
+                    <CustomButton type="negative" onClick={freeAgentHandler}>
+                        Set to free agent
+                    </CustomButton>
+                )}
+                <CustomButton type="positive" buttonType="submit">
+                    Transfer
+                </CustomButton>
+                <CustomButton type="negative" onClick={() => navigate(-1)}>
+                    Cancel
+                </CustomButton>
             </form>
         </div>
     );

@@ -9,6 +9,11 @@ import {Season} from "../OOP/enums/Season";
 import {PlayerService} from "../OOP/services/PlayerService";
 import {TeamService} from "../OOP/services/TeamService";
 import {GameService} from "../OOP/services/GameService";
+import Pagination from "../components/Pagination";
+import {TextInput} from "../components/CRUD/TextInput";
+import {Select} from "../components/CRUD/Select";
+import {JerseyNumberInput} from "../components/JerseyNumberInput";
+import {CustomButton} from "../components/CustomButton";
 
 // Define a new type that extends Player with seasons
 interface PlayerWithSeasons extends Player {
@@ -25,7 +30,6 @@ const PlayerCRUDPage = () => {
     const [players, setPlayers] = useState<PlayerWithSeasons[]>([]);
     const [teams, setTeams] = useState<Team[]>([]);
     const seasons = Object.values(Season);
-    const [selectedSeason, setSelectedSeason] = useState<Season | "">("");
     const [filters, setFilters] = useState({
         team: '',
         position: '',
@@ -37,14 +41,12 @@ const PlayerCRUDPage = () => {
 
     const navigate = useNavigate();
 
-    const perPageOptions = [10, 25, 50, 100]
-
     const filteredPlayers = players.filter(player =>
         (!filters.team || player.teamId === filters.team) &&
         (!filters.position || player.position === filters.position) &&
         (!filters.jerseyNr || player.jerseyNumber.toString().includes(filters.jerseyNr)) &&
         (!filters.search || player.name.toLowerCase().includes(filters.search.toLowerCase())) &&
-        (!selectedSeason || player.seasons.includes(selectedSeason))
+        (!filters.season || player.seasons.includes(filters.season))
     );
 
     const totalPages = Math.ceil(filteredPlayers.length / pagination.perPage);
@@ -70,83 +72,48 @@ const PlayerCRUDPage = () => {
 
     return (
         <div>
-            <button onClick={() => navigate("create")}>Create New Player</button>
+            <CustomButton type="positive" onClick={() => navigate("create")}>
+                Create New Player
+            </CustomButton>
 
-            <div>
-                <label htmlFor={"name-search"}>
-                    Filter by name
-                </label>
 
-                <input
-                    placeholder="Search name..."
-                    value={filters.search}
-                    onChange={e => setFilters(f => ({...f, search: e.target.value}))}
-                />
-            </div>
+            <TextInput
+                label={"Search by name"}
+                value={filters.search}
+                onChange={value => setFilters(f => ({...f, search: value}))}
+                placeholder={"Search name..."}
+            />
 
-            <div>
-                <label htmlFor="team-select">
-                    Filter by team
-                </label>
+            <Select
+                value={filters.team}
+                options={teams.map(t => ({value: t.id, label: t.name}))}
+                onChange={value => setFilters(f => ({...f, team: value}))}
+                label={"Filter by team"}
+                allLabel={"All Teams"}
+            />
 
-                <select
-                    value={filters.team}
-                    onChange={e => setFilters(f => ({...f, team: e.target.value}))}
-                >
-                    <option value="">All Teams</option>
-                    {teams.map(team => (
-                        <option key={team.id} value={team.id}>{team.name}</option>
-                    ))}
-                </select>
-            </div>
+            <Select
+                value={filters.position}
+                options={Object.values(Position).map(p => ({value: p, label: p}))}
+                onChange={value => setFilters(f => ({...f, position: value}))}
+                label={"Filter by position"}
+                allLabel={"All Positions"}
+            />
 
-            <div>
-                <label htmlFor="season-select">
-                    Filter by position
-                </label>
+            <JerseyNumberInput
+                label={"Filter by jersey number"}
+                value={filters.jerseyNr}
+                onChange={value => setFilters(f => ({...f, jerseyNr: value.toString()}))}
+                placeholder={"Jersey"}
+            />
 
-                <select
-                    value={filters.position}
-                    onChange={e => setFilters(f => ({...f, position: e.target.value}))}
-                >
-                    <option key={0} value="">All Positions</option>
-                    {Object.values(Position).map((pos, index) => (
-                        <option key={index + 1} value={pos}>{pos}</option>
-                    ))}
-                </select>
-            </div>
-
-            <div>
-                <label htmlFor="jersey-select">
-                    Filter by jersey number
-                </label>
-
-                <input
-                    type="number"
-                    placeholder="Jersey #"
-                    value={filters.jerseyNr}
-                    min={1}
-                    max={99}
-                    onChange={e => setFilters(f => ({...f, jerseyNr: e.target.value}))}
-                />
-            </div>
-
-            <div>
-                <label htmlFor="season-select">
-                    Filter by Season
-                </label>
-
-                <select
-                    value={selectedSeason}
-                    onChange={e => setSelectedSeason(e.target.value as Season || "")}
-                >
-                    <option value="">All Seasons</option>
-                    {seasons.map(season => (
-                        <option key={season} value={season}>{season}</option>
-                    ))}
-                </select>
-            </div>
-
+            <Select
+                value={filters.season}
+                options={seasons.map(s => ({value: s, label: s}))}
+                onChange={value => setFilters(f => ({...f, season: value}))}
+                label={"Filter by Season"}
+                allLabel={"All Seasons"}
+            />
 
             <div>
                 {paginatedPlayers.length > 0 ? paginatedPlayers.map(player => {
@@ -164,48 +131,26 @@ const PlayerCRUDPage = () => {
                         </div>
 
                         <div>
-                            <button onClick={() => navigate(`${player.id}`, {state: {player}})}>View</button>
-                            <button onClick={() => deleteHandler(player)}>Delete</button>
+                            <CustomButton
+                                type="neutral"
+                                onClick={() => navigate(`${player.id}`, {state: {player}})}
+                            >
+                                View
+                            </CustomButton>
+                            <CustomButton
+                                type="negative"
+                                onClick={() => deleteHandler(player)}
+                            >
+                                Delete
+                            </CustomButton>
                         </div>
                     </div>
                 }) : <p>No players.</p>}
             </div>
 
-            <div>
-                <button
-                    disabled={pagination.page === 1}
-                    onClick={() => setPagination(p => ({...p, page: p.page - 1}))}
-                >
-                    Previous
-                </button>
-
-                <span>Page {pagination.page} of {totalPages}</span>
-
-                <button
-                    disabled={pagination.page >= totalPages}
-                    onClick={() => setPagination(p => ({...p, page: p.page + 1}))}
-                >
-                    Next
-                </button>
-
-                {/* Per Page Selector */}
-                <select
-                    value={pagination.perPage}
-                    onChange={e => setPagination({
-                        page: 1,
-                        perPage: parseInt(e.target.value)
-                    })}
-                >
-                    {perPageOptions.map(option => (
-                        <option key={option} value={option}>
-                            {option} per page
-                        </option>
-                    ))}
-                </select>
-            </div>
+            <Pagination pagination={pagination} totalPages={totalPages} setPagination={setPagination}/>
         </div>
-    )
-        ;
+    );
 };
 
 export default PlayerCRUDPage;
