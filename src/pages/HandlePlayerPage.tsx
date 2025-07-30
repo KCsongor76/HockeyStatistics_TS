@@ -292,20 +292,18 @@ const HandlePlayerPage = () => {
                 allValue={"All"}
             />}
 
-
             <h3>Regular Season Stats</h3>
             <PlayerStatsTable stats={regularStats}/>
             <h3>Playoff Stats</h3>
             <PlayerStatsTable stats={playoffStats}/>
 
-
             <h3>Games Played In:</h3>
-
 
             <div onClick={() => setShowGames(!showGames)}>
                 <h3>Player Games</h3>
                 <span>{showGames ? '▲' : '▼'}</span>
             </div>
+
             {/* Game count indicator */}
             <p>{filteredGames.length} of {playerGames.length} games available by filter</p>
             {showGames && (
@@ -315,7 +313,6 @@ const HandlePlayerPage = () => {
                     showFilters={false}
                 />
             )}
-
 
             <CustomButton type="neutral" onClick={transferNavigate}>
                 Transfer

@@ -132,11 +132,10 @@ const TeamCrudPage = () => {
                 allLabel={"All Championships"}
             />
 
-            <div>
-                {paginatedTeams.length > 0 ? paginatedTeams.map((team) => (
-                    <TeamCard key={team.id} team={Team.fromPlain(team)} deleteHandler={deleteHandler}/>
-                )) : <p>No teams.</p>}
-            </div>
+
+            {paginatedTeams.length > 0 ? paginatedTeams.map((team) => (
+                <TeamCard key={team.id} team={Team.fromPlain(team)} deleteHandler={deleteHandler}/>
+            )) : <p>No teams.</p>}
 
             <Pagination pagination={pagination} totalPages={totalPages} setPagination={setPagination}/>
         </div>

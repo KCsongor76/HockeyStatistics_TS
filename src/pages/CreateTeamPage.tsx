@@ -36,25 +36,24 @@ const CreateTeamPage = () => {
     const handleLogoChange = (file: File | null) => {
         if (!file) {
             setTeamData(prev => ({...prev, logo: null}));
+            setErrors(prev => ({...prev, logo: ''}));
             return;
         }
 
-        // Check file type
         const allowedTypes = ['image/jpeg', 'image/png'];
         if (!allowedTypes.includes(file.type)) {
-            alert('Only .jpg and .png formats are allowed.');
+            setErrors(prev => ({...prev, logo: 'Only .jpg and .png formats are allowed'}));
             return;
         }
 
-        // Check file size (10MB in bytes)
-        const maxSize = 10 * 1024 * 1024; // 10MB
+        const maxSize = 10 * 1024 * 1024;
         if (file.size > maxSize) {
-            alert('File size should not exceed 10MB.');
+            setErrors(prev => ({...prev, logo: 'File size should not exceed 10MB'}));
             return;
         }
 
-        // If valid, set the logo
         setTeamData(prev => ({...prev, logo: file}));
+        setErrors(prev => ({...prev, logo: ''}));
     };
 
     const handleColorChange = (type: TeamColorType, colorType: keyof ITeamColor, value: string) => {
@@ -92,7 +91,6 @@ const CreateTeamPage = () => {
         }
 
         const logoFile = teamData.logo;
-        // Additional null check to satisfy TypeScript
         if (!logoFile) {
             setErrors(prev => ({...prev, logo: 'Logo is required'}));
             return;
@@ -100,16 +98,14 @@ const CreateTeamPage = () => {
 
         try {
             const nameExists = await TeamService.checkNameExists(teamData.name);
-            console.log(nameExists);
             if (nameExists) {
-                alert("Name already exists");
-                return
+                setErrors(prev => ({...prev, name: 'Team name already exists'}));
+                return;
             }
 
-            // Then check for existing logo
             const logoExists = await TeamService.checkLogoExists(logoFile.name, true);
             if (logoExists) {
-                alert("A team logo with the same file name already exists. Please choose a different file.");
+                setErrors(prev => ({...prev, logo: 'A team logo with the same file name already exists'}));
                 return;
             }
 
@@ -122,18 +118,17 @@ const CreateTeamPage = () => {
                 teamData.championships
             );
 
-            // Only upload logo after all validations pass
             await team.uploadLogo(logoFile);
             await TeamService.createTeam(team);
-            alert("Team created successfully!");
             navigateHandler();
 
         } catch (error) {
             if (error instanceof TeamAlreadyExistsError) {
-                alert(error.message); // Specific error for duplicate names
+                // @ts-ignore
+                setErrors(prev => ({...prev, name: error.message}));
             } else {
+                setErrors(prev => ({...prev, general: 'Team creation failed. Please try again.'}));
                 console.error("Team creation failed:", error);
-                alert("Team creation failed");
             }
         }
     };

@@ -52,7 +52,7 @@ function App() {
                 }
             } else {
                 setIsSignedIn(false);
-            } // todo
+            }
             setIsLoaded(true);
         });
 

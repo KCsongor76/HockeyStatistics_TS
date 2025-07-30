@@ -38,6 +38,7 @@ const HandleTeamPage = () => {
     const seasons = Object.values(Season);
     const [selectedSeason, setSelectedSeason] = useState<Season | 'All'>('All');
     const [selectedChampionship, setSelectedChampionship] = useState<string | 'All'>('All');
+    const [errors, setErrors] = useState<Record<string, string>>({});
 
     const [sortConfigs, setSortConfigs] = useState<{
         regular: { key: keyof PlayerStats | 'name' | 'jerseyNumber'; direction: 'asc' | 'desc' } | null;
@@ -267,32 +268,30 @@ const HandleTeamPage = () => {
     const handleLogoChange = (file: File | null) => {
         if (!file) {
             setLogo(null);
+            setErrors(prev => ({...prev, logo: ''}));
             return;
         }
 
-        // Check file type
         const allowedTypes = ['image/jpeg', 'image/png'];
         if (!allowedTypes.includes(file.type)) {
-            alert('Only .jpg and .png formats are allowed.');
+            setErrors(prev => ({...prev, logo: 'Only .jpg and .png formats are allowed'}));
             return;
         }
 
-        // Check file size (10MB in bytes)
-        const maxSize = 10 * 1024 * 1024; // 10MB
+        const maxSize = 10 * 1024 * 1024;
         if (file.size > maxSize) {
-            alert('File size should not exceed 10MB.');
+            setErrors(prev => ({...prev, logo: 'File size should not exceed 10MB'}));
             return;
         }
 
-        // Check if the new file has the same name as the current logo
         const currentLogoFileName = getCurrentLogoFileName();
         if (currentLogoFileName && ("team-logos/" + file.name) === currentLogoFileName) {
-            alert('Please choose a different file name. The selected file has the same name as the current logo.');
+            setErrors(prev => ({...prev, logo: 'Please choose a different file name'}));
             return;
         }
 
-        // If valid, set the logo
         setLogo(file);
+        setErrors(prev => ({...prev, logo: ''}));
     };
 
     const handleSave = async () => {
@@ -304,20 +303,18 @@ const HandleTeamPage = () => {
         }
 
         try {
-            // Check for duplicate name
             if (name !== initialTeam.name) {
                 const nameTaken = await TeamService.isNameTaken(name, team.id);
                 if (nameTaken) {
-                    alert(`Team name "${name}" is already taken.`);
+                    setErrors(prev => ({...prev, name: `Team name "${name}" is already taken`}));
                     return;
                 }
             }
 
-            // Check for duplicate logo filename
             if (logo) {
                 const logoExists = await TeamService.checkLogoExists(logo.name, false);
                 if (logoExists) {
-                    alert(`Logo filename "${logo.name}" is already used by another team.`);
+                    setErrors(prev => ({...prev, logo: `Logo filename "${logo.name}" is already used`}));
                     return;
                 }
             }
@@ -325,9 +322,10 @@ const HandleTeamPage = () => {
             const updatedTeam = await team.update(name, logo);
             setTeam(updatedTeam);
             setIsEditing(false);
+            setErrors({});
         } catch (error) {
+            setErrors(prev => ({...prev, general: 'Failed to update team. Please try again.'}));
             console.error("Error updating team:", error);
-            alert("Something went wrong");
         }
     };
 
@@ -382,9 +380,19 @@ const HandleTeamPage = () => {
 
             {isEditing ? (
                 <>
-                    <TextInput label="Team name:" value={name} onChange={handleNameChange} id="name"/>
-                    <FileInput label="Upload new logo:" onChange={handleLogoChange}/>
-
+                    <TextInput
+                        label="Team name:"
+                        value={name}
+                        onChange={handleNameChange}
+                        id="name"
+                        error={errors.name}
+                    />
+                    <FileInput
+                        label="Upload new logo:"
+                        onChange={handleLogoChange}
+                        error={errors.logo}
+                    />
+                    {errors.general && <span className="error">{errors.general}</span>}
 
                     <CustomButton type="positive" onClick={handleSave}>
                         Save Changes
@@ -392,7 +400,6 @@ const HandleTeamPage = () => {
                     <CustomButton type="negative" onClick={handleDiscard}>
                         Discard Changes
                     </CustomButton>
-
                 </>
             ) : (
                 <CustomButton type="neutral" onClick={handleEdit}>
