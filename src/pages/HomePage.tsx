@@ -29,7 +29,8 @@ const HomePage: React.FC<HomePageProps> = ({isSignedIn}) => {
         description: 'Begin a new hockey game tracking session',
         icon: '🏒', // Hockey stick emoji
         path: '/start',
-        onClick: () => {}
+        onClick: () => {
+        }
     }]);
 
     useEffect(() => {
@@ -73,6 +74,12 @@ const HomePage: React.FC<HomePageProps> = ({isSignedIn}) => {
                     description: 'Begin a new hockey game tracking session',
                     icon: '🏒',
                     path: '/start'
+                },
+                {
+                    title: 'Previous Games',
+                    description: 'Review and analyze past game records',
+                    icon: '📊',
+                    path: '/previous_games'
                 },
                 {
                     title: 'Admin Login',
