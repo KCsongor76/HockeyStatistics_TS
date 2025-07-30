@@ -1,6 +1,5 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
-import PreviousGamesPage2 from "./PreviousGamesPage2";
 import PreviousGamesPage from "./PreviousGamesPage";
 // @ts-ignore
 import styles from './HandlePlayerPage.module.css';
@@ -307,7 +306,7 @@ const HandlePlayerPage = () => {
             {/* Game count indicator */}
             <p>{filteredGames.length} of {playerGames.length} games available by filter</p>
             {showGames && (
-                <PreviousGamesPage2
+                <PreviousGamesPage
                     key={filteredGames.map(g => g.id).join('-')}
                     playerGames={filteredGames}
                     showFilters={false}

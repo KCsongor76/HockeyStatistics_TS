@@ -11,7 +11,6 @@ import {GameService} from "../OOP/services/GameService";
 import {TeamService} from "../OOP/services/TeamService";
 import {GameType} from "../OOP/enums/GameType";
 import {Player} from "../OOP/classes/Player";
-import PreviousGamesPage2 from "./PreviousGamesPage2";
 import {Game} from "../OOP/classes/Game";
 import {Season} from "../OOP/enums/Season";
 import {Select} from "../components/CRUD/Select";
@@ -471,7 +470,7 @@ const HandleTeamPage = () => {
                     <span>{showGames ? '▲' : '▼'}</span>
                 </div>
                 {showGames && (
-                    <PreviousGamesPage2
+                    <PreviousGamesPage
                         key={teamGames.map(g => g.id).join('-')}
                         playerGames={teamGames.map(g => Game.fromPlain(g))}
                         showFilters={false}

@@ -18,14 +18,11 @@ import HandleTeamPage from "./pages/HandleTeamPage";
 import PlayerCRUDPage from "./pages/PlayerCRUDPage";
 import CreatePlayerPage from "./pages/CreatePlayerPage";
 import TransferPlayerPage from "./pages/TransferPlayerPage";
-import {loader as startPageLoader} from "./pages/StartPage";
 import {loader as teamCRUDPageLoader} from "./pages/TeamCRUDPage";
 import {loader as CreatePlayerPageLoader} from "./pages/CreatePlayerPage";
 import {loader as playerCRUDPageLoader} from "./pages/PlayerCRUDPage";
 import HandlePlayerPage from "./pages/HandlePlayerPage";
-import StartPage2 from "./pages/StartPage2";
 import GamePage2 from "./pages/GamePage2";
-import PreviousGamesPage2 from "./pages/PreviousGamesPage2";
 import {TeamService} from "./OOP/services/TeamService";
 
 // todo: components
@@ -68,9 +65,9 @@ function App() {
             errorElement: <ErrorPage/>,
             children: [
                 {index: true, element: <HomePage isSignedIn={isSignedIn}/>},
-                {path: "start", element: <StartPage2/>, loader: startPageLoader},
+                {path: "start", element: <StartPage/>,},
                 {path: "game", element: <GamePage2/>},
-                {path: "previous_games", element: <PreviousGamesPage2/>},
+                {path: "previous_games", element: <PreviousGamesPage/>},
                 {path: "previous_games/:gameId", element: <PreviousGameDetailPage/>},
                 {
                     path: "handleTeams",
@@ -109,8 +106,10 @@ function App() {
             errorElement: <ErrorPage/>,
             children: [
                 {index: true, element: <HomePage isSignedIn={isSignedIn}/>},
-                {path: "start", element: <StartPage/>, loader: startPageLoader},
+                {path: "start", element: <StartPage/>,},
                 {path: "game", element: <GamePage/>},
+                {path: "previous_games", element: <PreviousGamesPage/>},
+                {path: "previous_games/:gameId", element: <PreviousGameDetailPage/>},
                 {path: "admin", element: <AuthPage/>},
                 {path: "*", element: <Navigate to="/admin" replace/>}, // Redirect unauthorized users
             ]
