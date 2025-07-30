@@ -18,10 +18,8 @@ import {Select} from "../components/CRUD/Select";
 import {TextInput} from "../components/CRUD/TextInput";
 import {FileInput} from "../components/FileInput";
 import {CustomButton} from "../components/CustomButton";
-
-// todo: when editing, it should check whether any team has the same name or same logo, if so, stop, and show an alert
-// todo: when showing players, should show players even if they have 0 games played for that team.
-// todo: if a player was present at a game, but got deleted, it should still be accessible and shown (soft delete?)
+import TeamPlayerStatsTable from "../components/TeamPlayerStatsTable";
+import TeamStatsTable from "../components/TeamStatsTable";
 
 const HandleTeamPage = () => {
     const location = useLocation();
@@ -40,6 +38,11 @@ const HandleTeamPage = () => {
     const seasons = Object.values(Season);
     const [selectedSeason, setSelectedSeason] = useState<Season | 'All'>('All');
     const [selectedChampionship, setSelectedChampionship] = useState<string | 'All'>('All');
+
+    const [sortConfigs, setSortConfigs] = useState<{
+        regular: { key: keyof PlayerStats | 'name' | 'jerseyNumber'; direction: 'asc' | 'desc' } | null;
+        playoff: { key: keyof PlayerStats | 'name' | 'jerseyNumber'; direction: 'asc' | 'desc' } | null;
+    }>({regular: null, playoff: null});
 
     const navigate = useNavigate();
 
@@ -106,19 +109,38 @@ const HandleTeamPage = () => {
 
     // Filter players based on games they participated in for the selected filters
     const filteredPlayers = useMemo(() => {
-        if (!team.players) return [];
+        // Get all players who ever played for this team (including transferred/deleted ones)
+        const allPlayersInGames = new Map<string, Player>();
 
-        // Get all filtered games (both regular and playoff)
-        const allFilteredGames = filterGames();
-
-        // Only return players who participated in at least one game matching the filters
-        return team.players.filter(player => {
-            return allFilteredGames.some(game =>
-                game.teams.home.roster?.some(p => p.id === player.id) ||
-                game.teams.away.roster?.some(p => p.id === player.id)
-            );
+        // Process all games to find players who played for this team
+        games.forEach(game => {
+            if (game.teams.home.id === team.id && game.teams.home.roster) {
+                game.teams.home.roster.forEach(player => {
+                    if (!allPlayersInGames.has(player.id)) {
+                        allPlayersInGames.set(player.id, Player.fromPlain(player));
+                    }
+                });
+            }
+            if (game.teams.away.id === team.id && game.teams.away.roster) {
+                game.teams.away.roster.forEach(player => {
+                    if (!allPlayersInGames.has(player.id)) {
+                        allPlayersInGames.set(player.id, Player.fromPlain(player));
+                    }
+                });
+            }
         });
-    }, [team.players, games, selectedSeason, selectedChampionship]);
+
+        // Add current team players (to include those who haven't played yet)
+        if (team.players) {
+            team.players.forEach(player => {
+                if (!allPlayersInGames.has(player.id)) {
+                    allPlayersInGames.set(player.id, player);
+                }
+            });
+        }
+
+        return Array.from(allPlayersInGames.values());
+    }, [team.players, games, team.id]);
 
     const sortedPlayers = useMemo(() => {
         const playersCopy = [...filteredPlayers];
@@ -166,12 +188,74 @@ const HandleTeamPage = () => {
         });
     }, [filteredPlayers, games, sortConfig, selectedSeason, selectedChampionship]);
 
-    const handleSort = (key: keyof PlayerStats | "name" | "jerseyNumber") => {
-        let direction: 'asc' | 'desc' = 'asc';
-        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
-            direction = 'desc';
-        }
-        setSortConfig({key, direction});
+    const getSortedPlayers = useMemo(() => (isPlayoff: boolean) => {
+        const playersCopy = [...filteredPlayers];
+        const sortConfig = isPlayoff ? sortConfigs.playoff : sortConfigs.regular;
+
+        if (!sortConfig) return playersCopy;
+
+        return playersCopy.sort((a, b) => {
+            // Direct player properties
+            if (sortConfig.key === 'name' || sortConfig.key === 'jerseyNumber') {
+                const aValue = a[sortConfig.key];
+                const bValue = b[sortConfig.key];
+
+                if (typeof aValue === 'string' && typeof bValue === 'string') {
+                    return sortConfig.direction === 'asc'
+                        ? aValue.localeCompare(bValue)
+                        : bValue.localeCompare(aValue);
+                }
+
+                return sortConfig.direction === 'asc'
+                    ? (aValue as number) - (bValue as number)
+                    : (bValue as number) - (aValue as number);
+            }
+
+            // Stats properties - use filtered games for stats calculation
+            const getStats = (player: Player) => {
+                const playerGames = filterGames().filter(game => {
+                    const isHomeTeam = game.teams.home.id === team.id;
+                    const roster = isHomeTeam ? game.teams.home.roster : game.teams.away.roster;
+                    return roster?.some(p => p.id === player.id);
+                });
+
+                // Filter by game type
+                const filteredByType = playerGames.filter(game =>
+                    isPlayoff ? game.type === GameType.PLAYOFF : game.type === GameType.REGULAR
+                );
+
+                return new PlayerStats(player.id, filteredByType);
+            };
+
+            const statsA = getStats(a);
+            const statsB = getStats(b);
+
+            const valueA = statsA[sortConfig.key];
+            const valueB = statsB[sortConfig.key];
+
+            if (valueA < valueB) {
+                return sortConfig.direction === 'asc' ? -1 : 1;
+            }
+            if (valueA > valueB) {
+                return sortConfig.direction === 'asc' ? 1 : -1;
+            }
+            return 0;
+        });
+    }, [filteredPlayers, games, sortConfigs, selectedSeason, selectedChampionship, team.id]);
+
+    const handleSort = (key: keyof PlayerStats | "name" | "jerseyNumber", isPlayoff: boolean) => {
+        setSortConfigs(prev => {
+            const currentConfig = isPlayoff ? prev.playoff : prev.regular;
+            let direction: 'asc' | 'desc' = 'asc';
+
+            if (currentConfig && currentConfig.key === key && currentConfig.direction === 'asc') {
+                direction = 'desc';
+            }
+
+            return isPlayoff
+                ? {...prev, playoff: {key, direction}}
+                : {...prev, regular: {key, direction}};
+        });
     };
 
     const goBackHandler = () => navigate("/handleTeams");
@@ -220,6 +304,24 @@ const HandleTeamPage = () => {
         }
 
         try {
+            // Check for duplicate name
+            if (name !== initialTeam.name) {
+                const nameTaken = await TeamService.isNameTaken(name, team.id);
+                if (nameTaken) {
+                    alert(`Team name "${name}" is already taken.`);
+                    return;
+                }
+            }
+
+            // Check for duplicate logo filename
+            if (logo) {
+                const logoExists = await TeamService.checkLogoExists(logo.name, false);
+                if (logoExists) {
+                    alert(`Logo filename "${logo.name}" is already used by another team.`);
+                    return;
+                }
+            }
+
             const updatedTeam = await team.update(name, logo);
             setTeam(updatedTeam);
             setIsEditing(false);
@@ -271,7 +373,6 @@ const HandleTeamPage = () => {
 
     if (!team) return <div>Loading...</div>;
 
-    // todo: custom buttons
     return (
         <div>
             <div>
@@ -328,105 +429,23 @@ const HandleTeamPage = () => {
                 {showPlayers && (
                     <>
                         {filteredPlayers.length > 0 ? (
-                            <div>
+                            <>
                                 <h3>Regular Season Stats</h3>
-                                <table>
-                                    <thead>
-                                    <tr>
-                                        <th onClick={() => handleSort('name')}>Name</th>
-                                        <th onClick={() => handleSort('jerseyNumber')}>#</th>
-                                        <th>Position</th>
-                                        <th onClick={() => handleSort('gamesPlayed')}>GP</th>
-                                        <th onClick={() => handleSort('goals')}>G</th>
-                                        <th onClick={() => handleSort('assists')}>A</th>
-                                        <th onClick={() => handleSort('points')}>P</th>
-                                        <th onClick={() => handleSort('shots')}>S</th>
-                                        <th onClick={() => handleSort('shootingPercentage')}>S%</th>
-                                        <th></th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {sortedPlayers.map((player) => {
-                                        const playerGames = filterGames().filter(game =>
-                                            game.teams.home.roster?.some(p => p.id === player.id) ||
-                                            game.teams.away.roster?.some(p => p.id === player.id)
-                                        );
-
-                                        const regularGames = playerGames.filter(game => game.type === GameType.REGULAR);
-                                        const regularStats = player ? new PlayerStats(player.id, regularGames as unknown as IGame[]) : null;
-
-                                        return (
-                                            <tr key={player.id}>
-                                                <td>{player.name}</td>
-                                                <td>{player.jerseyNumber}</td>
-                                                <td>{player.position}</td>
-                                                <td>{regularStats?.gamesPlayed || 0}</td>
-                                                <td>{regularStats?.goals || 0}</td>
-                                                <td>{regularStats?.assists || 0}</td>
-                                                <td>{regularStats?.points || 0}</td>
-                                                <td>{regularStats?.shots || 0}</td>
-                                                <td>{(regularStats?.shootingPercentage || 0).toFixed(1)}%</td>
-                                                <td>
-                                                    <button
-                                                        onClick={() => navigate(`../../handlePlayers/${player.id}`, {state: {player}})}>
-                                                        View Player
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        )
-                                    })}
-                                    </tbody>
-                                </table>
+                                <TeamPlayerStatsTable
+                                    sortedPlayers={getSortedPlayers(false)}
+                                    filterGames={filterGames}
+                                    handleSort={(key) => handleSort(key, false)}
+                                    isPlayoff={false}
+                                />
 
                                 <h3>Playoff Stats</h3>
-                                <table>
-                                    <thead>
-                                    <tr>
-                                        <th onClick={() => handleSort('name')}>Name</th>
-                                        <th onClick={() => handleSort('jerseyNumber')}>#</th>
-                                        <th>Position</th>
-                                        <th onClick={() => handleSort('gamesPlayed')}>GP</th>
-                                        <th onClick={() => handleSort('goals')}>G</th>
-                                        <th onClick={() => handleSort('assists')}>A</th>
-                                        <th onClick={() => handleSort('points')}>P</th>
-                                        <th onClick={() => handleSort('shots')}>S</th>
-                                        <th onClick={() => handleSort('shootingPercentage')}>S%</th>
-                                        <th></th>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    {sortedPlayers.map((player) => {
-                                        const playerGames = filterGames().filter(game =>
-                                            game.teams.home.roster?.some(p => p.id === player.id) ||
-                                            game.teams.away.roster?.some(p => p.id === player.id)
-                                        );
-
-                                        const playoffGames = playerGames.filter(game => game.type === GameType.PLAYOFF);
-                                        const playoffStats = player ? new PlayerStats(player.id, playoffGames as unknown as IGame[]) : null;
-
-                                        return (
-                                            <tr key={player.id}>
-                                                <td>{player.name}</td>
-                                                <td>{player.jerseyNumber}</td>
-                                                <td>{player.position}</td>
-                                                <td>{playoffStats?.gamesPlayed || 0}</td>
-                                                <td>{playoffStats?.goals || 0}</td>
-                                                <td>{playoffStats?.assists || 0}</td>
-                                                <td>{playoffStats?.points || 0}</td>
-                                                <td>{playoffStats?.shots || 0}</td>
-                                                <td>{(playoffStats?.shootingPercentage || 0).toFixed(1)}%</td>
-                                                <td>
-                                                    <button
-                                                        onClick={() => navigate(`../../handlePlayers/${player.id}`, {state: {player}})}>
-                                                        View Player
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        )
-                                    })}
-                                    </tbody>
-                                </table>
-                            </div>
+                                <TeamPlayerStatsTable
+                                    sortedPlayers={getSortedPlayers(true)}
+                                    filterGames={filterGames}
+                                    handleSort={(key) => handleSort(key, true)}
+                                    isPlayoff={true}
+                                />
+                            </>
                         ) : (
                             <p>No players found for the selected filters</p>
                         )}
@@ -434,67 +453,10 @@ const HandleTeamPage = () => {
                 )}
             </div>
 
-            <div>
-                <h3>Regular Season Stats</h3>
-                <div>
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>GP</th>
-                            <th>W</th>
-                            <th>L</th>
-                            <th>GF</th>
-                            <th>GA</th>
-                            <th>Shots</th>
-                            <th>TO</th>
-                            <th>S%</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td>{regularStats.gamesPlayed}</td>
-                            <td>{regularStats.wins}</td>
-                            <td>{regularStats.losses}</td>
-                            <td>{regularStats.goalsFor}</td>
-                            <td>{regularStats.goalsAgainst}</td>
-                            <td>{regularStats.shots}</td>
-                            <td>{regularStats.turnovers}</td>
-                            <td>{regularStats.shootingPercentage.toFixed(1)}%</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <h3 style={{marginTop: '2rem'}}>Playoff Stats</h3>
-                <div>
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>GP</th>
-                            <th>W</th>
-                            <th>L</th>
-                            <th>GF</th>
-                            <th>GA</th>
-                            <th>Shots</th>
-                            <th>TO</th>
-                            <th>S%</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td>{playoffStats.gamesPlayed}</td>
-                            <td>{playoffStats.wins}</td>
-                            <td>{playoffStats.losses}</td>
-                            <td>{playoffStats.goalsFor}</td>
-                            <td>{playoffStats.goalsAgainst}</td>
-                            <td>{playoffStats.shots}</td>
-                            <td>{playoffStats.turnovers}</td>
-                            <td>{playoffStats.shootingPercentage.toFixed(1)}%</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <h3>Regular Season Stats</h3>
+            <TeamStatsTable stats={regularStats}/>
+            <h3>Playoff Stats</h3>
+            <TeamStatsTable stats={playoffStats}/>
 
             <div>
                 <div onClick={() => setShowGames(!showGames)}>
@@ -511,7 +473,9 @@ const HandleTeamPage = () => {
             </div>
 
             <div>
-                <button onClick={goBackHandler}>Go Back</button>
+                <CustomButton type="negative" onClick={goBackHandler}>
+                    Go Back
+                </CustomButton>
             </div>
         </div>
     );

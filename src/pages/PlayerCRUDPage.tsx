@@ -14,6 +14,7 @@ import {TextInput} from "../components/CRUD/TextInput";
 import {Select} from "../components/CRUD/Select";
 import {JerseyNumberInput} from "../components/JerseyNumberInput";
 import {CustomButton} from "../components/CustomButton";
+import PlayerCard from "../components/PlayerCard";
 
 // Define a new type that extends Player with seasons
 interface PlayerWithSeasons extends Player {
@@ -116,36 +117,14 @@ const PlayerCRUDPage = () => {
             />
 
             <div>
-                {paginatedPlayers.length > 0 ? paginatedPlayers.map(player => {
-                    const playerTeam = teams.find(t => t.id === player.teamId);
-
-                    return <div key={player.id}>
-                        <div>
-                            <div>{player.name}</div>
-                            <div>#{player.jerseyNumber}</div>
-                        </div>
-
-                        <div>
-                            <div>Position: {player.position}</div>
-                            <div>Team: {playerTeam?.name || 'Unknown'}</div>
-                        </div>
-
-                        <div>
-                            <CustomButton
-                                type="neutral"
-                                onClick={() => navigate(`${player.id}`, {state: {player}})}
-                            >
-                                View
-                            </CustomButton>
-                            <CustomButton
-                                type="negative"
-                                onClick={() => deleteHandler(player)}
-                            >
-                                Delete
-                            </CustomButton>
-                        </div>
-                    </div>
-                }) : <p>No players.</p>}
+                {paginatedPlayers.length > 0 ? paginatedPlayers.map((player: Player) =>
+                    <PlayerCard
+                        key={player.id}
+                        player={player}
+                        playerTeam={teams.find(t => t.id === player.teamId)}
+                        deleteHandler={deleteHandler}
+                    />
+                ) : <p>No players.</p>}
             </div>
 
             <Pagination pagination={pagination} totalPages={totalPages} setPagination={setPagination}/>

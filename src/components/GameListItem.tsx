@@ -2,14 +2,14 @@ import React from 'react';
 import {useNavigate} from "react-router-dom";
 // @ts-ignore
 import styles from '../pages/PreviousGamesPage.module.css';
-import {IGame} from "../OOP/interfaces/IGame";
+import {Game} from "../OOP/classes/Game";
+import {Season} from "../OOP/enums/Season";
 
 interface GameListItemProps {
-    game: IGame;
-    index: number;
+    game: Game;
 }
 
-const GameListItem: React.FC<GameListItemProps> = ({game, index}) => {
+const GameListItem: React.FC<GameListItemProps> = ({game}) => {
     const navigate = useNavigate();
 
     const formatTime = (timestamp: string) => {
@@ -23,34 +23,37 @@ const GameListItem: React.FC<GameListItemProps> = ({game, index}) => {
 
     return (
         <li
-            className={styles.listItem}
-            key={game.id || index}
+            key={game.id}
             onClick={() => navigate(`/previous_games/${game.id}`, {state: game})}
         >
-            <div className={styles.gameContent}>
-                <div className={styles.teamSection}>
-                    <img className={styles.teamLogo}
-                         src={game.teams?.home.logo}
-                         alt={game.teams?.home.name}/>
-                    <span>{game.teams?.home.name}</span>
+            <div>
+                <div>
+                    <img
+                        src={game.homeTeam.logo}
+                        alt={game.homeTeam.name}
+                    />
+                    <span>{game.homeTeam.name}</span>
                 </div>
 
-                <div className={styles.scoreSection}>
-                    {game.score?.home.goals} - {game.score?.away.goals}
+                <div>
+                    {game.homeScore} - {game.awayScore}
                 </div>
 
-                <div className={styles.teamSection}>
-                    <img className={styles.teamLogo}
-                         src={game.teams?.away.logo}
-                         alt={game.teams?.away.name}/>
-                    <span>{game.teams?.away.name}</span>
+                <div>
+                    <img
+                        src={game.awayTeam.logo}
+                        alt={game.awayTeam.name}
+                    />
+                    <span>{game.awayTeam.name}</span>
                 </div>
 
-                <div className={styles.dateSection}>
+                <div>
                     {formatTime(game.timestamp)}
                 </div>
 
-                <p className={styles.dateSection}>{game.type}</p>
+                <p>Type: {game.type}</p>
+                <p>Season: {game.season || "Not specified"}</p>
+                <p>Championship: {game.championship.name}</p>
             </div>
         </li>
     );

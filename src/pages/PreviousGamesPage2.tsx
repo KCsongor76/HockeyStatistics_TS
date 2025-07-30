@@ -10,6 +10,7 @@ import {useNavigate} from "react-router-dom";
 import {Season} from "../OOP/enums/Season";
 import {Select} from "../components/CRUD/Select";
 import Pagination from "../components/Pagination";
+import GameListItem from "../components/GameListItem";
 
 interface PreviousGamesPageProps {
     playerGames?: Game[];
@@ -144,46 +145,7 @@ const PreviousGamesPage2: React.FC<PreviousGamesPageProps> = ({playerGames, show
             <div>
                 <ul>
                     {currentGames.length > 0 ? (
-                        currentGames.map((game) => {
-                            const season = game.season || 'Not Specified';
-
-                            return (
-                                <li
-                                    key={game.id}
-                                    onClick={() => navigate(`/previous_games/${game.id}`, {state: game})}
-                                >
-                                    <div>
-                                        <div>
-                                            <img
-                                                src={game.homeTeam.logo}
-                                                alt={game.homeTeam.name}
-                                            />
-                                            <span>{game.homeTeam.name}</span>
-                                        </div>
-
-                                        <div>
-                                            {game.homeScore} - {game.awayScore}
-                                        </div>
-
-                                        <div>
-                                            <img
-                                                src={game.awayTeam.logo}
-                                                alt={game.awayTeam.name}
-                                            />
-                                            <span>{game.awayTeam.name}</span>
-                                        </div>
-
-                                        <div>
-                                            {formatDate(game.timestamp)}
-                                        </div>
-
-                                        <p>Type: {game.type}</p>
-                                        <p>Season: {season}</p>
-                                        <p>Championship: {game.championship.name}</p>
-                                    </div>
-                                </li>
-                            );
-                        })
+                        currentGames.map((game) => <GameListItem key={game.id} game={game}/>)
                     ) : (
                         <p>No games found.</p>
                     )}

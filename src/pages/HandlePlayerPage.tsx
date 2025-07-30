@@ -19,6 +19,7 @@ import {TextInput} from "../components/CRUD/TextInput";
 import {Select} from "../components/CRUD/Select";
 import {JerseyNumberInput} from "../components/JerseyNumberInput";
 import {CustomButton} from "../components/CustomButton";
+import PlayerStatsTable from "../components/PlayerStatsTable";
 
 const HandlePlayerPage = () => {
     const {id: playerId} = useParams<{ id: string }>();
@@ -27,6 +28,7 @@ const HandlePlayerPage = () => {
     const [games, setGames] = useState<Game[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
+    const [jerseyError, setJerseyError] = useState<string | null>(null);
     const [showGames, setShowGames] = useState(false);
     const [name, setName] = useState("");
     const [position, setPosition] = useState<Position>(Position.DEFENDER);
@@ -135,7 +137,24 @@ const HandlePlayerPage = () => {
 
     const handleSave = async () => {
         if (!player) return;
+
+        // Check if jersey number was changed
+        if (jerseyNumber !== player.jerseyNumber) {
+            try {
+                const isAvailable = await Player.isJerseyNumberAvailable(player.teamId, jerseyNumber);
+                if (!isAvailable) {
+                    setJerseyError(`Jersey number #${jerseyNumber} is already taken by another player in this team.`);
+                    return;
+                }
+            } catch (error) {
+                console.error("Failed to check jersey number availability:", error);
+                setError('Failed to verify jersey number availability. Please try again.');
+                return;
+            }
+        }
+
         setUpdating(true);
+        setError(null);
 
         try {
             await PlayerService.updatePlayer(
@@ -227,6 +246,7 @@ const HandlePlayerPage = () => {
                         value={jerseyNumber}
                         onChange={value => setJerseyNumber(Number(value))}
                     />
+                    {jerseyError && <p>This jersey number is already selected.</p>}
 
                     <CustomButton
                         type="positive"
@@ -272,81 +292,31 @@ const HandlePlayerPage = () => {
                 allValue={"All"}
             />}
 
-            <div>
-                <h3>Regular Season Stats</h3>
-                <div>
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>GP</th>
-                            <th>G</th>
-                            <th>A</th>
-                            <th>P</th>
-                            <th>S</th>
-                            <th>S%</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {regularStats && (
-                            <tr>
-                                <td>{regularStats.gamesPlayed}</td>
-                                <td>{regularStats.goals}</td>
-                                <td>{regularStats.assists}</td>
-                                <td>{regularStats.points}</td>
-                                <td>{regularStats.shots}</td>
-                                <td>{regularStats.shootingPercentage.toFixed(1)}%</td>
-                            </tr>
-                        )}
-                        </tbody>
-                    </table>
-                </div>
 
-                <h3 style={{marginTop: '2rem'}}>Playoff Stats</h3>
-                <div>
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>GP</th>
-                            <th>G</th>
-                            <th>A</th>
-                            <th>P</th>
-                            <th>S</th>
-                            <th>S%</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {playoffStats && (
-                            <tr>
-                                <td>{playoffStats.gamesPlayed}</td>
-                                <td>{playoffStats.goals}</td>
-                                <td>{playoffStats.assists}</td>
-                                <td>{playoffStats.points}</td>
-                                <td>{playoffStats.shots}</td>
-                                <td>{playoffStats.shootingPercentage.toFixed(1)}%</td>
-                            </tr>
-                        )}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <h3>Regular Season Stats</h3>
+            <PlayerStatsTable stats={regularStats}/>
+            <h3>Playoff Stats</h3>
+            <PlayerStatsTable stats={playoffStats}/>
+
 
             <h3>Games Played In:</h3>
 
-            <div>
-                <div onClick={() => setShowGames(!showGames)}>
-                    <h3>Player Games</h3>
-                    <span>{showGames ? '▲' : '▼'}</span>
-                </div>
-                {/* Game count indicator */}
-                <p>{filteredGames.length} of {playerGames.length} games available by filter</p>
-                {showGames && (
-                    <PreviousGamesPage2
-                        key={filteredGames.map(g => g.id).join('-')}
-                        playerGames={filteredGames}
-                        showFilters={false}
-                    />
-                )}
+
+            <div onClick={() => setShowGames(!showGames)}>
+                <h3>Player Games</h3>
+                <span>{showGames ? '▲' : '▼'}</span>
             </div>
+            {/* Game count indicator */}
+            <p>{filteredGames.length} of {playerGames.length} games available by filter</p>
+            {showGames && (
+                <PreviousGamesPage2
+                    key={filteredGames.map(g => g.id).join('-')}
+                    playerGames={filteredGames}
+                    showFilters={false}
+                />
+            )}
+
+
             <CustomButton type="neutral" onClick={transferNavigate}>
                 Transfer
             </CustomButton>

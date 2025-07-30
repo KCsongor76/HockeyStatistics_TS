@@ -98,20 +98,21 @@ const CreateTeamPage = () => {
             return;
         }
 
-        // Check for existing logo
         try {
-            const exists = await TeamService.checkLogoExists(logoFile.name, true);
-            if (exists) {
+            const nameExists = await TeamService.checkNameExists(teamData.name);
+            console.log(nameExists);
+            if (nameExists) {
+                alert("Name already exists");
+                return
+            }
+
+            // Then check for existing logo
+            const logoExists = await TeamService.checkLogoExists(logoFile.name, true);
+            if (logoExists) {
                 alert("A team logo with the same file name already exists. Please choose a different file.");
                 return;
             }
-        } catch (error) {
-            console.error("Error checking logo existence:", error);
-            alert("Failed to check logo existence. Please try again.");
-            return;
-        }
 
-        try {
             const team = new Team(
                 teamData.name,
                 "",
@@ -120,8 +121,9 @@ const CreateTeamPage = () => {
                 teamData.seasons,
                 teamData.championships
             );
+
+            // Only upload logo after all validations pass
             await team.uploadLogo(logoFile);
-            console.log(team);
             await TeamService.createTeam(team);
             alert("Team created successfully!");
             navigateHandler();
@@ -130,6 +132,7 @@ const CreateTeamPage = () => {
             if (error instanceof TeamAlreadyExistsError) {
                 alert(error.message); // Specific error for duplicate names
             } else {
+                console.error("Team creation failed:", error);
                 alert("Team creation failed");
             }
         }

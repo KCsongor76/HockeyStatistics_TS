@@ -66,13 +66,13 @@ const TransferPlayerPage = () => {
 
         const newTeam = teams.find(t => t.id === selectedTeamId)!;
         try {
-            // ... jersey number check ...
+
             const isAvailable = await Player.isJerseyNumberAvailable(newTeam.id, player.jerseyNumber);
             if (!isAvailable) {
                 setErrors({jersey: `Jersey number ${player.jerseyNumber} is taken!`});
                 return;
             }
-            // ... rest of transfer code ...
+
             const confirm = window.confirm(`Transfer ${player.name} to ${newTeam.name}?`);
 
             if (confirm) {

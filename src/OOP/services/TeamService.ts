@@ -65,6 +65,10 @@ export class TeamService {
     static async deleteTeam(id: string) {
         const teamDocRef = doc(this.collectionRef, id);
 
+        // First get the team data to check for a logo
+        const teamSnap = await getDoc(teamDocRef);
+        const teamData = teamSnap.data() as ITeam | undefined;
+
         // Reference to the "players" subcollection
         const playersCollectionRef = collection(teamDocRef, "players");
 
@@ -77,7 +81,16 @@ export class TeamService {
         // Wait for all player documents to be deleted
         await Promise.all(deletePromises);
 
-        console.log("Team deleted successfully.");
+        // Delete the team's logo if it exists
+        if (teamData?.logo) {
+            try {
+                console.log("logo deleted")
+                await this.deleteLogo(teamData.logo);
+            } catch (error) {
+                console.error("Error deleting team logo:", error);
+                // Continue with team deletion even if logo deletion fails
+            }
+        }
 
         // Finally, delete the team document
         await deleteDoc(teamDocRef);
@@ -134,6 +147,11 @@ export class TeamService {
         }
     };
 
+    static checkNameExists = async (name: string) => {
+        const q = query(this.collectionRef, where('name', '==', name));
+        return !(await getDocs(q)).empty;
+    }
+
     static checkLogoExists = async (fileName: string, isTeamCreation: boolean = false): Promise<boolean> => {
         const logoRef = ref(storage, `team-logos/${fileName}`);
         try {
@@ -185,5 +203,16 @@ export class TeamService {
             console.error('Error transferring player:', error);
             throw new Error('Failed to transfer player');
         }
+    }
+
+    // Add to TeamService.ts
+    static async isNameTaken(name: string, excludeId?: string): Promise<boolean> {
+        const q = query(
+            this.collectionRef,
+            where('name', '==', name),
+            ...(excludeId ? [where('id', '!=', excludeId)] : [])
+        );
+        const snapshot = await getDocs(q);
+        return !snapshot.empty;
     }
 }

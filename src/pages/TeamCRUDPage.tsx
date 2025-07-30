@@ -14,6 +14,8 @@ import Pagination from "../components/Pagination";
 import {TextInput} from "../components/CRUD/TextInput";
 import {Select} from "../components/CRUD/Select";
 import {CustomButton} from '../components/CustomButton';
+import TeamCard from "../components/TeamCard";
+import {Team} from "../OOP/classes/Team";
 
 const TeamCrudPage = () => {
     const loaderData = useLoaderData() as {
@@ -71,10 +73,6 @@ const TeamCrudPage = () => {
 
     const createNavigateHandler = () => {
         navigate("create", {state: {championships}});
-    };
-
-    const viewNavigateHandler = (team: ITeam) => {
-        navigate(`${team.id}`, {state: {team}});
     };
 
     const deleteHandler = async (team: ITeam) => {
@@ -136,30 +134,7 @@ const TeamCrudPage = () => {
 
             <div>
                 {paginatedTeams.length > 0 ? paginatedTeams.map((team) => (
-                    <div key={team.id}>
-                        <div>
-                            <div>{team.name}</div>
-                        </div>
-
-                        <div>
-                            {team.championships?.map((ch) => ch.name).join(", ") || "No championships"}
-                        </div>
-
-                        <div>
-                            <CustomButton
-                                type="neutral"
-                                onClick={() => viewNavigateHandler(team)}
-                            >
-                                View
-                            </CustomButton>
-                            <CustomButton
-                                type="negative"
-                                onClick={() => deleteHandler(team)}
-                            >
-                                Delete
-                            </CustomButton>
-                        </div>
-                    </div>
+                    <TeamCard key={team.id} team={Team.fromPlain(team)} deleteHandler={deleteHandler}/>
                 )) : <p>No teams.</p>}
             </div>
 

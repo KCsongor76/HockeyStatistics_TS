@@ -83,6 +83,13 @@ export class Team {
     }
 
     async update(name: string, logoFile: File | null): Promise<Team> {
+        if (name !== this.name) {
+            const nameTaken = await TeamService.isNameTaken(name, this.id);
+            if (nameTaken) {
+                throw new Error(`Team name "${name}" is already taken.`);
+            }
+        }
+
         const oldLogoUrl = this.logo;
         let newLogo = this.logo;
 
