@@ -1,26 +1,17 @@
+/* StartPage.module.css */
 .container {
-    max-width: 800px;
+    max-width: 1000px;
     margin: 2rem auto;
     padding: 2rem;
-    background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-}
-
-.header {
-    text-align: center;
-    margin-bottom: 2rem;
+    background: white;
+    border-radius: 10px;
+    box-shadow: var(--card-shadow);
 }
 
 .title {
-    font-size: 2.5rem;
-    color: #2c3e50;
-    margin-bottom: 0.5rem;
-}
-
-.subtitle {
-    color: #7f8c8d;
-    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    color: var(--primary-dark);
+    text-align: center;
 }
 
 .formGrid {
@@ -29,193 +20,90 @@
     gap: 1.5rem;
 }
 
-.formGroup {
+.formSection {
+    padding: 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.sectionTitle {
+    margin-bottom: 1rem;
+    color: var(--primary);
+    font-size: 1.25rem;
+}
+
+.teamColors {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
     margin-bottom: 1.5rem;
 }
 
-.label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: #34495e;
-}
-
-.select, .input {
-    width: 100%;
-    padding: 0.8rem;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 1rem;
-    background: white;
-    transition: all 0.3s;
-}
-
-.select:focus, .input:focus {
-    outline: none;
-    border-color: #3498db;
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-}
-
-.colorGroup {
-    display: flex;
-    gap: 1rem;
-}
-
-.colorInput {
-    flex: 1;
-    height: 50px;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.colorInput input {
-    width: 100%;
-    height: 100%;
-    border: none;
-    cursor: pointer;
-}
-
-.rosterToggle {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin: 1rem 0;
-    padding: 0.8rem;
-    background: #e3f2fd;
-    border-radius: 8px;
-    cursor: pointer;
-    user-select: none;
-}
-
-.rosterContainer {
-    background: white;
-    border-radius: 8px;
-    padding: 1.5rem;
-    margin-top: 1rem;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-}
-
-.rosterGrid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-}
-
 .rosterSection {
-    background: #f8f9fa;
-    border-radius: 8px;
-    padding: 1rem;
-}
-
-.rosterTitle {
-    text-align: center;
-    margin-bottom: 1rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 2px solid #3498db;
-}
-
-.playerList {
-    max-height: 300px;
-    overflow-y: auto;
-}
-
-.playerItem {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.8rem;
-    margin-bottom: 0.5rem;
-    background: white;
-    border-radius: 6px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.rinkContainer {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
     margin: 1.5rem 0;
 }
 
+.rosterHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.rosterGroup {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.rinkImages {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
 .rinkOption {
-    border: 2px solid transparent;
-    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     padding: 1rem;
-    cursor: pointer;
-    transition: all 0.3s;
-    background: white;
-}
-
-.rinkOption.selected {
-    border-color: #3498db;
-    background: #e3f2fd;
-}
-
-.rinkImage {
-    width: 100%;
-    height: 150px;
-    object-fit: contain;
+    border: 1px solid var(--border);
     border-radius: 8px;
-    margin-top: 1rem;
+    cursor: pointer;
+    transition: var(--transition);
 }
 
-.error {
-    display: block;
+.rinkOption:hover {
+    border-color: var(--primary);
+}
+
+.rinkOption img {
+    max-width: 100%;
+    height: auto;
     margin-top: 0.5rem;
-    color: #e74c3c;
-    font-size: 0.9rem;
 }
 
 .buttonGroup {
     display: flex;
     gap: 1rem;
     margin-top: 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
-.button {
-    flex: 1;
-    padding: 1rem;
-    border: none;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 1.1rem;
-    cursor: pointer;
-    transition: all 0.3s;
-    text-align: center;
-}
-
-.primaryButton {
-    background: #3498db;
-    color: white;
-}
-
-.primaryButton:hover {
-    background: #2980b9;
-}
-
-.secondaryButton {
-    background: #ecf0f1;
-    color: #2c3e50;
-}
-
-.secondaryButton:hover {
-    background: #d5dbdb;
+.error {
+    color: var(--error);
+    margin-top: 0.25rem;
 }
 
 @media (max-width: 768px) {
-    .formGrid {
-        grid-template-columns: 1fr;
+    .container {
+        padding: 1.5rem;
+        margin: 1rem;
     }
 
-    .rosterGrid {
+    .rosterGroup {
         grid-template-columns: 1fr;
-    }
-
-    .rinkContainer {
-        grid-template-columns: 1fr;
-    }
-
-    .buttonGroup {
-        flex-direction: column;
     }
 }

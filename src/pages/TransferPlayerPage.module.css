@@ -1,64 +1,49 @@
 /* TransferPlayerPage.module.css */
-
 .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    background-color: #f9f9f9;
     max-width: 600px;
-    margin: 20px auto;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 10px;
+    box-shadow: var(--card-shadow);
 }
 
-.header {
-    font-size: 1.5rem;
-    margin-bottom: 15px;
-    color: #333;
+.title {
+    margin-bottom: 1.5rem;
+    color: var(--primary-dark);
+    text-align: center;
 }
 
-.form {
+.playerInfo {
     display: flex;
     flex-direction: column;
-    width: 100%;
-    max-width: 400px;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
 }
 
-.label {
-    margin-bottom: 8px;
-    font-weight: bold;
-    color: #555;
+.formGroup {
+    margin-bottom: 1.5rem;
 }
 
-.select {
-    margin-bottom: 15px;
-    padding: 8px;
-    font-size: 1rem;
-    border-radius: 4px;
-    border: 1px solid #ccc;
+.buttonGroup {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
 }
 
-.button {
-    margin: 5px;
-    padding: 10px 20px;
-    font-size: 1rem;
-    color: white;
-    background-color: #007bff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.button:hover {
-    background-color: #0056b3;
-}
-
-.loading {
-    font-size: 1.2rem;
-    color: #333;
+.generalError {
+    color: var(--error);
+    margin-top: 1rem;
     text-align: center;
-    margin-top: 20px;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 1.5rem;
+        margin: 1rem;
+    }
 }

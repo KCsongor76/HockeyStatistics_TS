@@ -11,6 +11,8 @@ import {Season} from "../OOP/enums/Season";
 import {Select} from "../components/CRUD/Select";
 import Pagination from "../components/Pagination";
 import GameListItem from "../components/GameListItem";
+// @ts-ignore
+import styles from './PreviousGamesPage.module.css';
 
 interface PreviousGamesPageProps {
     playerGames?: Game[];
@@ -92,11 +94,11 @@ const PreviousGamesPage2: React.FC<PreviousGamesPageProps> = ({playerGames, show
     if (games.length === 0) return <div>No games found.</div>;
 
     return (
-        <div>
-            <h1>Previous Games</h1>
+        <div className={styles.container}>
+            <h1 className={styles.title}>Previous Games</h1>
 
             {showFilters && (
-                <div>
+                <div className={styles.filters}>
                     <Select
                         value={homeTeamFilter}
                         options={teams.map(team => ({value: team.id, label: team.name}))}
@@ -133,6 +135,7 @@ const PreviousGamesPage2: React.FC<PreviousGamesPageProps> = ({playerGames, show
                     />
 
                     <select
+                        className={styles.sortSelect}
                         value={sortOrder}
                         onChange={(e) => setSortOrder(e.target.value)}
                     >
@@ -142,15 +145,13 @@ const PreviousGamesPage2: React.FC<PreviousGamesPageProps> = ({playerGames, show
                 </div>
             )}
 
-            <div>
-                <ul>
-                    {currentGames.length > 0 ? (
-                        currentGames.map((game) => <GameListItem key={game.id} game={game}/>)
-                    ) : (
-                        <p>No games found.</p>
-                    )}
-                </ul>
-            </div>
+            <ul className={styles.gamesList}>
+                {currentGames.length > 0 ? (
+                    currentGames.map((game) => <GameListItem key={game.id} game={game}/>)
+                ) : (
+                    <p>No games found.</p>
+                )}
+            </ul>
 
             <Pagination
                 pagination={pagination}

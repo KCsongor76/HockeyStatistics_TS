@@ -1,100 +1,56 @@
-.form {
+/* CreateTeamPage.module.css */
+.container {
     max-width: 800px;
     margin: 2rem auto;
     padding: 2rem;
-    background: #f8f9fa;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    background: white;
+    border-radius: 10px;
+    box-shadow: var(--card-shadow);
+}
+
+.title {
+    margin-bottom: 1.5rem;
+    color: var(--primary-dark);
+    text-align: center;
 }
 
 .formGroup {
     margin-bottom: 1.5rem;
 }
 
-.label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: #343a40;
-}
-
-.input {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-    font-size: 1rem;
-}
-
-.colorGroup {
-    display: flex;
+.championshipList {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 1rem;
-    margin-top: 0.5rem;
-}
-
-.colorInputGroup {
-    flex: 1;
-}
-
-.colorLabel {
-    display: block;
-    margin-bottom: 0.25rem;
-    font-size: 0.875rem;
-}
-
-.colorInput {
-    width: 100%;
-    height: 40px;
-    border: 1px solid #ced4da;
-    border-radius: 4px;
-}
-
-.championshipGroup {
     margin-top: 1rem;
 }
 
 .championshipItem {
     display: flex;
     align-items: center;
-    margin-bottom: 0.5rem;
+    gap: 0.5rem;
 }
 
 .buttonGroup {
     display: flex;
     gap: 1rem;
-    margin-top: 2rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
 }
 
-.button {
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 4px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background-color 0.2s;
+.generalError {
+    color: var(--error);
+    margin-top: 1rem;
+    text-align: center;
 }
 
-.primaryButton {
-    background-color: #007bff;
-    color: white;
-}
+@media (max-width: 768px) {
+    .container {
+        padding: 1.5rem;
+        margin: 1rem;
+    }
 
-.primaryButton:hover {
-    background-color: #0069d9;
-}
-
-.secondaryButton {
-    background-color: #6c757d;
-    color: white;
-}
-
-.secondaryButton:hover {
-    background-color: #5a6268;
-}
-
-.error {
-    display: block;
-    margin-top: 0.5rem;
-    color: #dc3545;
-    font-size: 0.875rem;
+    .championshipList {
+        grid-template-columns: 1fr;
+    }
 }

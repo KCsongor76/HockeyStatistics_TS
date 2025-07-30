@@ -72,51 +72,55 @@ const PlayerCRUDPage = () => {
     }, [loaderData]);
 
     return (
-        <div>
-            <CustomButton type="positive" onClick={() => navigate("create")}>
-                Create New Player
-            </CustomButton>
+        <div className={styles.container}>
+            <div className={styles.header}>
+                <h1 className={styles.title}>Manage Players</h1>
+                <CustomButton type="positive" onClick={() => navigate("create")}>
+                    Create New Player
+                </CustomButton>
+            </div>
 
+            <div className={styles.filters}>
+                <TextInput
+                    label={"Search by name"}
+                    value={filters.search}
+                    onChange={value => setFilters(f => ({...f, search: value}))}
+                    placeholder={"Search name..."}
+                />
 
-            <TextInput
-                label={"Search by name"}
-                value={filters.search}
-                onChange={value => setFilters(f => ({...f, search: value}))}
-                placeholder={"Search name..."}
-            />
+                <Select
+                    value={filters.team}
+                    options={teams.map(t => ({value: t.id, label: t.name}))}
+                    onChange={value => setFilters(f => ({...f, team: value}))}
+                    label={"Filter by team"}
+                    allLabel={"All Teams"}
+                />
 
-            <Select
-                value={filters.team}
-                options={teams.map(t => ({value: t.id, label: t.name}))}
-                onChange={value => setFilters(f => ({...f, team: value}))}
-                label={"Filter by team"}
-                allLabel={"All Teams"}
-            />
+                <Select
+                    value={filters.position}
+                    options={Object.values(Position).map(p => ({value: p, label: p}))}
+                    onChange={value => setFilters(f => ({...f, position: value}))}
+                    label={"Filter by position"}
+                    allLabel={"All Positions"}
+                />
 
-            <Select
-                value={filters.position}
-                options={Object.values(Position).map(p => ({value: p, label: p}))}
-                onChange={value => setFilters(f => ({...f, position: value}))}
-                label={"Filter by position"}
-                allLabel={"All Positions"}
-            />
+                <JerseyNumberInput
+                    label={"Filter by jersey number"}
+                    value={filters.jerseyNr}
+                    onChange={value => setFilters(f => ({...f, jerseyNr: value.toString()}))}
+                    placeholder={"Jersey"}
+                />
 
-            <JerseyNumberInput
-                label={"Filter by jersey number"}
-                value={filters.jerseyNr}
-                onChange={value => setFilters(f => ({...f, jerseyNr: value.toString()}))}
-                placeholder={"Jersey"}
-            />
+                <Select
+                    value={filters.season}
+                    options={seasons.map(s => ({value: s, label: s}))}
+                    onChange={value => setFilters(f => ({...f, season: value}))}
+                    label={"Filter by Season"}
+                    allLabel={"All Seasons"}
+                />
+            </div>
 
-            <Select
-                value={filters.season}
-                options={seasons.map(s => ({value: s, label: s}))}
-                onChange={value => setFilters(f => ({...f, season: value}))}
-                label={"Filter by Season"}
-                allLabel={"All Seasons"}
-            />
-
-            <div>
+            <div className={styles.playerGrid}>
                 {paginatedPlayers.length > 0 ? paginatedPlayers.map((player: Player) =>
                     <PlayerCard
                         key={player.id}
@@ -124,7 +128,7 @@ const PlayerCRUDPage = () => {
                         playerTeam={teams.find(t => t.id === player.teamId)}
                         deleteHandler={deleteHandler}
                     />
-                ) : <p>No players.</p>}
+                ) : <p className={styles.noPlayers}>No players found.</p>}
             </div>
 
             <Pagination pagination={pagination} totalPages={totalPages} setPagination={setPagination}/>

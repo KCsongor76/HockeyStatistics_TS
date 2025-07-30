@@ -149,66 +149,68 @@ const CreatePlayerPage = () => {
         }));
 
     return (
-        <form onSubmit={submitHandler}>
-            <TextInput
-                label="Name:"
-                value={playerData.name}
-                onChange={(value: string) => handleTextInputChange(value, 'name')}
-                disabled={isSubmitting}
-                required
-                error={errors.name}
-            />
+        <div className={styles.container}>
+            <h1 className={styles.title}>Create Player</h1>
+            <form onSubmit={submitHandler} className={styles.form}>
+                <TextInput
+                    label="Name:"
+                    value={playerData.name}
+                    onChange={(value: string) => handleTextInputChange(value, 'name')}
+                    disabled={isSubmitting}
+                    required
+                    error={errors.name}
+                />
 
-            <Select
-                label="Position:"
-                value={playerData.position}
-                options={positionOptions}
-                onChange={(value: string) => handleSelectChange(value, 'position')}
-                disabled={isSubmitting}
-                includeAll={false}
-            />
+                <Select
+                    label="Position:"
+                    value={playerData.position}
+                    options={positionOptions}
+                    onChange={(value: string) => handleSelectChange(value, 'position')}
+                    disabled={isSubmitting}
+                    includeAll={false}
+                />
 
-            <JerseyNumberInput
-                label="Jersey Number:"
-                value={playerData.jerseyNumber}
-                onChange={handleJerseyNumberChange}
-                disabled={isSubmitting}
-                error={errors.jerseyNumber}
-            />
+                <JerseyNumberInput
+                    label="Jersey Number:"
+                    value={playerData.jerseyNumber}
+                    onChange={handleJerseyNumberChange}
+                    disabled={isSubmitting}
+                    error={errors.jerseyNumber}
+                />
 
-            <div>
-                <label>
+                <div className={styles.freeAgentToggle}>
                     <input
                         type="checkbox"
                         checked={isFreeAgent}
                         onChange={() => setIsFreeAgent(!isFreeAgent)}
                         disabled={isSubmitting}
                     />
-                    Free Agent
-                </label>
-            </div>
+                    <label>Free Agent</label>
+                </div>
 
-            {!isFreeAgent && (
-                <Select
-                    label="Team:"
-                    value={playerData.teamId}
-                    options={teamOptions}
-                    onChange={(value: string) => handleSelectChange(value, 'teamId')}
-                    disabled={isSubmitting || teams.length === 0}
-                    includeAll={false}
-                />
-            )}
+                {!isFreeAgent && (
+                    <Select
+                        label="Team:"
+                        value={playerData.teamId}
+                        options={teamOptions}
+                        onChange={(value: string) => handleSelectChange(value, 'teamId')}
+                        disabled={isSubmitting || teams.length === 0}
+                        includeAll={false}
+                    />
+                )}
 
-            {errors.general && <span className={styles.error}>{errors.general}</span>}
+                {errors.general && <span className={styles.generalError}>{errors.general}</span>}
 
-            <CustomButton type="positive" disabled={isSubmitting} buttonType="submit">
-                {isSubmitting ? 'Creating...' : 'Create'}
-            </CustomButton>
-
-            <CustomButton type="negative" onClick={goBackHandler} disabled={isSubmitting}>
-                Go back
-            </CustomButton>
-        </form>
+                <div className={styles.buttonGroup}>
+                    <CustomButton type="positive" disabled={isSubmitting} buttonType="submit">
+                        {isSubmitting ? 'Creating...' : 'Create'}
+                    </CustomButton>
+                    <CustomButton type="negative" onClick={goBackHandler} disabled={isSubmitting}>
+                        Go back
+                    </CustomButton>
+                </div>
+            </form>
+        </div>
     );
 };
 

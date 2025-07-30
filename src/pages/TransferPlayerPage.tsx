@@ -87,41 +87,43 @@ const TransferPlayerPage = () => {
     };
 
     return (
-        <div>
-            <h2>Transfer Player</h2>
-            <p>Player: {player.name}</p>
-            <p>Current Team: {teams.find(t => t.id === player.teamId)?.name}</p>
+        <div className={styles.container}>
+            <h1 className={styles.title}>Transfer Player</h1>
 
-            <form onSubmit={submitHandler}>
-                <Select
-                    value={selectedTeamId}
-                    options={teams.map((team) => ({value: team.id, label: team.name}))}
-                    onChange={setSelectedTeamId}
-                    label={"Transfer to:"}
-                    allLabel={"Select a team"}
-                    allValue={""}
-                />
+            <div className={styles.playerInfo}>
+                <p><strong>Player:</strong> {player.name}</p>
+                <p><strong>Current Team:</strong> {teams.find(t => t.id === player.teamId)?.name}</p>
+            </div>
 
-                {/* Team select */}
-                {errors.team && <span>{errors.team}</span>}
+            <form onSubmit={submitHandler} className={styles.form}>
+                <div className={styles.formGroup}>
+                    <Select
+                        value={selectedTeamId}
+                        options={teams.map((team) => ({value: team.id, label: team.name}))}
+                        onChange={setSelectedTeamId}
+                        label={"Transfer to:"}
+                        allLabel={"Select a team"}
+                        allValue={""}
+                    />
+                    {errors.team && <span className={styles.error}>{errors.team}</span>}
+                    {errors.jersey && <span className={styles.error}>{errors.jersey}</span>}
+                </div>
 
-                {/* Jersey error */}
-                {errors.jersey && <span>{errors.jersey}</span>}
+                {errors.general && <span className={styles.generalError}>{errors.general}</span>}
 
-                {/* General error */}
-                {errors.general && <span>{errors.general}</span>}
-
-                {!isFreeAgent && (
-                    <CustomButton type="negative" onClick={freeAgentHandler}>
-                        Set to free agent
+                <div className={styles.buttonGroup}>
+                    {!isFreeAgent && (
+                        <CustomButton type="negative" onClick={freeAgentHandler}>
+                            Set to free agent
+                        </CustomButton>
+                    )}
+                    <CustomButton type="positive" buttonType="submit">
+                        Transfer
                     </CustomButton>
-                )}
-                <CustomButton type="positive" buttonType="submit">
-                    Transfer
-                </CustomButton>
-                <CustomButton type="negative" onClick={() => navigate(-1)}>
-                    Cancel
-                </CustomButton>
+                    <CustomButton type="negative" onClick={() => navigate(-1)}>
+                        Cancel
+                    </CustomButton>
+                </div>
             </form>
         </div>
     );

@@ -1,168 +1,148 @@
+/* HandleTeamPage.module.css */
 .container {
     max-width: 1200px;
     margin: 2rem auto;
     padding: 2rem;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    background: white;
+    border-radius: 10px;
+    box-shadow: var(--card-shadow);
 }
 
-.teamHeader {
+.header {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 2rem;
     margin-bottom: 2rem;
     padding-bottom: 1.5rem;
-    border-bottom: 1px solid #eee;
-}
-
-.teamLogo {
-    width: 120px;
-    height: 120px;
-    object-fit: contain;
-    border-radius: 50%;
-    background: #f8f9fa;
-    padding: 0.5rem;
-    border: 2px solid #3498db;
+    border-bottom: 1px solid var(--border);
 }
 
 .teamInfo {
-    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.teamLogo {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
 }
 
 .teamName {
     font-size: 2rem;
-    margin-bottom: 0.5rem;
-    color: #2c3e50;
+    color: var(--primary-dark);
 }
 
 .editSection {
-    background: #f8f9fa;
     padding: 1.5rem;
-    border-radius: 10px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
     margin-bottom: 2rem;
 }
 
-.editGroup {
-    margin-bottom: 1.2rem;
-}
-
-.editLabel {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-}
-
-.editInput {
-    width: 100%;
-    padding: 0.8rem;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-size: 1rem;
+.editForm {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
 }
 
 .editActions {
     display: flex;
     gap: 1rem;
+    margin-top: 1.5rem;
 }
 
-.editButton {
-    padding: 0.8rem 1.5rem;
-    border: none;
+.filterSection {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+    background-color: #f0f4f8;
+    padding: 1.5rem;
     border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.saveButton {
-    background: #27ae60;
-    color: white;
-}
-
-.discardButton {
-    background: #e74c3c;
-    color: white;
-}
-
-.sectionToggle {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-    padding: 1rem;
-    background: #e3f2fd;
-    border-radius: 8px;
-    margin: 1.5rem 0;
-    cursor: pointer;
 }
 
 .statsSection {
     margin-bottom: 2rem;
 }
 
-.statsGrid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-    margin-top: 1rem;
+.statsHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
 }
 
-.statsCard {
-    background: white;
-    border-radius: 10px;
-    padding: 1.5rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+.playersSection {
+    margin-top: 2rem;
 }
 
-.statsTitle {
-    text-align: center;
-    margin-bottom: 1.5rem;
-    padding-bottom: 0.8rem;
-    border-bottom: 2px solid #3498db;
-}
-
-.statsTable {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.statsTable th {
-    text-align: left;
-    padding: 0.8rem;
-    background: #f8f9fa;
+.playersHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     cursor: pointer;
-}
-
-.statsTable th:hover {
-    background: #e3f2fd;
-}
-
-.statsTable td {
-    padding: 0.8rem;
-    border-bottom: 1px solid #eee;
-}
-
-.statsTable tr:last-child td {
-    border-bottom: none;
-}
-
-.backButton {
-    padding: 0.8rem 1.5rem;
-    background: #7f8c8d;
-    color: white;
-    border: none;
+    padding: 1rem;
+    background-color: #f0f4f8;
     border-radius: 8px;
-    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.playersHeader:hover {
+    background-color: #e2e8f0;
+}
+
+.playerCount {
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+.gamesSection {
+    margin-top: 2rem;
+}
+
+.gamesHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     cursor: pointer;
-    margin-top: 1.5rem;
+    padding: 1rem;
+    background-color: #f0f4f8;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.gamesHeader:hover {
+    background-color: #e2e8f0;
+}
+
+.gamesCount {
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+.buttonGroup {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
 }
 
 @media (max-width: 768px) {
-    .teamHeader {
-        flex-direction: column;
-        text-align: center;
+    .container {
+        padding: 1.5rem;
+        margin: 1rem;
     }
 
-    .statsGrid {
-        grid-template-columns: 1fr;
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .teamInfo {
+        flex-direction: column;
+        align-items: flex-start;
     }
 }

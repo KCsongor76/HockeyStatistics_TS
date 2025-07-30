@@ -1,5 +1,7 @@
 import React from 'react';
 import {Player} from "../OOP/classes/Player";
+// @ts-ignore
+import styles from "./RosterManager.module.css"
 
 interface RosterManagerProps {
     player: Player;
@@ -14,11 +16,12 @@ const RosterManager = ({player, /*isAdding,*/ isHome, rosterHandler}: RosterMana
     const text = rosterHandler.name === "addPlayerToRoster" ? "Add" : "Remove"
 
     return (
-        <div key={player.id}>
-            <span>{player.name}</span>
+        <div className={styles.container}>
+            <span className={styles.playerName}>{player.name}</span>
             <button
                 type="button"
-                onClick={() => rosterHandler(player, isHome/*, isAdding*/)}
+                className={styles.button}
+                onClick={() => rosterHandler(player, isHome)}
             >
                 {text}
             </button>

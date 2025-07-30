@@ -1,0 +1,28 @@
+/* Pagination.module.css */
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1.5rem;
+    padding: 1rem 0;
+    border-top: 1px solid var(--border);
+}
+
+.buttonGroup {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.select {
+    padding: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background-color: white;
+}
+
+@media (max-width: 480px) {
+    .container {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}

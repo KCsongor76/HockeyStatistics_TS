@@ -1,0 +1,32 @@
+/* RosterManager.module.css */
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border);
+    transition: var(--transition);
+}
+
+.container:hover {
+    background-color: #f9f9f9;
+}
+
+.playerName {
+    font-weight: 500;
+}
+
+.button {
+    padding: 0.5rem 1rem;
+    background-color: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 0.875rem;
+}
+
+.button:hover {
+    background-color: var(--primary-dark);
+}

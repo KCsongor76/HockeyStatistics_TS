@@ -25,8 +25,6 @@ import HandlePlayerPage from "./pages/HandlePlayerPage";
 import GamePage2 from "./pages/GamePage2";
 import {TeamService} from "./OOP/services/TeamService";
 
-// todo: components
-// todo: form - no alerts, but errors
 // todo: instead of window.confirm()/alert, use maybe custom modals?
 // todo: services: oop/atomic/batch writes/etc
 // todo: make all files typescript correct

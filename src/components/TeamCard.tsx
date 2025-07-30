@@ -3,6 +3,8 @@ import {CustomButton} from "./CustomButton";
 import {Team} from "../OOP/classes/Team";
 import {useNavigate} from "react-router-dom";
 import {ITeam} from "../OOP/interfaces/ITeam";
+// @ts-ignore
+import styles from "./TeamCard.module.css"
 
 interface TeamCardProps {
     team: Team;
@@ -16,16 +18,16 @@ const TeamCard = ({team, deleteHandler}: TeamCardProps) => {
     }
 
     return (
-        <div key={team.id}>
-            <div>
-                <div>{team.name}</div>
+        <div className={styles.card}>
+            <div className={styles.header}>
+                <div className={styles.name}>{team.name}</div>
             </div>
 
-            <div>
+            <div className={styles.championships}>
                 {team.championships?.map((ch) => ch.name).join(", ") || "No championships"}
             </div>
 
-            <div>
+            <div className={styles.actions}>
                 <CustomButton
                     type="neutral"
                     onClick={() => viewNavigateHandler()}

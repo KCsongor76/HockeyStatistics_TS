@@ -1,5 +1,7 @@
 // src/components/ColorPicker.tsx
 import React from 'react';
+// @ts-ignore
+import styles from "./ColorPicker.module.css"
 
 interface ColorPickerProps {
     label: string;
@@ -16,23 +18,25 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
                                                             onPrimaryChange,
                                                             onSecondaryChange
                                                         }) => (
-    <div>
-        <label>{label}</label>
-        <div className="color-picker-group">
-            <div>
+    <div className={styles.container}>
+        <label className={styles.label}>{label}</label>
+        <div className={styles.colorPickerGroup}>
+            <div className={styles.colorGroup}>
                 <p>Primary</p>
                 <input
                     type="color"
                     value={primaryColor}
                     onChange={(e) => onPrimaryChange(e.target.value)}
+                    className={styles.colorInput}
                 />
             </div>
-            <div>
+            <div className={styles.colorGroup}>
                 <p>Secondary</p>
                 <input
                     type="color"
                     value={secondaryColor}
                     onChange={(e) => onSecondaryChange(e.target.value)}
+                    className={styles.colorInput}
                 />
             </div>
         </div>

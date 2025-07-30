@@ -371,101 +371,121 @@ const HandleTeamPage = () => {
     if (!team) return <div>Loading...</div>;
 
     return (
-        <div>
-            <div>
-                <p>{team.name}</p>
-                <img src={team.logo} alt={team.name}/>
+        <div className={styles.container}>
+            <div className={styles.header}>
+                <div className={styles.teamInfo}>
+                    {team.logo && <img src={team.logo} alt={team.name} className={styles.teamLogo}/>}
+                    <h1 className={styles.teamName}>{team.name}</h1>
+                </div>
             </div>
 
             {isEditing ? (
-                <>
-                    <TextInput
-                        label="Team name:"
-                        value={name}
-                        onChange={handleNameChange}
-                        id="name"
-                        error={errors.name}
-                    />
-                    <FileInput
-                        label="Upload new logo:"
-                        onChange={handleLogoChange}
-                        error={errors.logo}
-                    />
-                    {errors.general && <span className="error">{errors.general}</span>}
-
-                    <CustomButton type="positive" onClick={handleSave}>
-                        Save Changes
-                    </CustomButton>
-                    <CustomButton type="negative" onClick={handleDiscard}>
-                        Discard Changes
-                    </CustomButton>
-                </>
+                <div className={styles.editSection}>
+                    <div className={styles.editForm}>
+                        <TextInput
+                            label="Team name:"
+                            value={name}
+                            onChange={handleNameChange}
+                            error={errors.name}
+                        />
+                        <FileInput
+                            label="Upload new logo:"
+                            onChange={handleLogoChange}
+                            error={errors.logo}
+                        />
+                    </div>
+                    {errors.general && <span className={styles.generalError}>{errors.general}</span>}
+                    <div className={styles.editActions}>
+                        <CustomButton type="positive" onClick={handleSave}>
+                            Save Changes
+                        </CustomButton>
+                        <CustomButton type="negative" onClick={handleDiscard}>
+                            Discard Changes
+                        </CustomButton>
+                    </div>
+                </div>
             ) : (
                 <CustomButton type="neutral" onClick={handleEdit}>
                     Edit Team
                 </CustomButton>
             )}
 
-            {/* Filters Section */}
+            <div className={styles.filterSection}>
+                <Select
+                    value={selectedSeason || "All"}
+                    options={seasons.map(s => ({value: s, label: s}))}
+                    onChange={value => setSelectedSeason(value as Season | 'All')}
+                    label={"Season: "}
+                    allLabel={"All Seasons"}
+                    allValue={"All"}
+                />
 
-            <Select
-                value={selectedSeason || "All"}
-                options={seasons.map(s => ({value: s, label: s}))}
-                onChange={value => setSelectedSeason(value as Season | 'All')}
-                label={"Season: "}
-                allLabel={"All Seasons"}
-                allValue={"All"}
-            />
+                <Select
+                    value={selectedChampionship}
+                    options={availableChampionships.map(c => ({value: c.id, label: c.name}))}
+                    onChange={value => setSelectedChampionship(value)}
+                    label={"Championship: "}
+                    allLabel={"All Championships"}
+                    allValue={"All"}
+                />
+            </div>
 
-            <Select
-                value={selectedChampionship}
-                options={availableChampionships.map(c => ({value: c.id, label: c.name}))}
-                onChange={value => setSelectedChampionship(value)}
-                label={"Championship: "}
-                allLabel={"All Championships"}
-                allValue={"All"}
-            />
-
-
-            <div>
-                <div onClick={() => setShowPlayers(!showPlayers)}>
+            <div className={styles.playersSection}>
+                <div className={styles.playersHeader} onClick={() => setShowPlayers(!showPlayers)}>
                     <h3>Players {filteredPlayers.length > 0 && `(${filteredPlayers.length})`}</h3>
                     <span>{showPlayers ? '▲' : '▼'}</span>
                 </div>
                 {showPlayers && (
-                    <>
+                    <div className={styles.playersContent}>
                         {filteredPlayers.length > 0 ? (
                             <>
-                                <h3>Regular Season Stats</h3>
-                                <TeamPlayerStatsTable
-                                    sortedPlayers={getSortedPlayers(false)}
-                                    filterGames={filterGames}
-                                    handleSort={(key) => handleSort(key, false)}
-                                    isPlayoff={false}
-                                />
+                                <div className={styles.statsSection}>
+                                    <h3>Regular Season Stats</h3>
+                                    <div className={styles.tableContainer}>
+                                        <TeamPlayerStatsTable
+                                            sortedPlayers={getSortedPlayers(false)}
+                                            filterGames={filterGames}
+                                            handleSort={(key) => handleSort(key, false)}
+                                            isPlayoff={false}
+                                        />
+                                    </div>
+                                </div>
 
-                                <h3>Playoff Stats</h3>
-                                <TeamPlayerStatsTable
-                                    sortedPlayers={getSortedPlayers(true)}
-                                    filterGames={filterGames}
-                                    handleSort={(key) => handleSort(key, true)}
-                                    isPlayoff={true}
-                                />
+                                <div className={styles.statsSection}>
+                                    <h3>Playoff Stats</h3>
+                                    <div className={styles.tableContainer}>
+                                        <TeamPlayerStatsTable
+                                            sortedPlayers={getSortedPlayers(true)}
+                                            filterGames={filterGames}
+                                            handleSort={(key) => handleSort(key, true)}
+                                            isPlayoff={true}
+                                        />
+                                    </div>
+                                </div>
                             </>
                         ) : (
                             <p>No players found for the selected filters</p>
                         )}
-                    </>
+                    </div>
                 )}
             </div>
 
-            <h3>Regular Season Stats</h3>
-            <TeamStatsTable stats={regularStats}/>
-            <h3>Playoff Stats</h3>
-            <TeamStatsTable stats={playoffStats}/>
+            <div className={styles.statsSection}>
+                <h3>Regular Season Stats</h3>
+                <div className={styles.tableContainer}>
+                    <TeamStatsTable stats={regularStats}/>
+                </div>
+            </div>
 
-            <div>
-                <div onClick={() => setShowGames(!showGames)}>
+            <div className={styles.statsSection}>
+                <h3>Playoff Stats</h3>
+                <div className={styles.tableContainer}>
+                    <TeamStatsTable stats={playoffStats}/>
+                </div>
+            </div>
+
+            <div className={styles.gamesSection}>
+                <div className={styles.gamesHeader} onClick={() => setShowGames(!showGames)}>
                     <h3>Team Games {teamGames.length > 0 && `(${teamGames.length})`}</h3>
                     <span>{showGames ? '▲' : '▼'}</span>
                 </div>
@@ -478,7 +498,7 @@ const HandleTeamPage = () => {
                 )}
             </div>
 
-            <div>
+            <div className={styles.buttonGroup}>
                 <CustomButton type="negative" onClick={goBackHandler}>
                     Go Back
                 </CustomButton>

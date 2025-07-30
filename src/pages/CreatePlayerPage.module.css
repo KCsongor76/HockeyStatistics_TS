@@ -1,99 +1,50 @@
-.formContainer {
+/* CreatePlayerPage.module.css */
+.container {
     max-width: 600px;
     margin: 2rem auto;
     padding: 2rem;
-    background: #fff;
+    background: white;
     border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    box-shadow: var(--card-shadow);
+}
+
+.title {
+    margin-bottom: 1.5rem;
+    color: var(--primary-dark);
+    text-align: center;
 }
 
 .formGroup {
     margin-bottom: 1.5rem;
 }
 
-.label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: #333;
-}
-
-.input, .select {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    font-size: 1rem;
-    transition: border-color 0.3s;
-}
-
-.input:focus, .select:focus {
-    outline: none;
-    border-color: #4a90e2;
-    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
-}
-
-.error {
-    display: block;
-    margin-top: 0.5rem;
-    color: #e74c3c;
-    font-size: 0.875rem;
-}
-
-.checkboxContainer {
+.freeAgentToggle {
     display: flex;
     align-items: center;
-    margin: 1rem 0;
+    margin-bottom: 1.5rem;
 }
 
-.checkboxLabel {
+.freeAgentToggle label {
     margin-left: 0.5rem;
+    cursor: pointer;
 }
 
 .buttonGroup {
     display: flex;
     gap: 1rem;
-    margin-top: 2rem;
+    margin-top: 1.5rem;
+    flex-wrap: wrap;
 }
 
-.button {
-    padding: 0.75rem 1.5rem;
-    border: none;
-    border-radius: 5px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.submitButton {
-    background: #4a90e2;
-    color: white;
-}
-
-.submitButton:hover {
-    background: #357ae8;
-}
-
-.submitButton:disabled {
-    background: #bdc3c7;
-    cursor: not-allowed;
-}
-
-.backButton {
-    background: #ecf0f1;
-    color: #333;
-}
-
-.backButton:hover {
-    background: #d5dbdb;
+.generalError {
+    color: var(--error);
+    margin-top: 1rem;
+    text-align: center;
 }
 
 @media (max-width: 768px) {
-    .formContainer {
+    .container {
         padding: 1.5rem;
-    }
-
-    .buttonGroup {
-        flex-direction: column;
+        margin: 1rem;
     }
 }

@@ -1,108 +1,47 @@
+/* PreviousGamesPage.module.css */
 .container {
+    max-width: 1200px;
+    margin: 2rem auto;
     padding: 2rem;
-    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    min-height: 100vh;
+    background: white;
+    border-radius: 10px;
+    box-shadow: var(--card-shadow);
 }
 
-.header {
-    color: #2c3e50;
+.title {
+    margin-bottom: 1.5rem;
+    color: var(--primary-dark);
     text-align: center;
-    margin-bottom: 2rem;
-    font-size: 2.5rem;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
 }
 
-.controlsContainer {
-    display: flex;
+.filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 1rem;
     margin-bottom: 2rem;
-    flex-wrap: wrap;
-}
-
-.selectFilter {
-    padding: 0.5rem;
-    border-radius: 8px;
-    border: 1px solid #c3cfe2;
-    background: white;
-}
-
-.searchInput {
-    padding: 0.5rem;
-    border-radius: 8px;
-    border: 1px solid #c3cfe2;
-    min-width: 200px;
-}
-
-.listContainer {
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-    padding: 1rem;
-}
-
-.list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.listItem {
+    background-color: #f0f4f8;
     padding: 1.5rem;
-    border-bottom: 1px solid #e9ecef;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
+    border-radius: 8px;
 }
 
-.listItem:hover {
-    background-color: #f8f9fa;
-    transform: translateX(5px);
+.gamesList {
+    list-style: none;
 }
 
-.gameContent {
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-    flex-grow: 1;
-    flex-wrap: wrap;
+.gamesList li {
+    margin-bottom: 1rem;
 }
 
-.teamSection {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    min-width: 200px;
-}
-
-.teamLogo {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid white;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.scoreSection {
-    font-weight: 700;
-    font-size: 1.2rem;
-    color: #2c3e50;
-    min-width: 80px;
-}
-
-.dateSection {
-    min-width: 120px;
-    color: #6c757d;
+.sortSelect {
+    padding: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background-color: white;
 }
 
 @media (max-width: 768px) {
-    .gameContent {
-        gap: 1rem;
-    }
-
-    .teamSection {
-        min-width: auto;
+    .container {
+        padding: 1.5rem;
+        margin: 1rem;
     }
 }

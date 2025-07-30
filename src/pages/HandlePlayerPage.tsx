@@ -218,107 +218,129 @@ const HandlePlayerPage = () => {
     }
 
     return (
-        <div>
-            <h2>{player.name}</h2>
-            <p>Team: {team.name}</p>
-            <p>Position: {player.position}</p>
-            <p>Jersey number: #{player.jerseyNumber}</p>
+        <div className={styles.container}>
+            <div className={styles.header}>
+                <div className={styles.playerInfo}>
+                    <h2 className={styles.playerName}>{player.name}</h2>
+                    <div className={styles.playerDetails}>
+                        <p>Team: {team.name}</p>
+                        <p>Position: {player.position}</p>
+                        <p>Jersey number: #{player.jerseyNumber}</p>
+                    </div>
+                </div>
+            </div>
 
             {isEditing ? (
-                <>
-                    <TextInput
-                        label={"Player name:"}
-                        value={name}
-                        onChange={value => setName(value)}
-                    />
+                <div className={styles.editSection}>
+                    <div className={styles.editForm}>
+                        <TextInput
+                            label={"Player name:"}
+                            value={name}
+                            onChange={value => setName(value)}
+                        />
 
-                    <Select
-                        value={position}
-                        options={Object.values(Position).map((p) => ({value: p, label: p}))}
-                        onChange={value => setPosition(value as Position)}
-                        label={"Position:"}
-                        includeAll={false}
-                    />
+                        <Select
+                            value={position}
+                            options={Object.values(Position).map((p) => ({value: p, label: p}))}
+                            onChange={value => setPosition(value as Position)}
+                            label={"Position:"}
+                            includeAll={false}
+                        />
 
-                    <JerseyNumberInput
-                        label={"Jersey number:"}
-                        value={jerseyNumber}
-                        onChange={value => setJerseyNumber(Number(value))}
-                    />
-                    {jerseyError && <p>This jersey number is already selected.</p>}
+                        <JerseyNumberInput
+                            label={"Jersey number:"}
+                            value={jerseyNumber}
+                            onChange={value => setJerseyNumber(Number(value))}
+                        />
+                        {jerseyError && <p className={styles.error}>{jerseyError}</p>}
+                    </div>
 
-                    <CustomButton
-                        type="positive"
-                        onClick={handleSave}
-                        disabled={!name.trim() || updating}
-                    >
-                        {updating ? 'Saving...' : 'Save Changes'}
-                    </CustomButton>
-                    <CustomButton type="negative" onClick={() => setIsEditing(false)}>
-                        Discard Changes
-                    </CustomButton>
-                </>
+                    <div className={styles.editActions}>
+                        <CustomButton
+                            type="positive"
+                            onClick={handleSave}
+                            disabled={!name.trim() || updating}
+                        >
+                            {updating ? 'Saving...' : 'Save Changes'}
+                        </CustomButton>
+                        <CustomButton type="negative" onClick={() => setIsEditing(false)}>
+                            Discard Changes
+                        </CustomButton>
+                    </div>
+                </div>
             ) : (
                 <CustomButton type="neutral" onClick={() => setIsEditing(true)}>
                     Edit Player
                 </CustomButton>
             )}
 
-            <Select
-                value={selectedSeason}
-                options={Object.values(Season).map((s) => ({value: s, label: s}))}
-                onChange={value => setSelectedSeason(value as Season | "All")}
-                label={"Season:"}
-                allLabel={"All Seasons"}
-                allValue={"All"}
-            />
+            <div className={styles.filterSection}>
+                <Select
+                    value={selectedSeason}
+                    options={Object.values(Season).map((s) => ({value: s, label: s}))}
+                    onChange={value => setSelectedSeason(value as Season | "All")}
+                    label={"Season:"}
+                    allLabel={"All Seasons"}
+                    allValue={"All"}
+                />
 
-            {availableTeams.length > 1 && <Select
-                value={selectedTeamFilter}
-                options={availableTeams.map((t) => ({value: t.id, label: t.name}))}
-                onChange={value => setSelectedTeamFilter(value)}
-                label={"Team:"}
-                allLabel={"All Teams"}
-                allValue={"All"}
-            />}
+                {availableTeams.length > 1 && <Select
+                    value={selectedTeamFilter}
+                    options={availableTeams.map((t) => ({value: t.id, label: t.name}))}
+                    onChange={value => setSelectedTeamFilter(value)}
+                    label={"Team:"}
+                    allLabel={"All Teams"}
+                    allValue={"All"}
+                />}
 
-            {availableChampionships.length > 1 && <Select
-                value={selectedChampionshipFilter}
-                options={availableChampionships.map((c) => ({value: c.id, label: c.name}))}
-                onChange={value => setSelectedChampionshipFilter(value)}
-                label={"Championship:"}
-                allLabel={"All Championships"}
-                allValue={"All"}
-            />}
-
-            <h3>Regular Season Stats</h3>
-            <PlayerStatsTable stats={regularStats}/>
-            <h3>Playoff Stats</h3>
-            <PlayerStatsTable stats={playoffStats}/>
-
-            <h3>Games Played In:</h3>
-
-            <div onClick={() => setShowGames(!showGames)}>
-                <h3>Player Games</h3>
-                <span>{showGames ? '▲' : '▼'}</span>
+                {availableChampionships.length > 1 && <Select
+                    value={selectedChampionshipFilter}
+                    options={availableChampionships.map((c) => ({value: c.id, label: c.name}))}
+                    onChange={value => setSelectedChampionshipFilter(value)}
+                    label={"Championship:"}
+                    allLabel={"All Championships"}
+                    allValue={"All"}
+                />}
             </div>
 
-            {/* Game count indicator */}
-            <p>{filteredGames.length} of {playerGames.length} games available by filter</p>
-            {showGames && (
-                <PreviousGamesPage
-                    key={filteredGames.map(g => g.id).join('-')}
-                    playerGames={filteredGames}
-                    showFilters={false}
-                />
-            )}
+            <div className={styles.statsSection}>
+                <h3>Regular Season Stats</h3>
+                <div className={styles.tableContainer}>
+                    <PlayerStatsTable stats={regularStats}/>
+                </div>
+            </div>
 
-            <CustomButton type="neutral" onClick={transferNavigate}>
-                Transfer
-            </CustomButton>
-            <CustomButton type="negative" onClick={goBackNavigate}>
-                Go Back
-            </CustomButton>
+            <div className={styles.statsSection}>
+                <h3>Playoff Stats</h3>
+                <div className={styles.tableContainer}>
+                    <PlayerStatsTable stats={playoffStats}/>
+                </div>
+            </div>
+
+            <div className={styles.gamesSection}>
+                <div className={styles.gamesHeader} onClick={() => setShowGames(!showGames)}>
+                    <h3>Games Played In</h3>
+                    <span>{showGames ? '▲' : '▼'}</span>
+                </div>
+                <p className={styles.gamesCount}>{filteredGames.length} of {playerGames.length} games available by
+                    filter</p>
+                {showGames && (
+                    <PreviousGamesPage
+                        key={filteredGames.map(g => g.id).join('-')}
+                        playerGames={filteredGames}
+                        showFilters={false}
+                    />
+                )}
+            </div>
+
+            <div className={styles.buttonGroup}>
+                <CustomButton type="neutral" onClick={transferNavigate}>
+                    Transfer
+                </CustomButton>
+                <CustomButton type="negative" onClick={goBackNavigate}>
+                    Go Back
+                </CustomButton>
+            </div>
         </div>
     );
 };

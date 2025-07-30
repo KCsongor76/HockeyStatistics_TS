@@ -1,5 +1,7 @@
 // src/components/TextInput.tsx
 import React from 'react';
+// @ts-ignore
+import styles from "./TextInput.module.css"
 
 interface TextInputProps {
     label: string;
@@ -24,8 +26,8 @@ export const TextInput: React.FC<TextInputProps> = ({
                                                         disabled = false,
                                                         error = ""
                                                     }) => (
-    <div>
-        <label htmlFor={id || 'text-input'}>{label}</label>
+    <div className={styles.container}>
+        <label htmlFor={id || 'text-input'} className={styles.label}>{label}</label>
         <input
             id={id || 'text-input'}
             type={type}
@@ -34,7 +36,8 @@ export const TextInput: React.FC<TextInputProps> = ({
             onChange={(e) => onChange(e.target.value)}
             required={required}
             disabled={disabled}
+            className={styles.input}
         />
-        {error && <span>{error}</span>}
+        {error && <span className={styles.error}>{error}</span>}
     </div>
 );

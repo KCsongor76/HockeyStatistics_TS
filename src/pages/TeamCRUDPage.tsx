@@ -104,38 +104,44 @@ const TeamCrudPage = () => {
     }, [loaderData]);
 
     return (
-        <div>
-            <CustomButton type="positive" onClick={createNavigateHandler}>
-                Create New Team
-            </CustomButton>
+        <div className={styles.container}>
+            <div className={styles.header}>
+                <h1 className={styles.title}>Manage Teams</h1>
+                <CustomButton type="positive" onClick={createNavigateHandler}>
+                    Create New Team
+                </CustomButton>
+            </div>
 
-            <TextInput
-                label={"Search by name"}
-                value={filters.search}
-                onChange={value => setFilters(f => ({...f, search: value}))}
-                placeholder={"Search by name"}
-            />
+            <div className={styles.filters}>
+                <TextInput
+                    label={"Search by name"}
+                    value={filters.search}
+                    onChange={value => setFilters(f => ({...f, search: value}))}
+                    placeholder={"Search by name"}
+                />
 
-            <Select
-                value={filters.season}
-                options={seasons.map(s => ({value: s, label: s}))}
-                onChange={value => setFilters(f => ({...f, season: value}))}
-                label={"Filter by Season"}
-                allLabel={"All Seasons"}
-            />
+                <Select
+                    value={filters.season}
+                    options={seasons.map(s => ({value: s, label: s}))}
+                    onChange={value => setFilters(f => ({...f, season: value}))}
+                    label={"Filter by Season"}
+                    allLabel={"All Seasons"}
+                />
 
-            <Select
-                value={filters.championship}
-                options={championships.map(c => ({value: c.id, label: c.name}))}
-                onChange={value => setFilters(f => ({...f, championship: value}))}
-                label={"Filter by Championship"}
-                allLabel={"All Championships"}
-            />
+                <Select
+                    value={filters.championship}
+                    options={championships.map(c => ({value: c.id, label: c.name}))}
+                    onChange={value => setFilters(f => ({...f, championship: value}))}
+                    label={"Filter by Championship"}
+                    allLabel={"All Championships"}
+                />
+            </div>
 
-
-            {paginatedTeams.length > 0 ? paginatedTeams.map((team) => (
-                <TeamCard key={team.id} team={Team.fromPlain(team)} deleteHandler={deleteHandler}/>
-            )) : <p>No teams.</p>}
+            <div className={styles.teamGrid}>
+                {paginatedTeams.length > 0 ? paginatedTeams.map((team) => (
+                    <TeamCard key={team.id} team={Team.fromPlain(team)} deleteHandler={deleteHandler}/>
+                )) : <p className={styles.noTeams}>No teams found.</p>}
+            </div>
 
             <Pagination pagination={pagination} totalPages={totalPages} setPagination={setPagination}/>
         </div>

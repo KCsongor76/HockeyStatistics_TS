@@ -15,6 +15,8 @@ import {Select} from "../components/CRUD/Select";
 import {ColorPicker} from "../components/ColorPicker";
 import RosterManager from "../components/RosterManager";
 import {CustomButton} from "../components/CustomButton";
+// @ts-ignore
+import styles from "./StartPage.module.css"
 
 class GameSetup {
     championship: Championship | null = null;
@@ -194,7 +196,7 @@ const StartPage = () => {
     };
 
     return (
-        <form onSubmit={handleSubmit}>
+        <div className={styles.container}>
             {showContinueModal && (
                 <ContinueOrStartOverModal
                     onContinue={handleContinue}
@@ -202,192 +204,190 @@ const StartPage = () => {
                 />
             )}
 
-            <Select
-                label={"Season"}
-                value={setup.season}
-                options={seasons.map(season => ({value: season, label: season}))}
-                onChange={(value) => setSetup(new GameSetup({
-                    ...setup,
-                    season: value as Season || ""
-                }))}
-                includeAll={true}
-                allLabel={"Select Season"}
-                id={"season-select"}
-            />
-            {errors.season && <span>{errors.season}</span>}
+            <h1 className={styles.title}>Start New Game</h1>
+            <form onSubmit={handleSubmit} className={styles.formGrid}>
+                <div className={styles.formSection}>
+                    <Select
+                        label={"Season"}
+                        value={setup.season}
+                        options={seasons.map(season => ({value: season, label: season}))}
+                        onChange={(value) => setSetup(new GameSetup({
+                            ...setup,
+                            season: value as Season || ""
+                        }))}
+                        includeAll={true}
+                        allLabel={"Select Season"}
+                        id={"season-select"}
+                    />
+                    {errors.season && <span className={styles.error}>{errors.season}</span>}
 
-            <Select
-                label={"Championship"}
-                value={setup.championship?.id || ""}
-                options={championships.map(c => ({value: c.id, label: c.name}))}
-                onChange={(value) => setSetup(new GameSetup({
-                    ...setup,
-                    championship: championships.find(c => c.id === value) // || null
-                }))}
-                includeAll={true}
-                allLabel={"Select Championship"}
-                id={"championship-select"}
-            />
-            {errors.championship && <span>{errors.championship}</span>}
+                    <Select
+                        label={"Championship"}
+                        value={setup.championship?.id || ""}
+                        options={championships.map(c => ({value: c.id, label: c.name}))}
+                        onChange={(value) => setSetup(new GameSetup({
+                            ...setup,
+                            championship: championships.find(c => c.id === value)
+                        }))}
+                        includeAll={true}
+                        allLabel={"Select Championship"}
+                        id={"championship-select"}
+                    />
+                    {errors.championship && <span className={styles.error}>{errors.championship}</span>}
+                </div>
 
-            <Select
-                label={"Home Team"}
-                value={setup.homeTeam?.id || ''}
-                options={filteredTeams.map(team => ({value: team.id, label: team.name}))}
-                onChange={value => handleTeamChange(value, true)}
-                includeAll={!setup.championship}
-                allLabel={"Select Home Team"}
-                id={"home-team-select"}
-            />
-            {errors.homeTeam && <span>{errors.homeTeam}</span>}
+                <div className={styles.formSection}>
+                    <Select
+                        label={"Home Team"}
+                        value={setup.homeTeam?.id || ''}
+                        options={filteredTeams.map(team => ({value: team.id, label: team.name}))}
+                        onChange={value => handleTeamChange(value, true)}
+                        includeAll={!setup.championship}
+                        allLabel={"Select Home Team"}
+                        id={"home-team-select"}
+                    />
+                    {errors.homeTeam && <span className={styles.error}>{errors.homeTeam}</span>}
 
-            <Select
-                label={"Away Team"}
-                value={setup.awayTeam?.id || ''}
-                options={filteredTeams.map(team => ({value: team.id, label: team.name}))}
-                onChange={value => handleTeamChange(value, false)}
-                includeAll={!setup.championship}
-                allLabel={"Select Away Team"}
-                id={"away-team-select"}
-            />
-            {errors.awayTeam && <span>{errors.awayTeam}</span>}
-            {errors.teams && <span>{errors.teams}</span>}
+                    <Select
+                        label={"Away Team"}
+                        value={setup.awayTeam?.id || ''}
+                        options={filteredTeams.map(team => ({value: team.id, label: team.name}))}
+                        onChange={value => handleTeamChange(value, false)}
+                        includeAll={!setup.championship}
+                        allLabel={"Select Away Team"}
+                        id={"away-team-select"}
+                    />
+                    {errors.awayTeam && <span className={styles.error}>{errors.awayTeam}</span>}
+                    {errors.teams && <span className={styles.error}>{errors.teams}</span>}
 
-            <Select
-                label={"Game Type"}
-                value={setup.gameType}
-                options={Object.values(GameType).map(gameType => ({value: gameType, label: gameType}))}
-                onChange={value => setSetup(new GameSetup({
-                    ...setup,
-                    gameType: value as GameType
-                }))}
-            />
+                    <Select
+                        label={"Game Type"}
+                        value={setup.gameType}
+                        options={Object.values(GameType).map(gameType => ({value: gameType, label: gameType}))}
+                        onChange={value => setSetup(new GameSetup({
+                            ...setup,
+                            gameType: value as GameType
+                        }))}
+                    />
+                </div>
 
-            {/* Team Colors */}
-            <ColorPicker
-                label={"Home Colors"}
-                primaryColor={setup.homeColor.primary}
-                secondaryColor={setup.homeColor.secondary}
-                onPrimaryChange={value => setSetup(new GameSetup({
-                    ...setup,
-                    homeColor: {...setup.homeColor, primary: value}
-                }))}
-                onSecondaryChange={value => setSetup(new GameSetup({
-                    ...setup,
-                    homeColor: {...setup.homeColor, secondary: value}
-                }))}
-            />
-
-            <ColorPicker
-                label={"Away Colors"}
-                primaryColor={setup.awayColor.primary}
-                secondaryColor={setup.awayColor.secondary}
-                onPrimaryChange={value => setSetup(new GameSetup({
-                    ...setup,
-                    awayColor: {...setup.awayColor, primary: value}
-                }))}
-                onSecondaryChange={value => setSetup(new GameSetup({
-                    ...setup,
-                    awayColor: {...setup.awayColor, secondary: value}
-                }))}
-            />
-
-            {/* Roster Management */}
-            <CustomButton type="neutral" onClick={() => setShowRosters(!showRosters)}>
-                {showRosters ? 'Hide Rosters' : 'Show Rosters'}
-            </CustomButton>
-
-            {showRosters && (
-                <>
-                    {/* Home Roster Selection */}
-                    <div>
-                        <h3>Home Roster</h3>
-                        <h4>Available Players</h4>
-                        {setup.homeRosterOut.map(player => (
-                            <RosterManager
-                                key={player.id}
-                                player={player}
-                                isHome={true}
-                                rosterHandler={addPlayerToRoster}
-                            />
-                        ))}
-                        <h4>Selected Players</h4>
-                        {setup.homeRoster.map(player => (
-                            <RosterManager
-                                key={player.id}
-                                player={player}
-                                isHome={true}
-                                rosterHandler={removePlayerFromRoster}
-                            />
-                        ))}
-                    </div>
-
-                    {/* Away Roster Selection */}
-                    <div>
-                        <h3>Away Roster</h3>
-                        <h4>Available Players</h4>
-                        {setup.awayRosterOut.map(player => (
-                            <RosterManager
-                                key={player.id}
-                                player={player}
-                                isHome={false}
-                                rosterHandler={addPlayerToRoster}
-                            />
-                        ))}
-                        <h4>Selected Players</h4>
-                        {setup.awayRoster.map(player => (
-                            <RosterManager
-                                key={player.id}
-                                player={player}
-                                isHome={false}
-                                rosterHandler={removePlayerFromRoster}
-                            />
-                        ))}
-                    </div>
-                </>
-            )}
-
-            {/* Rink Image Selection */}
-            <div>
-                <label>Rink Image</label>
-                <div>
-                    <label>
-                        <input
-                            type="radio"
-                            checked={setup.selectedImage === rinkImages.rinkUp}
-                            onChange={() => setSetup(new GameSetup({
+                <div className={styles.formSection}>
+                    <div className={styles.teamColors}>
+                        <ColorPicker
+                            label={"Home Colors"}
+                            primaryColor={setup.homeColor.primary}
+                            secondaryColor={setup.homeColor.secondary}
+                            onPrimaryChange={value => setSetup(new GameSetup({
                                 ...setup,
-                                selectedImage: rinkImages.rinkUp
+                                homeColor: {...setup.homeColor, primary: value}
+                            }))}
+                            onSecondaryChange={value => setSetup(new GameSetup({
+                                ...setup,
+                                homeColor: {...setup.homeColor, secondary: value}
                             }))}
                         />
-                        <span>Up</span>
-                        <img src={rinkImages.rinkUp} alt="Up" style={{maxWidth: '100px'}}/>
-                    </label>
-                </div>
-                <div>
-                    <label>
-                        <input
-                            type="radio"
-                            checked={setup.selectedImage === rinkImages.rinkDown}
-                            onChange={() => setSetup(new GameSetup({
+
+                        <ColorPicker
+                            label={"Away Colors"}
+                            primaryColor={setup.awayColor.primary}
+                            secondaryColor={setup.awayColor.secondary}
+                            onPrimaryChange={value => setSetup(new GameSetup({
                                 ...setup,
-                                selectedImage: rinkImages.rinkDown
+                                awayColor: {...setup.awayColor, primary: value}
+                            }))}
+                            onSecondaryChange={value => setSetup(new GameSetup({
+                                ...setup,
+                                awayColor: {...setup.awayColor, secondary: value}
                             }))}
                         />
-                        <span>Down</span>
-                        <img src={rinkImages.rinkDown} alt="Down" style={{maxWidth: '100px'}}/>
-                    </label>
+                    </div>
                 </div>
-                {errors.image && <span>{errors.image}</span>}
-            </div>
 
-            <CustomButton type="positive" buttonType="submit">
-                Start Game
-            </CustomButton>
-            <CustomButton type="negative" onClick={() => navigate('/')}>
-                Go Back
-            </CustomButton>
-        </form>
+                <div className={styles.formSection}>
+                    <CustomButton type="neutral" onClick={() => setShowRosters(!showRosters)}>
+                        {showRosters ? 'Hide Rosters' : 'Show Rosters'}
+                    </CustomButton>
+
+                    {showRosters && (
+                        <div className={styles.rosterGroup}>
+                            <div className={styles.rosterSection}>
+                                <h3>Home Roster</h3>
+                                <h4>Available Players</h4>
+                                {setup.homeRosterOut.map(player => (
+                                    <RosterManager
+                                        key={player.id}
+                                        player={player}
+                                        isHome={true}
+                                        rosterHandler={addPlayerToRoster}
+                                    />
+                                ))}
+                                <h4>Selected Players</h4>
+                                {setup.homeRoster.map(player => (
+                                    <RosterManager
+                                        key={player.id}
+                                        player={player}
+                                        isHome={true}
+                                        rosterHandler={removePlayerFromRoster}
+                                    />
+                                ))}
+                            </div>
+
+                            <div className={styles.rosterSection}>
+                                <h3>Away Roster</h3>
+                                <h4>Available Players</h4>
+                                {setup.awayRosterOut.map(player => (
+                                    <RosterManager
+                                        key={player.id}
+                                        player={player}
+                                        isHome={false}
+                                        rosterHandler={addPlayerToRoster}
+                                    />
+                                ))}
+                                <h4>Selected Players</h4>
+                                {setup.awayRoster.map(player => (
+                                    <RosterManager
+                                        key={player.id}
+                                        player={player}
+                                        isHome={false}
+                                        rosterHandler={removePlayerFromRoster}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <div className={styles.formSection}>
+                    <label>Rink Image</label>
+                    <div className={styles.rinkImages}>
+                        <div className={styles.rinkOption} onClick={() => setSetup(new GameSetup({
+                            ...setup,
+                            selectedImage: rinkImages.rinkUp
+                        }))}>
+                            <span>Up</span>
+                            <img src={rinkImages.rinkUp} alt="Up"/>
+                        </div>
+                        <div className={styles.rinkOption} onClick={() => setSetup(new GameSetup({
+                            ...setup,
+                            selectedImage: rinkImages.rinkDown
+                        }))}>
+                            <span>Down</span>
+                            <img src={rinkImages.rinkDown} alt="Down"/>
+                        </div>
+                    </div>
+                    {errors.image && <span className={styles.error}>{errors.image}</span>}
+                </div>
+
+                <div className={styles.buttonGroup}>
+                    <CustomButton type="positive" buttonType="submit">
+                        Start Game
+                    </CustomButton>
+                    <CustomButton type="negative" onClick={() => navigate('/')}>
+                        Go Back
+                    </CustomButton>
+                </div>
+            </form>
+        </div>
     );
 };
 

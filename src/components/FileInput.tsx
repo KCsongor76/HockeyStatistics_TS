@@ -1,5 +1,7 @@
 // src/components/FileInput.tsx
 import React from 'react';
+// @ts-ignore
+import styles from "./FileInput.module.css"
 
 interface FileInputProps {
     label: string;
@@ -25,15 +27,16 @@ export const FileInput: React.FC<FileInputProps> = ({
     };
 
     return (
-        <div>
-            <label>{label}</label>
+        <div className={styles.container}>
+            <label className={styles.label}>{label}</label>
             <input
                 type="file"
                 accept={accept}
                 onChange={handleChange}
                 required={required}
+                className={styles.input}
             />
-            {error && <span>{error}</span>}
+            {error && <span className={styles.error}>{error}</span>}
         </div>
     );
 };

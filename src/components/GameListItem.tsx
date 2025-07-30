@@ -1,7 +1,7 @@
 import React from 'react';
 import {useNavigate} from "react-router-dom";
 // @ts-ignore
-import styles from '../pages/PreviousGamesPage.module.css';
+import styles from './GameListItem.module.css';
 import {Game} from "../OOP/classes/Game";
 import {Season} from "../OOP/enums/Season";
 
@@ -22,38 +22,39 @@ const GameListItem: React.FC<GameListItemProps> = ({game}) => {
     };
 
     return (
-        <li
-            key={game.id}
-            onClick={() => navigate(`/previous_games/${game.id}`, {state: game})}
-        >
-            <div>
-                <div>
+        <li className={styles.card} onClick={() => navigate(`/previous_games/${game.id}`, {state: game})}>
+            <div className={styles.header}>
+                <div className={styles.team}>
                     <img
                         src={game.homeTeam.logo}
                         alt={game.homeTeam.name}
+                        className={styles.teamLogo}
                     />
-                    <span>{game.homeTeam.name}</span>
+                    <span className={styles.teamName}>{game.homeTeam.name}</span>
                 </div>
 
-                <div>
+                <div className={styles.score}>
                     {game.homeScore} - {game.awayScore}
                 </div>
 
-                <div>
+                <div className={styles.team}>
                     <img
                         src={game.awayTeam.logo}
                         alt={game.awayTeam.name}
+                        className={styles.teamLogo}
                     />
-                    <span>{game.awayTeam.name}</span>
+                    <span className={styles.teamName}>{game.awayTeam.name}</span>
                 </div>
+            </div>
 
-                <div>
-                    {formatTime(game.timestamp)}
-                </div>
+            <div className={styles.date}>
+                {formatTime(game.timestamp)}
+            </div>
 
-                <p>Type: {game.type}</p>
-                <p>Season: {game.season || "Not specified"}</p>
-                <p>Championship: {game.championship.name}</p>
+            <div className={styles.details}>
+                <span className={styles.detailItem}>Type: {game.type}</span>
+                <span className={styles.detailItem}>Season: {game.season || "Not specified"}</span>
+                <span className={styles.detailItem}>Championship: {game.championship.name}</span>
             </div>
         </li>
     );

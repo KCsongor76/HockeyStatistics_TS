@@ -1,5 +1,7 @@
 // src/components/JerseyNumberInput.tsx
 import React from 'react';
+// @ts-ignore
+import styles from "./JerseyNumberInput.module.css"
 
 interface JerseyNumberInputProps {
     label: string;
@@ -18,8 +20,8 @@ export const JerseyNumberInput: React.FC<JerseyNumberInputProps> = ({
                                                                         error,
                                                                         placeholder = ""
                                                                     }) => (
-    <div>
-        <label>{label}</label>
+    <div className={styles.container}>
+        <label className={styles.label}>{label}</label>
         <input
             type="number"
             min={1}
@@ -28,7 +30,8 @@ export const JerseyNumberInput: React.FC<JerseyNumberInputProps> = ({
             onChange={(e) => onChange(e.target.value)}
             disabled={disabled}
             placeholder={placeholder}
+            className={styles.input}
         />
-        {error && <span className="error">{error}</span>}
+        {error && <span className={styles.error}>{error}</span>}
     </div>
 );

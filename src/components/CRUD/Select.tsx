@@ -1,5 +1,7 @@
 // src/components/Select.tsx
 import React from 'react';
+// @ts-ignore
+import styles from "./Select.module.css"
 
 interface SelectOption {
     value: string;
@@ -29,13 +31,14 @@ export const Select: React.FC<SelectProps> = ({
                                                   id,
                                                   disabled = false
                                               }) => (
-    <div>
-        {label.length > 0 && <label htmlFor={id || 'select'}>{label}</label>}
+    <div className={styles.container}>
+        {label && <label htmlFor={id || 'select'} className={styles.label}>{label}</label>}
         <select
             id={id || 'select'}
             value={value}
             onChange={(e) => onChange(e.target.value)}
             disabled={disabled}
+            className={styles.select}
         >
             {includeAll && <option value={allValue}>{allLabel}</option>}
             {options.map(option => (

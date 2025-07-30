@@ -134,62 +134,73 @@ const CreateTeamPage = () => {
     };
 
     return (
-        <form onSubmit={submitHandler}>
-            <TextInput
-                label="Team name:"
-                value={teamData.name}
-                onChange={handleChange}
-                required
-                error={errors.name}
-            />
+        <div className={styles.container}>
+            <h1 className={styles.title}>Create Team</h1>
+            <form onSubmit={submitHandler} className={styles.form}>
+                <TextInput
+                    label="Team name:"
+                    value={teamData.name}
+                    onChange={handleChange}
+                    required
+                    error={errors.name}
+                />
 
-            <FileInput
-                label="Team logo:"
-                onChange={handleLogoChange}
-                required
-                error={errors.logo}
-            />
+                <FileInput
+                    label="Team logo:"
+                    onChange={handleLogoChange}
+                    required
+                    error={errors.logo}
+                />
 
-            <ColorPicker
-                label={"Home colors"}
-                primaryColor={teamData.homeColor.primary}
-                secondaryColor={teamData.homeColor.secondary}
-                onPrimaryChange={value => handleColorChange('homeColor', 'primary', value)}
-                onSecondaryChange={value => handleColorChange('homeColor', 'secondary', value)}
-            />
+                <div className={styles.colorGroup}>
+                    <ColorPicker
+                        label={"Home colors"}
+                        primaryColor={teamData.homeColor.primary}
+                        secondaryColor={teamData.homeColor.secondary}
+                        onPrimaryChange={value => handleColorChange('homeColor', 'primary', value)}
+                        onSecondaryChange={value => handleColorChange('homeColor', 'secondary', value)}
+                    />
+                </div>
 
-            <ColorPicker
-                label={"Away colors"}
-                primaryColor={teamData.awayColor.primary}
-                secondaryColor={teamData.awayColor.secondary}
-                onPrimaryChange={value => handleColorChange('awayColor', 'primary', value)}
-                onSecondaryChange={value => handleColorChange('awayColor', 'secondary', value)}
-            />
+                <div className={styles.colorGroup}>
+                    <ColorPicker
+                        label={"Away colors"}
+                        primaryColor={teamData.awayColor.primary}
+                        secondaryColor={teamData.awayColor.secondary}
+                        onPrimaryChange={value => handleColorChange('awayColor', 'primary', value)}
+                        onSecondaryChange={value => handleColorChange('awayColor', 'secondary', value)}
+                    />
+                </div>
 
-            <div>
-                <label>Championship:</label>
-                {championships.map(ch => (
-                    <div key={ch.id}>
-                        <input
-                            type="checkbox"
-                            checked={teamData.championships.includes(ch)}
-                            onChange={() => toggleChampionship(ch)}
-                        />
-                        <span>{ch.name}</span>
+                <div className={styles.formGroup}>
+                    <label>Championships:</label>
+                    <div className={styles.championshipList}>
+                        {championships.map(ch => (
+                            <div key={ch.id} className={styles.championshipItem}>
+                                <input
+                                    type="checkbox"
+                                    checked={teamData.championships.includes(ch)}
+                                    onChange={() => toggleChampionship(ch)}
+                                />
+                                <span>{ch.name}</span>
+                            </div>
+                        ))}
                     </div>
-                ))}
-                {errors.championships && <span>{errors.championships}</span>}
-            </div>
+                    {errors.championships && <span className={styles.error}>{errors.championships}</span>}
+                </div>
 
-            {errors.general && <span>{errors.general}</span>}
+                {errors.general && <span className={styles.generalError}>{errors.general}</span>}
 
-            <CustomButton type="positive" buttonType="submit">
-                Create team
-            </CustomButton>
-            <CustomButton type="negative" onClick={navigateHandler}>
-                Go back
-            </CustomButton>
-        </form>
+                <div className={styles.buttonGroup}>
+                    <CustomButton type="positive" buttonType="submit">
+                        Create team
+                    </CustomButton>
+                    <CustomButton type="negative" onClick={navigateHandler}>
+                        Go back
+                    </CustomButton>
+                </div>
+            </form>
+        </div>
     );
 };
 

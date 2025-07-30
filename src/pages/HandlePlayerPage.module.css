@@ -1,118 +1,123 @@
 /* HandlePlayerPage.module.css */
-
 .container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    background-color: #f9f9f9;
-    max-width: 600px;
-    margin: 20px auto;
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 10px;
+    box-shadow: var(--card-shadow);
 }
 
 .header {
-    font-size: 2rem;
-    margin-bottom: 10px;
-    color: #333;
-}
-
-.teamName {
-    font-size: 1.2rem;
-    color: #555;
-    margin-bottom: 10px;
-}
-
-.position,
-.jerseyNumber {
-    font-size: 1rem;
-    color: #777;
-    margin-bottom: 5px;
-}
-
-.button {
-    margin-top: 20px;
-    padding: 10px 20px;
-    font-size: 1rem;
-    color: white;
-    background-color: #007bff;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.button:hover {
-    background-color: #0056b3;
-}
-
-.loading,
-.error {
-    font-size: 1.2rem;
-    color: #ff0000;
-    text-align: center;
-    margin-top: 20px;
-}
-
-.subHeader {
-    margin-top: 2rem;
-    color: #333;
-    border-bottom: 2px solid #666;
-    padding-bottom: 0.5rem;
-}
-
-.statsSection {
-    margin: 2rem 0;
-}
-
-.subHeader {
-    color: #2c3e50;
-    margin-bottom: 1rem;
-    font-size: 1.25rem;
-    border-bottom: 2px solid #e2e8f0;
-    padding-bottom: 0.5rem;
-}
-
-.tableContainer {
-    margin: 1rem 0;
-    overflow-x: auto;
-}
-
-.tableContainer table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.tableContainer th,
-.tableContainer td {
-    padding: 0.75rem;
-    text-align: center;
-    border: 1px solid #ddd;
-}
-
-.tableContainer th {
-    background-color: #f8f9fa;
-    font-weight: 600;
-}
-
-.tableContainer tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
-.gamesDropdown {
-    margin-top: 2rem;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.dropdownHeader {
-    padding: 1rem;
-    background-color: #f7fafc;
-    cursor: pointer;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.playerInfo {
+    flex: 1;
+}
+
+.playerName {
+    font-size: 2rem;
+    color: var(--primary-dark);
+}
+
+.playerDetails {
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 0.5rem;
+    color: var(--text-light);
+}
+
+.editSection {
+    padding: 1.5rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+}
+
+.editForm {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.editActions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.filterSection {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+    background-color: #f0f4f8;
+    padding: 1.5rem;
+    border-radius: 8px;
+}
+
+.statsSection {
+    margin-bottom: 2rem;
+}
+
+.statsHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.gamesSection {
+    margin-top: 2rem;
+}
+
+.gamesHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    padding: 1rem;
+    background-color: #f0f4f8;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.gamesHeader:hover {
+    background-color: #e2e8f0;
+}
+
+.gamesCount {
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+.buttonGroup {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 1.5rem;
+        margin: 1rem;
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .playerDetails {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
 }

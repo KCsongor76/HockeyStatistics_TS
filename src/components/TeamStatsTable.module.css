@@ -1,0 +1,44 @@
+/* TeamStatsTable.module.css */
+.tableContainer {
+    overflow-x: auto;
+    margin-bottom: 2rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    box-shadow: var(--card-shadow);
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+}
+
+.table th {
+    background-color: var(--primary);
+    color: white;
+    font-weight: 600;
+    text-align: left;
+    padding: 0.75rem 1rem;
+}
+
+.table td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background-color: white;
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+.table tr:hover td {
+    background-color: #f9f9f9;
+}
+
+@media (max-width: 768px) {
+    .tableContainer {
+        border-radius: 0;
+        border-left: none;
+        border-right: none;
+    }
+}

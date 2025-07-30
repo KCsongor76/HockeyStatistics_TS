@@ -1,0 +1,51 @@
+/* index.css */
+:root {
+    --primary: #3a6ea5;
+    --primary-dark: #2a4e7a;
+    --secondary: #45b08c;
+    --accent: #ff6b6b;
+    --background: #f5f7fa;
+    --text: #333;
+    --text-light: #666;
+    --border: #ddd;
+    --error: #e74c3c;
+    --success: #2ecc71;
+    --warning: #f39c12;
+    --card-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    --transition: all 0.3s ease;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--background);
+    color: var(--text);
+    line-height: 1.6;
+}
+
+h1, h2, h3, h4 {
+    margin-bottom: 1rem;
+    color: var(--primary-dark);
+}
+
+p {
+    margin-bottom: 1rem;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 768px) {
+    .container {
+        padding: 0 0.5rem;
+    }
+}
