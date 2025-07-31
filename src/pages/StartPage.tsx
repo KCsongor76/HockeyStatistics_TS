@@ -258,6 +258,8 @@ const StartPage = () => {
                         id={"away-team-select"}
                     />
                     {errors.awayTeam && <span className={styles.error}>{errors.awayTeam}</span>}
+
+                    {errors.teams && <br></br>}
                     {errors.teams && <span className={styles.error}>{errors.teams}</span>}
 
                     <Select
@@ -360,17 +362,23 @@ const StartPage = () => {
                 <div className={styles.formSection}>
                     <label>Rink Image</label>
                     <div className={styles.rinkImages}>
-                        <div className={styles.rinkOption} onClick={() => setSetup(new GameSetup({
-                            ...setup,
-                            selectedImage: rinkImages.rinkUp
-                        }))}>
+                        <div
+                            className={`${styles.rinkOption} ${setup.selectedImage === rinkImages.rinkUp ? styles.selected : ''}`}
+                            onClick={() => setSetup(new GameSetup({
+                                ...setup,
+                                selectedImage: rinkImages.rinkUp
+                            }))}
+                        >
                             <span>Up</span>
                             <img src={rinkImages.rinkUp} alt="Up"/>
                         </div>
-                        <div className={styles.rinkOption} onClick={() => setSetup(new GameSetup({
-                            ...setup,
-                            selectedImage: rinkImages.rinkDown
-                        }))}>
+                        <div
+                            className={`${styles.rinkOption} ${setup.selectedImage === rinkImages.rinkDown ? styles.selected : ''}`}
+                            onClick={() => setSetup(new GameSetup({
+                                ...setup,
+                                selectedImage: rinkImages.rinkDown
+                            }))}
+                        >
                             <span>Down</span>
                             <img src={rinkImages.rinkDown} alt="Down"/>
                         </div>
