@@ -64,7 +64,7 @@ function App() {
             children: [
                 {index: true, element: <HomePage isSignedIn={isSignedIn}/>},
                 {path: "start", element: <StartPage/>,},
-                {path: "game", element: <GamePage2/>},
+                {path: "game", element: <GamePage/>},
                 {path: "previous_games", element: <PreviousGamesPage/>},
                 {path: "previous_games/:gameId", element: <PreviousGameDetailPage/>},
                 {

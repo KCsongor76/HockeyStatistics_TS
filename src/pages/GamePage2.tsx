@@ -7,7 +7,6 @@ import AssistSelectorModal from "../modals/AssistSelectorModal";
 import IconDataModal from "../modals/IconDataModal";
 import {IChampionship} from "../OOP/interfaces/IChampionship";
 import {IGameAction} from "../OOP/interfaces/IGameAction";
-import {ITeamColor} from "../OOP/interfaces/ITeamColor";
 import {IPlayer} from "../OOP/interfaces/IPlayer";
 import {ITeam} from "../OOP/interfaces/ITeam";
 import {IGame} from "../OOP/interfaces/IGame";
@@ -25,31 +24,12 @@ import {ActionType} from "../OOP/enums/ActionType";
 import {GameType} from "../OOP/enums/GameType";
 import {GameService} from "../OOP/services/GameService";
 
-// todo: on page reload, we should set the unfinishedgame local storage
-// todo: if we save an unfinished game, make sure the timer is stopped,
-//  even if when we exit and save, it's still running, on re-continuing, it should be stopped.
-// todo: somewhere we should show the season.
-// todo: fix the Start Time button (and their group's) logic: next period shouldn't be accessible,
-//  if game is finished (eg. 3rd period end), and the score is uneven
+// todo: if a user presses the page reload button, make sure to save the latest data, because as of now, every new data is lost on page reloads
+//  (probably can't be done in the "declarative react" way, but only in the "imperative javascript" way)
 
+// todo: regular game type, 3rd period, 1-0 score, time runs out, Stop Time button still turns into
+//  Next Period button, but this button shouldn't appear in this case. (at least if I click on it, it disappears, and nothing else happens)
 
-type FormData = {
-    championship: IChampionship;
-    homeTeam: ITeam;
-    awayTeam: ITeam;
-    homeRoster: IPlayer[];
-    homeRosterOut: IPlayer[];
-    awayRosterOut: IPlayer[];
-    awayRoster: IPlayer[];
-    gameType: GameType;
-    homeColor: ITeamColor;
-    awayColor: ITeamColor;
-    imageOption: {
-        rinkUp: string;
-        rinkDown: string;
-    };
-    selectedImage: string;
-};
 
 interface ITeamRoster extends ITeam {
     roster: IPlayer[];
@@ -57,7 +37,7 @@ interface ITeamRoster extends ITeam {
 
 const GamePage = () => {
     const location = useLocation();
-    const { setup, savedGameState } = location.state || {};
+    const {setup, savedGameState} = location.state || {};
 
     const [selectedPosition, setSelectedPosition] = useState<{ x: number, y: number } | null>(null);
     const [selectedAction, setSelectedAction] = useState<{ type: ActionType, team: ITeamRoster } | null>(null);
@@ -65,7 +45,7 @@ const GamePage = () => {
     const [gameState, setGameState] = useState(new GameState({
         period: savedGameState?.period || 1,
         time: savedGameState?.time || 5,
-        isTimerRunning: savedGameState?.isTimerRunning || false,
+        isTimerRunning: false, // Force timer to be stopped on load
         homeScore: savedGameState?.homeScore || {goals: 0, shots: 0, turnovers: 0},
         awayScore: savedGameState?.awayScore || {goals: 0, shots: 0, turnovers: 0},
         actions: savedGameState?.actions || [],
@@ -106,7 +86,7 @@ const GamePage = () => {
         score: {home: gameState.homeScore, away: gameState.awayScore},
         selectedImage: formData?.selectedImage || "",
         season: formData?.season || "",
-        championship: formData?.championship || { id: "", name: "" }
+        championship: formData?.championship || {id: "", name: ""}
     };
 
     const isPlayoff = gameData.type === GameType.PLAYOFF;
@@ -117,8 +97,8 @@ const GamePage = () => {
     const calculateActionTimeSeconds = (action: IGameAction) =>
         GameAction.calculateActionTimeSeconds(action, gameData.type);
 
-    const initialActionTimes = gameData.actions.map(a => calculateActionTimeSeconds(a));
-    const initialMaxTime = initialActionTimes.length > 0 ? Math.max(...initialActionTimes) : defaultMaxTime;
+    // const initialActionTimes = gameData.actions.map(a => calculateActionTimeSeconds(a));
+    // const initialMaxTime = initialActionTimes.length > 0 ? Math.max(...initialActionTimes) : defaultMaxTime;
 
     const availablePeriods = Array.from(new Set(gameData.actions.map(action => action.period)));
     const availableActionTypes = Array.from(new Set(gameData.actions.map(action => action.type)));
@@ -255,7 +235,7 @@ const GamePage = () => {
         const game = new Game(
             "",
             new Date().toISOString(),
-            gameData.season, // todo check?
+            gameData.season,
             Championship.fromPlain(championship),
             gameState.actions,
             teams,
@@ -282,6 +262,16 @@ const GamePage = () => {
     const handleNextPeriod = () => {
         const newGameState = new GameState({...gameState});
         const isTied = newGameState.homeScore.goals === newGameState.awayScore.goals;
+
+        const isFinalPeriod = formData.gameType === GameType.REGULAR
+            ? newGameState.period >= RegularPeriod.THIRD && !isTied
+            : newGameState.period >= PlayoffPeriod.THIRD && !isTied;
+
+        if (isFinalPeriod) {
+            newGameState.isGameOver = true;
+            setGameState(newGameState);
+            return;
+        }
 
         if (formData.gameType === GameType.REGULAR) {
             if (newGameState.period === RegularPeriod.THIRD && isTied) {
@@ -367,7 +357,16 @@ const GamePage = () => {
         roster,
         gameData.actions,
         selectedTeamView === 'all' ? '' : selectedTeamView === 'home' ? gameData.teams.home.id : gameData.teams.away.id
-    );
+    ).map(player => {
+        const assists = gameData.actions.filter(a =>
+            a.assists?.some(assist => assist.id === player.id)
+        ).length;
+        return {
+            ...player,
+            assists,
+            points: player.goals + assists
+        };
+    });
 
     const sortedPlayers = [...playerStats].sort((a, b) => {
         let compareValue = 0;
@@ -534,6 +533,7 @@ const GamePage = () => {
                         </div>
 
                         <div className={styles.gameControls}>
+                            <p className={styles.seasonDisplay}>{gameData.season}</p>
                             <p className={styles.periodDisplay}>Period: {gameState.periodLabel}</p>
                             <p className={styles.timeDisplay}>{gameState.periodLabel === "SO" ? "0:00" : GameUtils.formatTime(gameState.time)}</p>
                             <p className={styles.scoreDisplay}>{gameState.homeScore.goals} - {gameState.awayScore.goals}</p>
@@ -701,8 +701,8 @@ const GamePage = () => {
                                         <Icon
                                             type={action.type}
                                             teamType={action.team.id === gameData.teams.home.id ? 'HOME' : 'AWAY'}
-                                            teamColors={action.team.id === gameData.teams.home.id ? gameData.teams.home.homeColor : gameData.teams.away.homeColor}
-                                            // teamColors={action.team.id === formData.homeTeam.id ? formData.homeColor : formData.awayColor /* oop - .equals method*/}
+                                            // teamColors={action.team.id === gameData.teams.home.id ? gameData.teams.home.homeColor : gameData.teams.away.homeColor}
+                                            teamColors={action.team.id === formData.homeTeam.id ? formData.homeColor : formData.awayColor /* oop - .equals method*/}
                                             size={iconSize}
                                             onClick={(e: React.MouseEvent<Element, MouseEvent>) => handleIconClick(action, e)}
                                         />
@@ -712,6 +712,7 @@ const GamePage = () => {
                         </div>
 
                         <div className={styles.filterGroup}>
+                            <br/>
                             <h3 className={styles.filterTitle}>Player Statistics</h3>
 
                             {positionGroups.map((group) => (
@@ -722,7 +723,7 @@ const GamePage = () => {
                                             <table className={styles.statsTable}>
                                                 <thead>
                                                 <tr>
-                                                    {['name', 'jerseyNumber', 'position', 'goals', 'shots', 'turnovers'].map((col) => (
+                                                    {['name', 'jerseyNumber', 'goals', 'assists', 'points', 'shots', 'turnovers'].map((col) => (
                                                         <th key={col} onClick={() => handleSort(col as keyof IPlayer)}>
                                                             {col === 'jerseyNumber' ? 'Number' :
                                                                 col === 'name' ? 'Name' :
@@ -751,8 +752,9 @@ const GamePage = () => {
                                                     >
                                                         <td>{player.name}</td>
                                                         <td>{player.jerseyNumber}</td>
-                                                        <td>{player.position}</td>
                                                         <td>{player.goals}</td>
+                                                        <td>{player.assists}</td>
+                                                        <td>{player.points}</td>
                                                         <td>{player.shots}</td>
                                                         <td>{player.turnovers}</td>
                                                     </tr>

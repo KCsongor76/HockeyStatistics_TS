@@ -44,6 +44,7 @@ export class Player {
         await TeamService.transferPlayer(oldTeamId, newTeam.id, this as unknown as IPlayer);
     }
 
+    // In Player.ts
     static getPlayerStats(players: IPlayer[], actions: IGameAction[], teamId?: string) {
         return players.map(player => {
             const playerActions = actions.filter(a =>
@@ -51,11 +52,18 @@ export class Player {
                 (!teamId || a.team.id === teamId)
             );
 
+            const assists = actions.filter(a =>
+                a.assists?.some(assist => assist.id === player.id) &&
+                (!teamId || a.team.id === teamId)
+            ).length;
+
             return {
                 ...player,
                 goals: playerActions.filter(a => a.type === ActionType.GOAL).length,
                 shots: playerActions.filter(a => [ActionType.SHOT, ActionType.GOAL].includes(a.type)).length,
-                turnovers: playerActions.filter(a => a.type === ActionType.TURNOVER).length
+                turnovers: playerActions.filter(a => a.type === ActionType.TURNOVER).length,
+                assists,
+                points: playerActions.filter(a => a.type === ActionType.GOAL).length + assists
             };
         });
     }

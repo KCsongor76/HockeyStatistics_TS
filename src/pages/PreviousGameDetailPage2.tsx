@@ -10,11 +10,15 @@ import IconDataModal from "../modals/IconDataModal";
 import {GameService} from "../OOP/services/GameService";
 import {IPlayer} from "../OOP/interfaces/IPlayer";
 import {GameType} from "../OOP/enums/GameType";
-import {CustomButton} from "../components/CustomButton";
-import GameStatsStatic from "../components/GameStatsStatic";
-import GameFilters from "../components/GameFilters";
+import TeamStats from '../components/TeamStats';
+import ScoreDisplay from '../components/ScoreDisplay';
+import TeamViewFilter from '../components/TeamViewFilter';
+import PeriodFilter from '../components/PeriodFilter';
+import ActionTypeFilter from '../components/ActionTypeFilter';
+import GameVisualization from '../components/GameVisualization';
+import PlayerTable from '../components/PlayerTable';
 
-const PreviousGameDetailPage = () => {
+const PreviousGameDetailPage2 = () => {
     const location = useLocation();
     const gameData = location.state as IGame;
     const navigate = useNavigate();
@@ -253,23 +257,27 @@ const PreviousGameDetailPage = () => {
         ).length
     };
 
-    const getPeriodLabel = (period: number) => {
-        if (gameData.type === GameType.REGULAR) {
-            switch (period) {
-                case RegularPeriod.FIRST:
-                case RegularPeriod.SECOND:
-                case RegularPeriod.THIRD:
-                    return `Period ${period}`;
-                case RegularPeriod.OT:
-                    return 'OT';
-                case RegularPeriod.SO:
-                    return 'SO';
-                default:
-                    return `Period ${period}`;
-            }
-        }
-        return period <= 3 ? `Period ${period}` : `OT${period - 3}`;
-    };
+    const TableHeader = () => (
+        <thead>
+        <tr>
+            {['name', 'jerseyNumber', 'position', 'goals', 'shots', 'turnovers'].map((col) => (
+                <th
+                    key={col}
+                    onClick={() => handleSort(col as keyof IPlayer)}
+                >
+                    {col === 'jerseyNumber' ? 'Number' :
+                        col === 'name' ? 'Name' :
+                            col[0].toUpperCase() + col.slice(1)}
+                    {sortBy === col && (
+                        <span className={styles.sortIndicator}>
+                                {sortOrder === 'asc' ? '↑' : '↓'}
+                            </span>
+                    )}
+                </th>
+            ))}
+        </tr>
+        </thead>
+    );
 
     useEffect(() => {
         updateIconSize();
@@ -294,7 +302,7 @@ const PreviousGameDetailPage = () => {
     }, [gameData.actions, defaultMaxTime]);
 
     return (
-        <div>
+        <div className={styles.container}>
             {selectedActionDetails && (
                 <IconDataModal
                     action={selectedActionDetails}
@@ -304,104 +312,56 @@ const PreviousGameDetailPage = () => {
             )}
 
             <h1>Full game stats</h1>
-            <GameStatsStatic
-                homeTeam={gameData.teams.home}
-                awayTeam={gameData.teams.away}
-                homeStats={gameData.score.home}
-                awayStats={gameData.score.away}
-            />
-
-            <h1>Active filtered stats</h1>
-            <GameStatsStatic
-                homeTeam={gameData.teams.home}
-                awayTeam={gameData.teams.away}
-                homeStats={homeStats}
-                awayStats={awayStats}
-            />
-
-            <GameFilters
-                gameData={gameData}
-                availablePeriods={availablePeriods}
-                availableActionTypes={availableActionTypes}
-                isTimeFilterActive={isTimeFilterActive}
-                setSelectedTeamView={setSelectedTeamView}
-                togglePeriod={togglePeriod}
-                toggleActionType={toggleActionType}
-            />
-
-            <div>
-                <img
-                    ref={fieldImageRef}
-                    src={gameData.selectedImage}
-                    alt="gamePage"
-                />
-                {filteredActions.map((action, index) =>
-                    <div key={index} onClick={() => handleIconClick(action)}>{action.type[0]}</div>
-                )}
+            <div className={styles.statsContainer}>
+                <TeamStats team={gameData.teams.home} stats={gameData.score.home}/>
+                <ScoreDisplay homeScore={gameData.score.home.goals} awayScore={gameData.score.away.goals}/>
+                <TeamStats team={gameData.teams.away} stats={gameData.score.away}/>
             </div>
 
-            <div>
-                <div>
-                    <h3>Player Statistics</h3>
-                    {positionGroups.map((group) => (
-                        group.players.length > 0 && (
-                            <div key={group.title}>
-                                <h4>{group.title}</h4>
-                                <div>
-                                    <table>
-                                        <thead>
-                                        <tr>
-                                            {['name', 'jerseyNumber', 'position', 'goals', 'shots', 'turnovers'].map((col) => (
-                                                <th
-                                                    key={col}
-                                                    onClick={() => handleSort(col as keyof IPlayer)}
-                                                >
-                                                    {col === 'jerseyNumber' ? 'Number' :
-                                                        col === 'name' ? 'Name' :
-                                                            col[0].toUpperCase() + col.slice(1)}
-                                                    {sortBy === col && (
-                                                        <span>
-                                                                {sortOrder === 'asc' ? '↑' : '↓'}
-                                                            </span>
-                                                    )}
-                                                </th>
-                                            ))}
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {group.players.map((player) => (
-                                            <tr
-                                                key={player.id}
-                                                onClick={() => {
-                                                    if (selectedPlayer === player.id) {
-                                                        setSelectedPlayer(null);
-                                                    } else {
-                                                        setSelectedPlayer(player.id);
-                                                    }
-                                                }}
-                                            >
-                                                <td>{player.name}</td>
-                                                <td>{player.jerseyNumber}</td>
-                                                <td>{player.position}</td>
-                                                <td>{player.goals}</td>
-                                                <td>{player.shots}</td>
-                                                <td>{player.turnovers}</td>
-                                            </tr>
-                                        ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        )
-                    ))}
-                </div>
+            <h1>Active filtered stats (period/time/space/player)</h1>
+            <div className={styles.statsContainer}>
+                <TeamStats team={gameData.teams.home} stats={homeStats}/>
+                <ScoreDisplay homeScore={homeStats.goals} awayScore={awayStats.goals}/>
+                <TeamStats team={gameData.teams.away} stats={awayStats}/>
+            </div>
+
+            <div className={styles.filterSection}>
+                <TeamViewFilter selectedView={selectedTeamView} setSelectedView={setSelectedTeamView}/>
+                <PeriodFilter
+                    gameType={gameData.type}
+                    availablePeriods={availablePeriods}
+                    selectedPeriods={selectedPeriods}
+                    togglePeriod={togglePeriod}
+                    isTimeFilterActive={isTimeFilterActive}
+                />
+                <ActionTypeFilter
+                    availableActionTypes={availableActionTypes}
+                    selectedActionTypes={selectedActionTypes}
+                    toggleActionType={toggleActionType}
+                />
+            </div>
+
+            <GameVisualization
+                gameData={gameData}
+                filteredActions={filteredActions}
+                iconSize={iconSize}
+                handleIconClick={handleIconClick}
+            />
+
+            <div className={styles.container}>
+                <PlayerTable
+                    positionGroups={positionGroups}
+                    selectedPlayer={selectedPlayer}
+                    setSelectedPlayer={setSelectedPlayer}
+                    TableHeader={TableHeader}
+                />
 
                 {uniqueNonRoster.length > 0 && (
                     <>
-                        <h4>Non-Roster Players</h4>
-                        <ul>
+                        <h4 className={styles.nonRosterTitle}>Non-Roster Players</h4>
+                        <ul className={styles.nonRosterList}>
                             {uniqueNonRoster.map(player => (
-                                <li key={player.id}>
+                                <li className={styles.nonRosterItem} key={player.id}>
                                     {player.name} (#{player.jerseyNumber})
                                 </li>
                             ))}
@@ -410,14 +370,14 @@ const PreviousGameDetailPage = () => {
                 )}
             </div>
 
-            <CustomButton type={'negative'} onClick={() => deleteHandler(gameData)}>
+            <button className={styles.deleteButton} onClick={() => deleteHandler(gameData)}>
                 Delete Game
-            </CustomButton>
-            <CustomButton type={'neutral'} onClick={() => navigate(-1)}>
+            </button>
+            <button className={styles.button} onClick={() => navigate(-1)}>
                 Go Back
-            </CustomButton>
+            </button>
         </div>
     );
 };
 
-export default PreviousGameDetailPage;
+export default PreviousGameDetailPage2;
