@@ -1,6 +1,8 @@
 // RinkWithIcons.tsx
 import React from 'react';
 import {IGameAction} from "../OOP/interfaces/IGameAction";
+// @ts-ignore
+import styles from "./RinkWithIcons.module.css"
 
 interface RinkWithIconsProps {
     imageRef: React.RefObject<HTMLImageElement>;
@@ -18,17 +20,33 @@ const RinkWithIcons: React.FC<RinkWithIconsProps> = ({
                                                          iconSize = 30
                                                      }) => {
     return (
-        <div>
+        <div className={styles.container}>
             <img
                 ref={imageRef}
                 src={src}
                 alt="Rink"
+                className={styles.rinkImage}
             />
-            {filteredActions.map((action, index) => (
-                <div key={index} onClick={(e) => handleIconClick(action, e)}>
-                    {action.type[0]}
-                </div>
-            ))}
+            {filteredActions.map((action, index) => {
+                const style = {
+                    left: `${action.x * 100}%`,
+                    top: `${action.y * 100}%`,
+                    width: `${iconSize}px`,
+                    height: `${iconSize}px`,
+                    fontSize: `${iconSize * 0.6}px`
+                };
+
+                return (
+                    <div
+                        key={index}
+                        className={`${styles.icon} ${styles[action.type.toLowerCase()]}`}
+                        style={style}
+                        onClick={(e) => handleIconClick(action, e)}
+                    >
+                        {action.type[0]}
+                    </div>
+                );
+            })}
         </div>
     );
 };

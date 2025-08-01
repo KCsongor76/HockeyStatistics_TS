@@ -1,0 +1,34 @@
+.container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+th, td {
+    padding: 0.5rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+th {
+    background-color: #f8f8f8;
+    cursor: pointer;
+    position: relative;
+}
+
+th:hover {
+    background-color: #eee;
+}
+
+tr:hover {
+    background-color: #f9f9f9;
+}
+
+tr.selected {
+    background-color: #e6f7ff;
+}

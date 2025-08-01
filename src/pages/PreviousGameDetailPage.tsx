@@ -14,7 +14,6 @@ import {CustomButton} from "../components/CustomButton";
 import GameStatsStatic from "../components/GameStatsStatic";
 import GameFilters from "../components/GameFilters";
 import RinkImageIconDisplay from "../components/RinkImageIconDisplay";
-import PlayerGameStatsTable from "../components/PlayerGameStatsTable";
 import PlayerStatsSection from "../components/PlayerStatsSection";
 import RinkWithIcons from "../components/RinkWithIcons";
 
@@ -279,8 +278,82 @@ const PreviousGameDetailPage = () => {
         setTimeFilter(prev => [prev[0], newMaxTime]);
     }, [gameData.actions, defaultMaxTime]);
 
+
+
     return (
-        <>
+        <div className={styles.container}>
+            <h1>Full game stats</h1>
+            <div className={styles.statsSection}>
+                <GameStatsStatic
+                    homeTeam={gameData.teams.home}
+                    awayTeam={gameData.teams.away}
+                    homeStats={gameData.score.home}
+                    awayStats={gameData.score.away}
+                />
+            </div>
+
+            <h1>Active filtered stats</h1>
+            <div className={styles.statsSection}>
+                <GameStatsStatic
+                    homeTeam={gameData.teams.home}
+                    awayTeam={gameData.teams.away}
+                    homeStats={homeStats}
+                    awayStats={awayStats}
+                />
+            </div>
+
+            <div className={styles.filtersSection}>
+                <GameFilters
+                    gameData={gameData}
+                    availablePeriods={availablePeriods}
+                    availableActionTypes={availableActionTypes}
+                    isTimeFilterActive={isTimeFilterActive}
+                    setSelectedTeamView={setSelectedTeamView}
+                    togglePeriod={togglePeriod}
+                    toggleActionType={toggleActionType}
+                />
+            </div>
+
+            <div className={styles.rinkContainer}>
+                <RinkWithIcons
+                    imageRef={fieldImageRef}
+                    src={gameData.selectedImage}
+                    filteredActions={filteredActions}
+                    handleIconClick={handleIconClick}
+                />
+            </div>
+
+            <div className={styles.rinkContainer}>
+                <RinkImageIconDisplay
+                    imageRef={fieldImageRef}
+                    src={gameData.selectedImage}
+                    filteredActions={filteredActions}
+                    handleIconClick={handleIconClick}
+                    iconSize={iconSize}
+                />
+            </div>
+
+            <div className={styles.playerStatsSection}>
+                <PlayerStatsSection
+                    positionGroups={positionGroups}
+                    handleSort={handleSort}
+                    sortBy={sortBy}
+                    sortOrder={sortOrder}
+                    selectedPlayer={selectedPlayer}
+                    setSelectedPlayer={setSelectedPlayer}
+                    uniqueNonRoster={uniqueNonRoster}
+                />
+            </div>
+
+            <div className={styles.buttonGroup}>
+                <CustomButton type="negative" onClick={() => deleteHandler(gameData)}>
+                    Delete Game
+                </CustomButton>
+                <CustomButton type="neutral" onClick={() => navigate(-1)}>
+                    Go Back
+                </CustomButton>
+            </div>
+
             {selectedActionDetails && (
                 <IconDataModal
                     action={selectedActionDetails}
@@ -288,66 +361,7 @@ const PreviousGameDetailPage = () => {
                     gameType={gameData.type}
                 />
             )}
-
-            <h1>Full game stats</h1>
-            <GameStatsStatic
-                homeTeam={gameData.teams.home}
-                awayTeam={gameData.teams.away}
-                homeStats={gameData.score.home}
-                awayStats={gameData.score.away}
-            />
-
-            <h1>Active filtered stats</h1>
-            <GameStatsStatic
-                homeTeam={gameData.teams.home}
-                awayTeam={gameData.teams.away}
-                homeStats={homeStats}
-                awayStats={awayStats}
-            />
-
-            <GameFilters
-                gameData={gameData}
-                availablePeriods={availablePeriods}
-                availableActionTypes={availableActionTypes}
-                isTimeFilterActive={isTimeFilterActive}
-                setSelectedTeamView={setSelectedTeamView}
-                togglePeriod={togglePeriod}
-                toggleActionType={toggleActionType}
-            />
-
-            <RinkWithIcons
-                imageRef={fieldImageRef}
-                src={gameData.selectedImage}
-                filteredActions={filteredActions}
-                handleIconClick={handleIconClick}
-            />
-
-            <RinkImageIconDisplay
-                imageRef={fieldImageRef}
-                gameData={gameData}
-                filteredActions={filteredActions}
-                handleIconClick={handleIconClick}
-                iconSize={iconSize}
-            />
-
-            <h3>Player Statistics</h3>
-            <PlayerStatsSection
-                positionGroups={positionGroups}
-                handleSort={handleSort}
-                sortBy={sortBy}
-                sortOrder={sortOrder}
-                selectedPlayer={selectedPlayer}
-                setSelectedPlayer={setSelectedPlayer}
-                uniqueNonRoster={uniqueNonRoster}
-            />
-
-            <CustomButton type={'negative'} onClick={() => deleteHandler(gameData)}>
-                Delete Game
-            </CustomButton>
-            <CustomButton type={'neutral'} onClick={() => navigate(-1)}>
-                Go Back
-            </CustomButton>
-        </>
+        </div>
     );
 };
 

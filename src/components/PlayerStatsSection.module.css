@@ -1,0 +1,16 @@
+.container {
+    margin-top: 1rem;
+}
+
+.positionGroup {
+    margin-bottom: 1.5rem;
+}
+
+.nonRosterList {
+    list-style: none;
+    padding: 0;
+}
+
+.nonRosterList li {
+    padding: 0.25rem 0;
+}

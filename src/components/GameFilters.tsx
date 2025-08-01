@@ -4,6 +4,8 @@ import {GameType} from "../OOP/enums/GameType";
 import {PlayoffPeriod, RegularPeriod} from "../OOP/enums/Period";
 import {IGame} from "../OOP/interfaces/IGame";
 import {ActionType} from "../OOP/enums/ActionType";
+// @ts-ignore
+import styles from "./GameFilters.module.css"
 
 interface GameFiltersProps {
     gameData: IGame;
@@ -15,21 +17,35 @@ interface GameFiltersProps {
     toggleActionType: (type: ActionType) => void;
 }
 
-const GameFilters: React.FC<GameFiltersProps> = ({gameData, availablePeriods, availableActionTypes, isTimeFilterActive, setSelectedTeamView, togglePeriod, toggleActionType}: GameFiltersProps) => {
+const GameFilters: React.FC<GameFiltersProps> = ({
+                                                     gameData,
+                                                     availablePeriods,
+                                                     availableActionTypes,
+                                                     isTimeFilterActive,
+                                                     setSelectedTeamView,
+                                                     togglePeriod,
+                                                     toggleActionType
+                                                 }: GameFiltersProps) => {
     return (
-        <div>
+        <div className={styles.container}>
             <div>
                 <h3>Team View</h3>
-                <div>
-                    <CustomButton type={'neutral'} onClick={() => setSelectedTeamView('all')}>All Teams</CustomButton>
-                    <CustomButton type={'neutral'} onClick={() => setSelectedTeamView('home')}>Home Team</CustomButton>
-                    <CustomButton type={'neutral'} onClick={() => setSelectedTeamView('away')}>Away Team</CustomButton>
+                <div className={styles.filterGroup}>
+                    <CustomButton type="neutral" onClick={() => setSelectedTeamView('all')}>
+                        All Teams
+                    </CustomButton>
+                    <CustomButton type="neutral" onClick={() => setSelectedTeamView('home')}>
+                        Home Team
+                    </CustomButton>
+                    <CustomButton type="neutral" onClick={() => setSelectedTeamView('away')}>
+                        Away Team
+                    </CustomButton>
                 </div>
             </div>
 
             <div>
                 <h3>Periods</h3>
-                <div>
+                <div className={styles.filterGroup}>
                     {availablePeriods.map((period) => {
                         const getPeriodLabel = () => {
                             if (gameData.type === GameType.REGULAR) {
@@ -62,7 +78,7 @@ const GameFilters: React.FC<GameFiltersProps> = ({gameData, availablePeriods, av
                                 onClick={() => togglePeriod(period)}
                                 disabled={isTimeFilterActive}
                             >
-                                {getPeriodLabel(period)}
+                                {getPeriodLabel()}
                             </CustomButton>
                         )
                     })}
@@ -71,7 +87,7 @@ const GameFilters: React.FC<GameFiltersProps> = ({gameData, availablePeriods, av
 
             <div>
                 <h3>Action Types</h3>
-                <div>
+                <div className={styles.filterGroup}>
                     {availableActionTypes.map((type) => (
                         <CustomButton
                             key={type}

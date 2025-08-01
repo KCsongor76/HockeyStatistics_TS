@@ -1,5 +1,7 @@
 import React from 'react';
 import {IPlayer} from "../OOP/interfaces/IPlayer";
+// @ts-ignore
+import styles from "./PlayerGameStatsTable.module.css"
 
 interface PlayerGameStatsTableProps {
     group: any;
@@ -19,44 +21,45 @@ const PlayerGameStatsTable = ({
                                   setSelectedPlayer
                               }: PlayerGameStatsTableProps) => {
     return (
-        <div key={group.title}>
+        <div className={styles.container}>
             <h4>{group.title}</h4>
-            <div>
-                <table>
-                    <thead>
-                    <tr>
-                        {['name', 'jerseyNumber', 'goals', 'assists', 'points', 'shots', 'turnovers'].map((col) => (
-                            <th key={col} onClick={() => handleSort(col as keyof IPlayer)}>
-                                {col === 'jerseyNumber' ? 'Number' :
-                                    col === 'name' ? 'Name' :
-                                        col[0].toUpperCase() + col.slice(1)}
-                                {sortBy === col && (<span>{sortOrder === 'asc' ? '↑' : '↓'}</span>)}
-                            </th>
-                        ))}
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {group.players.map((player: any) => (
-                        <tr
-                            key={player.id}
-                            onClick={() => {
-                                if (selectedPlayer === player.id) {
-                                    setSelectedPlayer(null);
-                                } else {
-                                    setSelectedPlayer(player.id);
-                                }
-                            }}
-                        >
-                            <td>{player.name}</td>
-                            <td>{player.jerseyNumber}</td>
-                            <td>{player.goals}</td>
-                            <td>{player.shots}</td>
-                            <td>{player.turnovers}</td>
-                        </tr>
+            <table>
+                <thead>
+                <tr>
+                    {['name', 'jerseyNumber', 'goals', 'assists', 'points', 'shots', 'turnovers'].map((col) => (
+                        <th key={col} onClick={() => handleSort(col as keyof IPlayer)}>
+                            {col === 'jerseyNumber' ? 'Number' :
+                                col === 'name' ? 'Name' :
+                                    col[0].toUpperCase() + col.slice(1)}
+                            {sortBy === col && (<span>{sortOrder === 'asc' ? '↑' : '↓'}</span>)}
+                        </th>
                     ))}
-                    </tbody>
-                </table>
-            </div>
+                </tr>
+                </thead>
+                <tbody>
+                {group.players.map((player: any) => (
+                    <tr
+                        key={player.id}
+                        className={selectedPlayer === player.id ? styles.selected : ''}
+                        onClick={() => {
+                            if (selectedPlayer === player.id) {
+                                setSelectedPlayer(null);
+                            } else {
+                                setSelectedPlayer(player.id);
+                            }
+                        }}
+                    >
+                        <td>{player.name}</td>
+                        <td>{player.jerseyNumber}</td>
+                        <td>{player.goals}</td>
+                        <td>{player.assists}</td>
+                        <td>{player.points}</td>
+                        <td>{player.shots}</td>
+                        <td>{player.turnovers}</td>
+                    </tr>
+                ))}
+                </tbody>
+            </table>
         </div>
     );
 };

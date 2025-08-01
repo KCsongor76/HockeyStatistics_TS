@@ -7,9 +7,9 @@ interface ScoreDisplayProps {
     awayScore: number;
 }
 
-const ScoreDisplay = ({ homeScore, awayScore }: ScoreDisplayProps) => (
-    <div className={styles.gameControls}>
-        <p className={styles.scoreDisplay}>{homeScore} - {awayScore}</p>
+const ScoreDisplay = ({homeScore, awayScore}: ScoreDisplayProps) => (
+    <div className={styles.score}>
+        {homeScore} - {awayScore}
     </div>
 );
 

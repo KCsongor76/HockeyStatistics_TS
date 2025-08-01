@@ -29,6 +29,7 @@ import RinkImageIconDisplay from "../components/RinkImageIconDisplay";
 import PlayerGameStatsTable from "../components/PlayerGameStatsTable";
 import PlayerStatsSection from "../components/PlayerStatsSection";
 import RinkWithIcons from "../components/RinkWithIcons";
+import RinkWithIconsLive from "../components/RinkWithIconsLive";
 
 // todo: if a user presses the page reload button, make sure to save the latest data, because as of now, every new data is lost on page reloads
 //  (probably can't be done in the "declarative react" way, but only in the "imperative javascript" way)
@@ -446,7 +447,86 @@ const GamePage = () => {
     }, [formData, gameState]);
 
     return (
-        <>
+        <div className={styles.container}>
+            {/* Rink with icons */}
+            <div className={styles.rinkContainer}>
+                <RinkWithIconsLive
+                    ref={fieldImageRef}
+                    src={formData.selectedImage}
+                    showDetails={showDetails}
+                    gameState={gameState}
+                    handleClick={handleClick}
+                    handleIconClick={handleIconClick}
+                    handleMouseDown={handleMouseDown}
+                    handleMouseUp={handleMouseUp}
+                    handleTouchStart={handleTouchStart}
+                    handleTouchEnd={handleTouchEnd}
+                />
+            </div>
+
+            {/* Game stats */}
+            <div className={styles.statsSection}>
+                <GameStatsLive
+                    formData={formData}
+                    gameState={gameState}
+                    gameData={gameData}
+                    setGameState={setGameState}
+                    handleNextPeriod={handleNextPeriod}
+                    submitGameHandler={submitGameHandler}
+                />
+            </div>
+
+            {/* Controls */}
+            <div className={styles.controls}>
+                <CustomButton
+                    type="neutral"
+                    onClick={() => setShowDetails(!showDetails)}
+                >
+                    {showDetails ? "Hide Details" : "Show Details"}
+                </CustomButton>
+            </div>
+
+            {showDetails && (
+                <>
+                    {/* Filters */}
+                    <div className={styles.filtersSection}>
+                        <GameFilters
+                            gameData={gameData}
+                            availablePeriods={availablePeriods}
+                            availableActionTypes={availableActionTypes}
+                            isTimeFilterActive={isTimeFilterActive}
+                            setSelectedTeamView={setSelectedTeamView}
+                            togglePeriod={togglePeriod}
+                            toggleActionType={toggleActionType}
+                        />
+                    </div>
+
+                    {/* Rink visualization */}
+                    <div className={styles.rinkContainer}>
+                        <RinkImageIconDisplay
+                            imageRef={visualizationImageRef}
+                            src={gameData.selectedImage}
+                            filteredActions={filteredActions}
+                            handleIconClick={handleIconClick}
+                            iconSize={iconSize}
+                        />
+                    </div>
+
+                    {/* Player stats */}
+                    <div className={styles.playerStatsSection}>
+                        <PlayerStatsSection
+                            positionGroups={positionGroups}
+                            handleSort={handleSort}
+                            sortBy={sortBy}
+                            sortOrder={sortOrder}
+                            selectedPlayer={selectedPlayer}
+                            setSelectedPlayer={setSelectedPlayer}
+                            uniqueNonRoster={uniqueNonRoster}
+                        />
+                    </div>
+                </>
+            )}
+
             {selectedPosition && !selectedAction && (
                 <ActionSelectorModal
                     homeTeam={formData.homeTeam}
@@ -491,86 +571,7 @@ const GamePage = () => {
                     gameType={gameData.type}
                 />
             )}
-
-
-            <div onClick={handleClick}>
-                <img
-                    ref={fieldImageRef}
-                    src={formData.selectedImage}
-                    alt="gamePage"
-                    onMouseDown={handleMouseDown}
-                    onMouseUp={handleMouseUp}
-                    onMouseLeave={handleMouseUp}
-                    onTouchStart={handleTouchStart}
-                    onTouchEnd={handleTouchEnd}
-                    onTouchCancel={handleTouchEnd}
-                />
-
-                {showDetails && gameState.actions.map((action, index) =>
-                    <div key={index} onClick={(e) => handleIconClick(action, e)}>
-                        {action.type[0]}
-                    </div>
-                )}
-            </div>
-
-            <GameStatsLive
-                formData={formData}
-                gameState={gameState}
-                gameData={gameData}
-                setGameState={setGameState}
-                handleNextPeriod={handleNextPeriod}
-                submitGameHandler={submitGameHandler}
-            />
-
-            {showDetails && (
-                <>
-                    <GameFilters
-                        gameData={gameData}
-                        availablePeriods={availablePeriods}
-                        availableActionTypes={availableActionTypes}
-                        isTimeFilterActive={isTimeFilterActive}
-                        setSelectedTeamView={setSelectedTeamView}
-                        togglePeriod={togglePeriod}
-                        toggleActionType={toggleActionType}
-                    />
-
-                    <RinkWithIcons
-                        imageRef={visualizationImageRef}
-                        src={gameData.selectedImage}
-                        filteredActions={filteredActions}
-                        handleIconClick={handleIconClick}
-                    />
-
-                    <RinkImageIconDisplay
-                        imageRef={visualizationImageRef}
-                        gameData={gameData}
-                        filteredActions={filteredActions}
-                        handleIconClick={handleIconClick}
-                        iconSize={iconSize}
-                    />
-
-                    <h3>Player Statistics</h3>
-                    <PlayerStatsSection
-                        positionGroups={positionGroups}
-                        handleSort={handleSort}
-                        sortBy={sortBy}
-                        sortOrder={sortOrder}
-                        selectedPlayer={selectedPlayer}
-                        setSelectedPlayer={setSelectedPlayer}
-                        uniqueNonRoster={uniqueNonRoster}
-                    />
-
-                    {selectedActionDetails && (
-                        <IconDataModal
-                            action={selectedActionDetails}
-                            onClose={() => setSelectedActionDetails(null)}
-                            gameType={gameData.type}
-                        />
-                    )}
-                </>
-            )}
-
-        </>
+        </div>
     );
 };
 

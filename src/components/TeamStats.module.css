@@ -1,0 +1,26 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.teamLogo {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    margin-bottom: 0.5rem;
+}
+
+.teamName {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.stats {
+    display: flex;
+    gap: 1rem;
+}
+
+.statItem {
+    margin: 0;
+}

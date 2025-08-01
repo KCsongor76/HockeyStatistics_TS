@@ -1,6 +1,8 @@
 import React from 'react';
 import PlayerGameStatsTable from "./PlayerGameStatsTable";
 import {IPlayer} from "../OOP/interfaces/IPlayer";
+// @ts-ignore
+import styles from "./PlayerStatsSection.module.css"
 
 interface PlayerStatsSectionProps {
     positionGroups: any;
@@ -10,7 +12,6 @@ interface PlayerStatsSectionProps {
     selectedPlayer: string | null;
     setSelectedPlayer: (value: React.SetStateAction<string | null>) => void
     uniqueNonRoster: IPlayer[];
-
 }
 
 const PlayerStatsSection = ({
@@ -23,7 +24,8 @@ const PlayerStatsSection = ({
                                 uniqueNonRoster
                             }: PlayerStatsSectionProps) => {
     return (
-        <>
+        <div className={styles.container}>
+            <h3>Player Statistics</h3>
             {positionGroups.map((group: any) => (
                 group.players.length > 0 && (
                     <PlayerGameStatsTable
@@ -40,7 +42,7 @@ const PlayerStatsSection = ({
             {uniqueNonRoster.length > 0 && (
                 <>
                     <h4>Non-Roster Players</h4>
-                    <ul>
+                    <ul className={styles.nonRosterList}>
                         {uniqueNonRoster.map(player => (
                             <li key={player.id}>
                                 {player.name} (#{player.jerseyNumber})
@@ -49,7 +51,7 @@ const PlayerStatsSection = ({
                     </ul>
                 </>
             )}
-        </>
+        </div>
     );
 };
 

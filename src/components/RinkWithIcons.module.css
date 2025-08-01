@@ -1,0 +1,37 @@
+.container {
+    position: relative;
+    margin: 1rem 0;
+}
+
+.rinkImage {
+    width: 100%;
+    max-height: 60vh;
+    object-fit: contain;
+}
+
+.icon {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.goal {
+    background-color: #4CAF50;
+}
+
+.shot {
+    background-color: #2196F3;
+}
+
+.turnover {
+    background-color: #F44336;
+}

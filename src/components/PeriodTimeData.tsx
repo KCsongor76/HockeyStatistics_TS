@@ -1,6 +1,8 @@
 import React from 'react';
 import {CustomButton} from "./CustomButton";
 import {GameState} from "../OOP/classes/GameState";
+// @ts-ignore
+import styles from "./PeriodTimeData.module.css"
 
 interface PeriodTimeDataProps {
     gameState: GameState;
@@ -11,7 +13,7 @@ interface PeriodTimeDataProps {
 
 const PeriodTimeData = ({gameState, setGameState, handleNextPeriod, submitGameHandler}: PeriodTimeDataProps) => {
     return (
-        <div>
+        <div className={styles.container}>
             {!gameState.isGameOver && (
                 gameState.isTimerRunning ? (
                     <CustomButton

@@ -5,6 +5,8 @@ import {GameState} from "../OOP/classes/GameState";
 import TeamStats from "./TeamStats";
 import PeriodTimeData from "./PeriodTimeData";
 import {IGame} from "../OOP/interfaces/IGame";
+// @ts-ignore
+import styles from "./GameStatsLive.module.css"
 
 interface GameStatsLiveProps {
     formData: any;
@@ -24,13 +26,19 @@ const GameStatsLive = ({
                            submitGameHandler
                        }: GameStatsLiveProps) => {
     return (
-        <div>
-            <TeamStats team={formData.homeTeam} stats={gameState.homeScore}/>
+        <div className={styles.container}>
+            <div className={styles.teamStats}>
+                <TeamStats team={formData.homeTeam} stats={gameState.homeScore}/>
+            </div>
 
-            <div>
+            <div className={styles.gameInfo}>
                 <p>{gameData.season}</p>
-                <p>Period: {gameState.periodLabel}</p>
-                <p>{gameState.periodLabel === "SO" ? "0:00" : GameUtils.formatTime(gameState.time)}</p>
+                <p className={styles.period}>Period: {gameState.periodLabel}</p>
+                <p className={styles.time}>
+                    {gameState.periodLabel === "SO"
+                        ? "0:00"
+                        : GameUtils.formatTime(gameState.time)}
+                </p>
 
                 <CustomButton
                     type={'positive'}
@@ -47,7 +55,9 @@ const GameStatsLive = ({
                 />
             </div>
 
-            <TeamStats team={formData.awayTeam} stats={gameState.awayScore}/>
+            <div className={styles.teamStats}>
+                <TeamStats team={formData.awayTeam} stats={gameState.awayScore}/>
+            </div>
         </div>
     );
 };
