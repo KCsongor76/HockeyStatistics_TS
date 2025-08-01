@@ -15,6 +15,7 @@ import GameStatsStatic from "../components/GameStatsStatic";
 import GameFilters from "../components/GameFilters";
 import RinkImageIconDisplay from "../components/RinkImageIconDisplay";
 import PlayerGameStatsTable from "../components/PlayerGameStatsTable";
+import PlayerStatsSection from "../components/PlayerStatsSection";
 
 const PreviousGameDetailPage = () => {
     const location = useLocation();
@@ -278,7 +279,7 @@ const PreviousGameDetailPage = () => {
     }, [gameData.actions, defaultMaxTime]);
 
     return (
-        <div>
+        <>
             {selectedActionDetails && (
                 <IconDataModal
                     action={selectedActionDetails}
@@ -324,39 +325,24 @@ const PreviousGameDetailPage = () => {
                 )}
             </div>
 
-            {/*<RinkImageIconDisplay */}
-            {/*    imageRef={fieldImageRef} */}
-            {/*    gameData={gameData} */}
-            {/*    filteredActions={filteredActions} */}
-            {/*    handleIconClick={handleIconClick} */}
-            {/*/>*/}
+            <RinkImageIconDisplay
+                imageRef={fieldImageRef}
+                gameData={gameData}
+                filteredActions={filteredActions}
+                handleIconClick={handleIconClick}
+                iconSize={iconSize}
+            />
 
             <h3>Player Statistics</h3>
-            {positionGroups.map((group) => (
-                group.players.length > 0 && (
-                    <PlayerGameStatsTable
-                        group={group}
-                        handleSort={handleSort}
-                        sortBy={sortBy}
-                        sortOrder={sortOrder}
-                        selectedPlayer={selectedPlayer}
-                        setSelectedPlayer={setSelectedPlayer}
-                    />
-                )
-            ))}
-
-            {uniqueNonRoster.length > 0 && (
-                <>
-                    <h4>Non-Roster Players</h4>
-                    <ul>
-                        {uniqueNonRoster.map(player => (
-                            <li key={player.id}>
-                                {player.name} (#{player.jerseyNumber})
-                            </li>
-                        ))}
-                    </ul>
-                </>
-            )}
+            <PlayerStatsSection
+                positionGroups={positionGroups}
+                handleSort={handleSort}
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+                selectedPlayer={selectedPlayer}
+                setSelectedPlayer={setSelectedPlayer}
+                uniqueNonRoster={uniqueNonRoster}
+            />
 
             <CustomButton type={'negative'} onClick={() => deleteHandler(gameData)}>
                 Delete Game
@@ -364,7 +350,7 @@ const PreviousGameDetailPage = () => {
             <CustomButton type={'neutral'} onClick={() => navigate(-1)}>
                 Go Back
             </CustomButton>
-        </div>
+        </>
     );
 };
 

@@ -1,15 +1,25 @@
 import React from 'react';
-import {IGame} from "../OOP/interfaces/IGame";
 import {IGameAction} from "../OOP/interfaces/IGameAction";
 
 interface RinkImageIconDisplayProps {
-    imageRef: React.RefObject<HTMLImageElement>
-    gameData: IGame;
+    imageRef: React.RefObject<HTMLImageElement>;
+    gameData: {
+        selectedImage: string;
+    };
     filteredActions: IGameAction[];
-    handleIconClick: (action: IGameAction, e?: React.MouseEvent<Element, MouseEvent>) => void;
+    handleIconClick: (action: IGameAction, e: React.MouseEvent<Element, MouseEvent>) => void;
+    iconSize?: number;
+    className?: string;
 }
 
-const RinkImageIconDisplay = ({imageRef, gameData, filteredActions, handleIconClick}: RinkImageIconDisplayProps) => {
+const RinkImageIconDisplay: React.FC<RinkImageIconDisplayProps> = ({
+                                                                       imageRef,
+                                                                       gameData,
+                                                                       filteredActions,
+                                                                       handleIconClick,
+                                                                       iconSize = 30,
+                                                                       className = ''
+                                                                   }) => {
     return (
         <div>
             <img
@@ -17,9 +27,11 @@ const RinkImageIconDisplay = ({imageRef, gameData, filteredActions, handleIconCl
                 src={gameData.selectedImage}
                 alt="gamePage"
             />
-            {filteredActions.map((action, index) =>
-                <div key={index} onClick={() => handleIconClick(action)}>{action.type[0]}</div>
-            )}
+            {filteredActions.map((action, index) => (
+                <div key={index} onClick={(e) => handleIconClick(action, e)}>
+                    {action.type[0]}
+                </div>
+            ))}
         </div>
     );
 };

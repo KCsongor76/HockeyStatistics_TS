@@ -27,6 +27,7 @@ import GameStatsLive from "../components/GameStatsLive";
 import GameFilters from "../components/GameFilters";
 import RinkImageIconDisplay from "../components/RinkImageIconDisplay";
 import PlayerGameStatsTable from "../components/PlayerGameStatsTable";
+import PlayerStatsSection from "../components/PlayerStatsSection";
 
 // todo: if a user presses the page reload button, make sure to save the latest data, because as of now, every new data is lost on page reloads
 //  (probably can't be done in the "declarative react" way, but only in the "imperative javascript" way)
@@ -34,6 +35,7 @@ import PlayerGameStatsTable from "../components/PlayerGameStatsTable";
 // todo: regular game type, 3rd period, 1-0 score, time runs out, Stop Time button still turns into
 //  Next Period button, but this button shouldn't appear in this case. (at least if I click on it, it disappears, and nothing else happens)
 
+// todo: showDetails: only hide icons on first rink image
 
 interface ITeamRoster extends ITeam {
     roster: IPlayer[];
@@ -489,108 +491,91 @@ const GamePage = () => {
                 />
             )}
 
-            <div>
-                <div onClick={handleClick}>
-                    <img
-                        ref={fieldImageRef}
-                        src={formData.selectedImage}
-                        alt="gamePage"
-                        onMouseDown={handleMouseDown}
-                        onMouseUp={handleMouseUp}
-                        onMouseLeave={handleMouseUp}
-                        onTouchStart={handleTouchStart}
-                        onTouchEnd={handleTouchEnd}
-                        onTouchCancel={handleTouchEnd}
-                    />
 
-                    {showDetails && gameState.actions.map((action, index) =>
-                        <div key={index} onClick={(e) => handleIconClick(action, e)}>
-                            {action.type[0]}
-                        </div>
-                    )}
-                </div>
-
-                <GameStatsLive
-                    formData={formData}
-                    gameState={gameState}
-                    gameData={gameData}
-                    setGameState={setGameState}
-                    handleNextPeriod={handleNextPeriod}
-                    submitGameHandler={submitGameHandler}
+            <div onClick={handleClick}>
+                <img
+                    ref={fieldImageRef}
+                    src={formData.selectedImage}
+                    alt="gamePage"
+                    onMouseDown={handleMouseDown}
+                    onMouseUp={handleMouseUp}
+                    onMouseLeave={handleMouseUp}
+                    onTouchStart={handleTouchStart}
+                    onTouchEnd={handleTouchEnd}
+                    onTouchCancel={handleTouchEnd}
                 />
 
-                {showDetails && (
-                    <div>
-                        <GameFilters
-                            gameData={gameData}
-                            availablePeriods={availablePeriods}
-                            availableActionTypes={availableActionTypes}
-                            isTimeFilterActive={isTimeFilterActive}
-                            setSelectedTeamView={setSelectedTeamView}
-                            togglePeriod={togglePeriod}
-                            toggleActionType={toggleActionType}
-                        />
-
-                        <div>
-                            <img
-                                ref={visualizationImageRef}
-                                src={gameData.selectedImage}
-                                alt="gamePage"
-                            />
-                            {filteredActions.map((action, index) =>
-                                <div key={index}
-                                     onClick={(e: React.MouseEvent<Element, MouseEvent>) => handleIconClick(action, e)}>
-                                    {action.type[0]}
-                                </div>
-                            )}
-                        </div>
-
-                        {/*<RinkImageIconDisplay */}
-                        {/*    imageRef={visualizationImageRef} */}
-                        {/*    gameData={gameData} */}
-                        {/*    filteredActions={filteredActions} */}
-                        {/*    handleIconClick={handleIconClick} */}
-                        {/*/>*/}
-
-                        <div>
-                            <h3>Player Statistics</h3>
-                            {positionGroups.map((group) => (
-                                group.players.length > 0 && (
-                                    <PlayerGameStatsTable
-                                        group={group}
-                                        handleSort={handleSort}
-                                        sortBy={sortBy}
-                                        sortOrder={sortOrder}
-                                        selectedPlayer={selectedPlayer}
-                                        setSelectedPlayer={setSelectedPlayer}
-                                    />
-                                )
-                            ))}
-
-                            {uniqueNonRoster.length > 0 && (
-                                <>
-                                    <h4>Non-Roster Players</h4>
-                                    <ul>
-                                        {uniqueNonRoster.map(player => (
-                                            <li key={player.id}>
-                                                {player.name} (#{player.jerseyNumber})
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </>
-                            )}
-                        </div>
-
-                        {selectedActionDetails && (
-                            <IconDataModal
-                                action={selectedActionDetails}
-                                onClose={() => setSelectedActionDetails(null)}
-                                gameType={gameData.type}
-                            />
-                        )}
+                {showDetails && gameState.actions.map((action, index) =>
+                    <div key={index} onClick={(e) => handleIconClick(action, e)}>
+                        {action.type[0]}
                     </div>
                 )}
             </div>
+
+            <GameStatsLive
+                formData={formData}
+                gameState={gameState}
+                gameData={gameData}
+                setGameState={setGameState}
+                handleNextPeriod={handleNextPeriod}
+                submitGameHandler={submitGameHandler}
+            />
+
+            {showDetails && (
+                <>
+                    <GameFilters
+                        gameData={gameData}
+                        availablePeriods={availablePeriods}
+                        availableActionTypes={availableActionTypes}
+                        isTimeFilterActive={isTimeFilterActive}
+                        setSelectedTeamView={setSelectedTeamView}
+                        togglePeriod={togglePeriod}
+                        toggleActionType={toggleActionType}
+                    />
+
+                    <div>
+                        <img
+                            ref={visualizationImageRef}
+                            src={gameData.selectedImage}
+                            alt="gamePage"
+                        />
+                        {filteredActions.map((action, index) =>
+                            <div key={index}
+                                 onClick={(e: React.MouseEvent<Element, MouseEvent>) => handleIconClick(action, e)}>
+                                {action.type[0]}
+                            </div>
+                        )}
+                    </div>
+
+                    <RinkImageIconDisplay
+                        imageRef={visualizationImageRef}
+                        gameData={gameData}
+                        filteredActions={filteredActions}
+                        handleIconClick={handleIconClick}
+                        iconSize={iconSize}
+                    />
+
+                    <h3>Player Statistics</h3>
+                    <PlayerStatsSection
+                        positionGroups={positionGroups}
+                        handleSort={handleSort}
+                        sortBy={sortBy}
+                        sortOrder={sortOrder}
+                        selectedPlayer={selectedPlayer}
+                        setSelectedPlayer={setSelectedPlayer}
+                        uniqueNonRoster={uniqueNonRoster}
+                    />
+
+                    {selectedActionDetails && (
+                        <IconDataModal
+                            action={selectedActionDetails}
+                            onClose={() => setSelectedActionDetails(null)}
+                            gameType={gameData.type}
+                        />
+                    )}
+                </>
+            )}
+
         </>
     );
 };
