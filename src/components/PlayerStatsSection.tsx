@@ -12,6 +12,7 @@ interface PlayerStatsSectionProps {
     selectedPlayer: string | null;
     setSelectedPlayer: (value: React.SetStateAction<string | null>) => void
     uniqueNonRoster: IPlayer[];
+    playerStats: IPlayer[];
 }
 
 const PlayerStatsSection = ({
@@ -21,14 +22,35 @@ const PlayerStatsSection = ({
                                 sortOrder,
                                 selectedPlayer,
                                 setSelectedPlayer,
-                                uniqueNonRoster
+                                uniqueNonRoster,
+                                playerStats
                             }: PlayerStatsSectionProps) => {
+    const sortedPlayers = [...playerStats].sort((a, b) => {
+        let compareValue = 0;
+        if (sortBy === 'name' || sortBy === 'position') {
+            compareValue = a[sortBy].localeCompare(b[sortBy]);
+        } else if (typeof a[sortBy] === 'number' && typeof b[sortBy] === 'number') {
+            compareValue = (a[sortBy] as number) - (b[sortBy] as number);
+        }
+        return sortOrder === 'asc' ? compareValue : -compareValue;
+    });
+
+    const goalies = sortedPlayers.filter(player => player.position === 'Goalie');
+    const defenders = sortedPlayers.filter(player => player.position === 'Defender');
+    const forwards = sortedPlayers.filter(player => player.position === 'Forward');
+    const sortedPositionGroups = [
+        {title: 'Goalies', players: goalies},
+        {title: 'Defenders', players: defenders},
+        {title: 'Forwards', players: forwards}
+    ];
+
     return (
         <div className={styles.container}>
             <h3>Player Statistics</h3>
-            {positionGroups.map((group: any) => (
+            {sortedPositionGroups.map((group: any) => (
                 group.players.length > 0 && (
                     <PlayerGameStatsTable
+                        key={group.title}
                         group={group}
                         handleSort={handleSort}
                         sortBy={sortBy}

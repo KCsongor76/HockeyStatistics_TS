@@ -7,6 +7,7 @@ import PeriodTimeData from "./PeriodTimeData";
 import {IGame} from "../OOP/interfaces/IGame";
 // @ts-ignore
 import styles from "./GameStatsLive.module.css"
+import ScoreDisplay from "./ScoreDisplay";
 
 interface GameStatsLiveProps {
     formData: any;
@@ -40,13 +41,6 @@ const GameStatsLive = ({
                         : GameUtils.formatTime(gameState.time)}
                 </p>
 
-                <CustomButton
-                    type={'positive'}
-                    onClick={submitGameHandler}
-                >
-                    Save Game
-                </CustomButton>
-
                 <PeriodTimeData
                     gameState={gameState}
                     setGameState={setGameState}
@@ -54,6 +48,8 @@ const GameStatsLive = ({
                     submitGameHandler={submitGameHandler}
                 />
             </div>
+
+            <ScoreDisplay homeScore={gameState.homeScore.goals} awayScore={gameState.awayScore.goals}/>
 
             <div className={styles.teamStats}>
                 <TeamStats team={formData.awayTeam} stats={gameState.awayScore}/>

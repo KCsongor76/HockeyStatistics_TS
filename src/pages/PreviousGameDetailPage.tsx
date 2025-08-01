@@ -13,9 +13,9 @@ import {GameType} from "../OOP/enums/GameType";
 import {CustomButton} from "../components/CustomButton";
 import GameStatsStatic from "../components/GameStatsStatic";
 import GameFilters from "../components/GameFilters";
-import RinkImageIconDisplay from "../components/RinkImageIconDisplay";
 import PlayerStatsSection from "../components/PlayerStatsSection";
 import RinkWithIcons from "../components/RinkWithIcons";
+import {Player} from "../OOP/classes/Player";
 
 const PreviousGameDetailPage = () => {
     const location = useLocation();
@@ -146,22 +146,6 @@ const PreviousGameDetailPage = () => {
         setSelectedActionDetails(null);
     };
 
-    const getPlayerStats = (players: IPlayer[], teamId: string) => {
-        return players.map(player => {
-            const playerActions = gameData.actions.filter(a =>
-                a.player.id === player.id &&
-                (teamId ? a.team.id === teamId : true) // Only filter by team if teamId is provided
-            );
-
-            return {
-                ...player,
-                goals: playerActions.filter(a => a.type === ActionType.GOAL).length,
-                shots: playerActions.filter(a => a.type === ActionType.SHOT || a.type === ActionType.GOAL).length,
-                turnovers: playerActions.filter(a => a.type === ActionType.TURNOVER).length
-            };
-        });
-    };
-
     const getDisplayPlayers = () => {
         if (selectedTeamView === 'home') {
             return {
@@ -196,35 +180,6 @@ const PreviousGameDetailPage = () => {
             }
         }
     }
-
-    const sortedPlayers = getPlayerStats(roster, selectedTeamView === 'all' ? '' :
-        selectedTeamView === 'home' ? gameData.teams.home.id : gameData.teams.away.id)
-        .sort((a, b) => {
-            let compareValue = 0;
-
-            if (sortBy === 'name' || sortBy === 'position') {
-                compareValue = a.name.localeCompare(b.name);
-            } else {
-                const aValue = a[sortBy as keyof typeof a];
-                const bValue = b[sortBy as keyof typeof b];
-
-                if (typeof aValue === 'number' && typeof bValue === 'number') {
-                    compareValue = aValue - bValue;
-                }
-            }
-
-            return sortOrder === 'asc' ? compareValue : -compareValue;
-        });
-
-    const goalies = sortedPlayers.filter(player => player.position === 'Goalie');
-    const defenders = sortedPlayers.filter(player => player.position === 'Defender');
-    const forwards = sortedPlayers.filter(player => player.position === 'Forward');
-
-    const positionGroups = [
-        {title: 'Goalies', players: goalies},
-        {title: 'Defenders', players: defenders},
-        {title: 'Forwards', players: forwards}
-    ];
 
     const homeStats = {
         goals: filteredActions.filter(a =>
@@ -278,7 +233,20 @@ const PreviousGameDetailPage = () => {
         setTimeFilter(prev => [prev[0], newMaxTime]);
     }, [gameData.actions, defaultMaxTime]);
 
-
+    const playerStats = Player.getPlayerStats(
+        roster,
+        gameData.actions,
+        selectedTeamView === 'all' ? '' : selectedTeamView === 'home' ? gameData.teams.home.id : gameData.teams.away.id
+    ).map(player => {
+        const assists = gameData.actions.filter(a =>
+            a.assists?.some(assist => assist.id === player.id)
+        ).length;
+        return {
+            ...player,
+            assists,
+            points: player.goals + assists
+        };
+    });
 
     return (
         <div className={styles.container}>
@@ -320,28 +288,20 @@ const PreviousGameDetailPage = () => {
                     src={gameData.selectedImage}
                     filteredActions={filteredActions}
                     handleIconClick={handleIconClick}
-                />
-            </div>
-
-            <div className={styles.rinkContainer}>
-                <RinkImageIconDisplay
-                    imageRef={fieldImageRef}
-                    src={gameData.selectedImage}
-                    filteredActions={filteredActions}
-                    handleIconClick={handleIconClick}
                     iconSize={iconSize}
                 />
             </div>
 
             <div className={styles.playerStatsSection}>
                 <PlayerStatsSection
-                    positionGroups={positionGroups}
+                    positionGroups={[]}
                     handleSort={handleSort}
                     sortBy={sortBy}
                     sortOrder={sortOrder}
                     selectedPlayer={selectedPlayer}
                     setSelectedPlayer={setSelectedPlayer}
                     uniqueNonRoster={uniqueNonRoster}
+                    playerStats={playerStats}
                 />
             </div>
 

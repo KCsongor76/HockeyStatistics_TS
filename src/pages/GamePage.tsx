@@ -25,11 +25,9 @@ import {GameService} from "../OOP/services/GameService";
 import {CustomButton} from "../components/CustomButton";
 import GameStatsLive from "../components/GameStatsLive";
 import GameFilters from "../components/GameFilters";
-import RinkImageIconDisplay from "../components/RinkImageIconDisplay";
-import PlayerGameStatsTable from "../components/PlayerGameStatsTable";
 import PlayerStatsSection from "../components/PlayerStatsSection";
-import RinkWithIcons from "../components/RinkWithIcons";
 import RinkWithIconsLive from "../components/RinkWithIconsLive";
+import RinkWithIcons from "../components/RinkWithIcons";
 
 // todo: if a user presses the page reload button, make sure to save the latest data, because as of now, every new data is lost on page reloads
 //  (probably can't be done in the "declarative react" way, but only in the "imperative javascript" way)
@@ -79,8 +77,6 @@ const GamePage = () => {
     const [sortBy, setSortBy] = useState<keyof IPlayer>('name');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
-
-    console.log("formData", formData);
 
     const gameData: IGame = {
         id: "",
@@ -376,25 +372,6 @@ const GamePage = () => {
         };
     });
 
-    const sortedPlayers = [...playerStats].sort((a, b) => {
-        let compareValue = 0;
-        if (sortBy === 'name' || sortBy === 'position') {
-            compareValue = a[sortBy].localeCompare(b[sortBy]);
-        } else if (typeof a[sortBy] === 'number' && typeof b[sortBy] === 'number') {
-            compareValue = (a[sortBy] as number) - (b[sortBy] as number);
-        }
-        return sortOrder === 'asc' ? compareValue : -compareValue;
-    });
-
-    const goalies = sortedPlayers.filter(player => player.position === 'Goalie');
-    const defenders = sortedPlayers.filter(player => player.position === 'Defender');
-    const forwards = sortedPlayers.filter(player => player.position === 'Forward');
-    const positionGroups = [
-        {title: 'Goalies', players: goalies},
-        {title: 'Defenders', players: defenders},
-        {title: 'Forwards', players: forwards}
-    ];
-
     const blocker = useBlocker(({currentLocation, nextLocation}) => {
         return currentLocation.pathname === '/game' && nextLocation.pathname !== '/game';
     });
@@ -503,7 +480,7 @@ const GamePage = () => {
 
                     {/* Rink visualization */}
                     <div className={styles.rinkContainer}>
-                        <RinkImageIconDisplay
+                        <RinkWithIcons
                             imageRef={visualizationImageRef}
                             src={gameData.selectedImage}
                             filteredActions={filteredActions}
@@ -515,13 +492,14 @@ const GamePage = () => {
                     {/* Player stats */}
                     <div className={styles.playerStatsSection}>
                         <PlayerStatsSection
-                            positionGroups={positionGroups}
+                            positionGroups={[]}
                             handleSort={handleSort}
                             sortBy={sortBy}
                             sortOrder={sortOrder}
                             selectedPlayer={selectedPlayer}
                             setSelectedPlayer={setSelectedPlayer}
                             uniqueNonRoster={uniqueNonRoster}
+                            playerStats={playerStats}
                         />
                     </div>
                 </>

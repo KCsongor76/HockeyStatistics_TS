@@ -30,6 +30,12 @@
     margin: 0.5rem 0;
 }
 
+.score {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
 @media (max-width: 768px) {
     .container {
         grid-template-columns: 1fr;

@@ -1,6 +1,6 @@
 import React from 'react';
 // @ts-ignore
-import styles from '../pages/PreviousGameDetailPage.module.css';
+import styles from './ScoreDisplay.module.css';
 
 interface ScoreDisplayProps {
     homeScore: number;
