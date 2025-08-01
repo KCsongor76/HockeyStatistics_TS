@@ -24,6 +24,11 @@
     background-color: var(--primary-dark);
 }
 
+.positive.active {
+    background-color: var(--primary-dark);
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1) inset;
+}
+
 .neutral {
     background-color: #f0f0f0;
     color: var(--text);
@@ -33,6 +38,11 @@
     background-color: #e0e0e0;
 }
 
+.neutral.active {
+    background-color: #e0e0e0;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1) inset;
+}
+
 .negative {
     background-color: var(--error);
     color: white;
@@ -40,6 +50,11 @@
 
 .negative:hover {
     background-color: #c0392b;
+}
+
+.negative.active {
+    background-color: #c0392b;
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1) inset;
 }
 
 .button:disabled {

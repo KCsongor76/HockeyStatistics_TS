@@ -30,11 +30,6 @@ const PreviousGameDetailPage = () => {
     type Period = RegularPeriod | PlayoffPeriod;
     const [selectedPeriods, setSelectedPeriods] = useState<Set<Period>>(new Set(Object.values(RegularPeriod) as Period[]));
     const [selectedActionTypes, setSelectedActionTypes] = useState<Set<ActionType>>(new Set(Object.values(ActionType)));
-    // const availablePeriods = isPlayoff
-    //     ? Object.values(PlayoffPeriod).filter(v => typeof v === 'number') as PlayoffPeriod[]
-    //     : Object.values(RegularPeriod).filter(v => typeof v === 'number') as RegularPeriod[];
-    const availablePeriods = Array.from(new Set(gameData.actions.map(action => action.period)));
-    const availableActionTypes = Array.from(new Set(gameData.actions.map(action => action.type)));
     const [sortBy, setSortBy] = useState<keyof IPlayer>('name');
     const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
     const [selectedPlayer, setSelectedPlayer] = useState<string | null>(null);
@@ -116,26 +111,6 @@ const PreviousGameDetailPage = () => {
             setSortBy(column);
             setSortOrder('asc');
         }
-    };
-
-    const togglePeriod = (period: RegularPeriod | PlayoffPeriod) => {
-        const newPeriods = new Set(selectedPeriods);
-        if (newPeriods.has(period)) {
-            newPeriods.delete(period);
-        } else {
-            newPeriods.add(period);
-        }
-        setSelectedPeriods(newPeriods);
-    };
-
-    const toggleActionType = (type: ActionType) => {
-        const newTypes = new Set(selectedActionTypes);
-        if (newTypes.has(type)) {
-            newTypes.delete(type);
-        } else {
-            newTypes.add(type);
-        }
-        setSelectedActionTypes(newTypes);
     };
 
     const handleIconClick = (action: IGameAction) => {
@@ -273,12 +248,13 @@ const PreviousGameDetailPage = () => {
             <div className={styles.filtersSection}>
                 <GameFilters
                     gameData={gameData}
-                    availablePeriods={availablePeriods}
-                    availableActionTypes={availableActionTypes}
                     isTimeFilterActive={isTimeFilterActive}
-                    setSelectedTeamView={setSelectedTeamView}
-                    togglePeriod={togglePeriod}
-                    toggleActionType={toggleActionType}
+                    onTeamViewChange={setSelectedTeamView}
+                    onPeriodsChange={setSelectedPeriods}
+                    onActionTypesChange={setSelectedActionTypes}
+                    initialTeamView={selectedTeamView}
+                    initialPeriods={selectedPeriods}
+                    initialActionTypes={selectedActionTypes}
                 />
             </div>
 

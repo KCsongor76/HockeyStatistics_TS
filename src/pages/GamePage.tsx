@@ -101,13 +101,7 @@ const GamePage = () => {
     const calculateActionTimeSeconds = (action: IGameAction) =>
         GameAction.calculateActionTimeSeconds(action, gameData.type);
 
-    // const initialActionTimes = gameData.actions.map(a => calculateActionTimeSeconds(a));
-    // const initialMaxTime = initialActionTimes.length > 0 ? Math.max(...initialActionTimes) : defaultMaxTime;
-
-    const availablePeriods = Array.from(new Set(gameData.actions.map(action => action.period)));
-    const availableActionTypes = Array.from(new Set(gameData.actions.map(action => action.type)));
     const isTimeFilterActive = timeFilter[0] > 0 || timeFilter[1] < maxTime;
-
     const filteredActions = gameData.actions.filter(action => {
         const teamFilter = selectedTeamView === 'all' ||
             (selectedTeamView === 'home' && action.team.id === gameData.teams.home.id) ||
@@ -322,18 +316,6 @@ const GamePage = () => {
         setSortOrder(prev => sortBy === column ? (prev === 'asc' ? 'desc' : 'asc') : 'asc');
     };
 
-    const togglePeriod = (period: number) => {
-        const newPeriods = new Set(selectedPeriods);
-        newPeriods.has(period) ? newPeriods.delete(period) : newPeriods.add(period);
-        setSelectedPeriods(newPeriods);
-    };
-
-    const toggleActionType = (type: ActionType) => {
-        const newTypes = new Set(selectedActionTypes);
-        newTypes.has(type) ? newTypes.delete(type) : newTypes.add(type);
-        setSelectedActionTypes(newTypes);
-    };
-
     const getDisplayPlayers = () => {
         if (selectedTeamView === 'home') {
             return {
@@ -469,12 +451,13 @@ const GamePage = () => {
                     <div className={styles.filtersSection}>
                         <GameFilters
                             gameData={gameData}
-                            availablePeriods={availablePeriods}
-                            availableActionTypes={availableActionTypes}
                             isTimeFilterActive={isTimeFilterActive}
-                            setSelectedTeamView={setSelectedTeamView}
-                            togglePeriod={togglePeriod}
-                            toggleActionType={toggleActionType}
+                            onTeamViewChange={setSelectedTeamView}
+                            onPeriodsChange={setSelectedPeriods}
+                            onActionTypesChange={setSelectedActionTypes}
+                            initialTeamView={selectedTeamView}
+                            initialPeriods={selectedPeriods}
+                            initialActionTypes={selectedActionTypes}
                         />
                     </div>
 

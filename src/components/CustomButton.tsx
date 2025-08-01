@@ -10,6 +10,7 @@ interface CustomButtonProps {
     type?: ButtonType;
     disabled?: boolean;
     buttonType?: 'button' | 'submit' | 'reset';
+    active?: boolean;
 }
 
 export const CustomButton: React.FC<CustomButtonProps> = ({
@@ -17,9 +18,10 @@ export const CustomButton: React.FC<CustomButtonProps> = ({
                                                               onClick,
                                                               type = 'neutral',
                                                               disabled = false,
-                                                              buttonType = 'button'
+                                                              buttonType = 'button',
+                                                              active = false
                                                           }) => {
-    const buttonClass = `${styles.button} ${styles[type]}`;
+    const buttonClass = `${styles.button} ${styles[type]} ${active ? styles.active : ''}`;
 
     return (
         <button
