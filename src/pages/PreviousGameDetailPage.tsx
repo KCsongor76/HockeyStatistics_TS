@@ -16,6 +16,7 @@ import GameFilters from "../components/GameFilters";
 import RinkImageIconDisplay from "../components/RinkImageIconDisplay";
 import PlayerGameStatsTable from "../components/PlayerGameStatsTable";
 import PlayerStatsSection from "../components/PlayerStatsSection";
+import RinkWithIcons from "../components/RinkWithIcons";
 
 const PreviousGameDetailPage = () => {
     const location = useLocation();
@@ -314,16 +315,12 @@ const PreviousGameDetailPage = () => {
                 toggleActionType={toggleActionType}
             />
 
-            <div>
-                <img
-                    ref={fieldImageRef}
-                    src={gameData.selectedImage}
-                    alt="gamePage"
-                />
-                {filteredActions.map((action, index) =>
-                    <div key={index} onClick={() => handleIconClick(action)}>{action.type[0]}</div>
-                )}
-            </div>
+            <RinkWithIcons
+                imageRef={fieldImageRef}
+                src={gameData.selectedImage}
+                filteredActions={filteredActions}
+                handleIconClick={handleIconClick}
+            />
 
             <RinkImageIconDisplay
                 imageRef={fieldImageRef}

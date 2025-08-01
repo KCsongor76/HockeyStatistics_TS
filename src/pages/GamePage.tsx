@@ -28,6 +28,7 @@ import GameFilters from "../components/GameFilters";
 import RinkImageIconDisplay from "../components/RinkImageIconDisplay";
 import PlayerGameStatsTable from "../components/PlayerGameStatsTable";
 import PlayerStatsSection from "../components/PlayerStatsSection";
+import RinkWithIcons from "../components/RinkWithIcons";
 
 // todo: if a user presses the page reload button, make sure to save the latest data, because as of now, every new data is lost on page reloads
 //  (probably can't be done in the "declarative react" way, but only in the "imperative javascript" way)
@@ -533,19 +534,12 @@ const GamePage = () => {
                         toggleActionType={toggleActionType}
                     />
 
-                    <div>
-                        <img
-                            ref={visualizationImageRef}
-                            src={gameData.selectedImage}
-                            alt="gamePage"
-                        />
-                        {filteredActions.map((action, index) =>
-                            <div key={index}
-                                 onClick={(e: React.MouseEvent<Element, MouseEvent>) => handleIconClick(action, e)}>
-                                {action.type[0]}
-                            </div>
-                        )}
-                    </div>
+                    <RinkWithIcons
+                        imageRef={visualizationImageRef}
+                        src={gameData.selectedImage}
+                        filteredActions={filteredActions}
+                        handleIconClick={handleIconClick}
+                    />
 
                     <RinkImageIconDisplay
                         imageRef={visualizationImageRef}
