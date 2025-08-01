@@ -25,6 +25,8 @@ import {GameService} from "../OOP/services/GameService";
 import {CustomButton} from "../components/CustomButton";
 import GameStatsLive from "../components/GameStatsLive";
 import GameFilters from "../components/GameFilters";
+import RinkImageIconDisplay from "../components/RinkImageIconDisplay";
+import PlayerGameStatsTable from "../components/PlayerGameStatsTable";
 
 // todo: if a user presses the page reload button, make sure to save the latest data, because as of now, every new data is lost on page reloads
 //  (probably can't be done in the "declarative react" way, but only in the "imperative javascript" way)
@@ -530,72 +532,38 @@ const GamePage = () => {
                         />
 
                         <div>
-                            <div>
-                                <img
-                                    ref={visualizationImageRef}
-                                    src={gameData.selectedImage}
-                                    alt="gamePage"
-                                />
-                                {filteredActions.map((action, index) =>
-                                    <div key={index}
-                                         onClick={(e: React.MouseEvent<Element, MouseEvent>) => handleIconClick(action, e)}>
-                                        {action.type[0]}
-                                    </div>
-                                )}
-                            </div>
+                            <img
+                                ref={visualizationImageRef}
+                                src={gameData.selectedImage}
+                                alt="gamePage"
+                            />
+                            {filteredActions.map((action, index) =>
+                                <div key={index}
+                                     onClick={(e: React.MouseEvent<Element, MouseEvent>) => handleIconClick(action, e)}>
+                                    {action.type[0]}
+                                </div>
+                            )}
                         </div>
 
-                        <div>
-                            <br/>
-                            <h3>Player Statistics</h3>
+                        {/*<RinkImageIconDisplay */}
+                        {/*    imageRef={visualizationImageRef} */}
+                        {/*    gameData={gameData} */}
+                        {/*    filteredActions={filteredActions} */}
+                        {/*    handleIconClick={handleIconClick} */}
+                        {/*/>*/}
 
+                        <div>
+                            <h3>Player Statistics</h3>
                             {positionGroups.map((group) => (
                                 group.players.length > 0 && (
-                                    <div key={group.title}>
-                                        <h4>{group.title}</h4>
-                                        <div>
-                                            <table>
-                                                <thead>
-                                                <tr>
-                                                    {['name', 'jerseyNumber', 'goals', 'assists', 'points', 'shots', 'turnovers'].map((col) => (
-                                                        <th key={col} onClick={() => handleSort(col as keyof IPlayer)}>
-                                                            {col === 'jerseyNumber' ? 'Number' :
-                                                                col === 'name' ? 'Name' :
-                                                                    col[0].toUpperCase() + col.slice(1)}
-                                                            {sortBy === col && (
-                                                                <span>
-                                                                    {sortOrder === 'asc' ? '↑' : '↓'}
-                                                                </span>
-                                                            )}
-                                                        </th>
-                                                    ))}
-                                                </tr>
-                                                </thead>
-                                                <tbody>
-                                                {group.players.map((player) => (
-                                                    <tr
-                                                        key={player.id}
-                                                        onClick={() => {
-                                                            if (selectedPlayer === player.id) {
-                                                                setSelectedPlayer(null);
-                                                            } else {
-                                                                setSelectedPlayer(player.id);
-                                                            }
-                                                        }}
-                                                    >
-                                                        <td>{player.name}</td>
-                                                        <td>{player.jerseyNumber}</td>
-                                                        <td>{player.goals}</td>
-                                                        <td>{player.assists}</td>
-                                                        <td>{player.points}</td>
-                                                        <td>{player.shots}</td>
-                                                        <td>{player.turnovers}</td>
-                                                    </tr>
-                                                ))}
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
+                                    <PlayerGameStatsTable
+                                        group={group}
+                                        handleSort={handleSort}
+                                        sortBy={sortBy}
+                                        sortOrder={sortOrder}
+                                        selectedPlayer={selectedPlayer}
+                                        setSelectedPlayer={setSelectedPlayer}
+                                    />
                                 )
                             ))}
 

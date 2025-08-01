@@ -13,6 +13,8 @@ import {GameType} from "../OOP/enums/GameType";
 import {CustomButton} from "../components/CustomButton";
 import GameStatsStatic from "../components/GameStatsStatic";
 import GameFilters from "../components/GameFilters";
+import RinkImageIconDisplay from "../components/RinkImageIconDisplay";
+import PlayerGameStatsTable from "../components/PlayerGameStatsTable";
 
 const PreviousGameDetailPage = () => {
     const location = useLocation();
@@ -253,24 +255,6 @@ const PreviousGameDetailPage = () => {
         ).length
     };
 
-    const getPeriodLabel = (period: number) => {
-        if (gameData.type === GameType.REGULAR) {
-            switch (period) {
-                case RegularPeriod.FIRST:
-                case RegularPeriod.SECOND:
-                case RegularPeriod.THIRD:
-                    return `Period ${period}`;
-                case RegularPeriod.OT:
-                    return 'OT';
-                case RegularPeriod.SO:
-                    return 'SO';
-                default:
-                    return `Period ${period}`;
-            }
-        }
-        return period <= 3 ? `Period ${period}` : `OT${period - 3}`;
-    };
-
     useEffect(() => {
         updateIconSize();
         const handleResize = () => {
@@ -340,75 +324,39 @@ const PreviousGameDetailPage = () => {
                 )}
             </div>
 
-            <div>
-                <div>
-                    <h3>Player Statistics</h3>
-                    {positionGroups.map((group) => (
-                        group.players.length > 0 && (
-                            <div key={group.title}>
-                                <h4>{group.title}</h4>
-                                <div>
-                                    <table>
-                                        <thead>
-                                        <tr>
-                                            {['name', 'jerseyNumber', 'position', 'goals', 'shots', 'turnovers'].map((col) => (
-                                                <th
-                                                    key={col}
-                                                    onClick={() => handleSort(col as keyof IPlayer)}
-                                                >
-                                                    {col === 'jerseyNumber' ? 'Number' :
-                                                        col === 'name' ? 'Name' :
-                                                            col[0].toUpperCase() + col.slice(1)}
-                                                    {sortBy === col && (
-                                                        <span>
-                                                                {sortOrder === 'asc' ? '↑' : '↓'}
-                                                            </span>
-                                                    )}
-                                                </th>
-                                            ))}
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        {group.players.map((player) => (
-                                            <tr
-                                                key={player.id}
-                                                onClick={() => {
-                                                    if (selectedPlayer === player.id) {
-                                                        setSelectedPlayer(null);
-                                                    } else {
-                                                        setSelectedPlayer(player.id);
-                                                    }
-                                                }}
-                                            >
-                                                <td>{player.name}</td>
-                                                <td>{player.jerseyNumber}</td>
-                                                <td>{player.position}</td>
-                                                <td>{player.goals}</td>
-                                                <td>{player.shots}</td>
-                                                <td>{player.turnovers}</td>
-                                            </tr>
-                                        ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        )
-                    ))}
-                </div>
+            {/*<RinkImageIconDisplay */}
+            {/*    imageRef={fieldImageRef} */}
+            {/*    gameData={gameData} */}
+            {/*    filteredActions={filteredActions} */}
+            {/*    handleIconClick={handleIconClick} */}
+            {/*/>*/}
 
-                {uniqueNonRoster.length > 0 && (
-                    <>
-                        <h4>Non-Roster Players</h4>
-                        <ul>
-                            {uniqueNonRoster.map(player => (
-                                <li key={player.id}>
-                                    {player.name} (#{player.jerseyNumber})
-                                </li>
-                            ))}
-                        </ul>
-                    </>
-                )}
-            </div>
+            <h3>Player Statistics</h3>
+            {positionGroups.map((group) => (
+                group.players.length > 0 && (
+                    <PlayerGameStatsTable
+                        group={group}
+                        handleSort={handleSort}
+                        sortBy={sortBy}
+                        sortOrder={sortOrder}
+                        selectedPlayer={selectedPlayer}
+                        setSelectedPlayer={setSelectedPlayer}
+                    />
+                )
+            ))}
+
+            {uniqueNonRoster.length > 0 && (
+                <>
+                    <h4>Non-Roster Players</h4>
+                    <ul>
+                        {uniqueNonRoster.map(player => (
+                            <li key={player.id}>
+                                {player.name} (#{player.jerseyNumber})
+                            </li>
+                        ))}
+                    </ul>
+                </>
+            )}
 
             <CustomButton type={'negative'} onClick={() => deleteHandler(gameData)}>
                 Delete Game
