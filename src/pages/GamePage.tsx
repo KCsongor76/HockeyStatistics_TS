@@ -196,29 +196,6 @@ const GamePage = () => {
         setIsModalOpen(false);
     };
 
-    const startPressTimer = () => {
-        setIsLongPress(false);
-        pressTimer.current = window.setTimeout(() => {
-            setIsLongPress(true);
-            setShowDetails(prev => !prev);
-        }, 500);
-    };
-
-    const clearPressTimer = () => {
-        if (pressTimer.current) {
-            clearTimeout(pressTimer.current);
-            pressTimer.current = null;
-        }
-    };
-
-    const handleMouseDown = () => startPressTimer();
-    const handleMouseUp = () => clearPressTimer();
-    const handleTouchStart = (e: React.TouchEvent) => {
-        e.preventDefault();
-        startPressTimer();
-    };
-    const handleTouchEnd = () => clearPressTimer();
-
     const submitGameHandler = async () => {
         const championship = {
             id: formData.championship.id,
@@ -415,11 +392,11 @@ const GamePage = () => {
                     showDetails={showDetails}
                     gameState={gameState}
                     handleClick={handleClick}
-                    handleIconClick={handleIconClick}
-                    handleMouseDown={handleMouseDown}
-                    handleMouseUp={handleMouseUp}
-                    handleTouchStart={handleTouchStart}
-                    handleTouchEnd={handleTouchEnd}
+                    setSelectedActionDetails={setSelectedActionDetails}
+                    setIsModalOpen={setIsModalOpen}
+                    setIsLongPress={setIsLongPress}
+                    pressTimer={pressTimer}
+                    setShowDetails={setShowDetails}
                 />
             </div>
 

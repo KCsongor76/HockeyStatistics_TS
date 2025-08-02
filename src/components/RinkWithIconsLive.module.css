@@ -7,7 +7,7 @@
     width: 100%;
     max-height: 60vh;
     object-fit: contain;
-    cursor: pointer;
+    cursor: crosshair;
 }
 
 .icon {
@@ -22,7 +22,11 @@
     color: white;
     cursor: pointer;
     transform: translate(-50%, -50%);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.icon:hover {
+    scale: 1.1;
 }
 
 .goal {

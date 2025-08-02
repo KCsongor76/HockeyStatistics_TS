@@ -10,11 +10,11 @@ interface RinkWithIconsLiveProps {
     showDetails: boolean;
     gameState: GameState;
     handleClick: (e: React.MouseEvent<HTMLDivElement>) => void;
-    handleIconClick: (action: IGameAction, e: React.MouseEvent,) => void
-    handleMouseDown: () => void;
-    handleMouseUp: () => void;
-    handleTouchStart: (e: React.TouchEvent) => void;
-    handleTouchEnd: () => void;
+    setSelectedActionDetails: (value: React.SetStateAction<IGameAction | null>) => void
+    setIsModalOpen: (value: React.SetStateAction<boolean>) => void;
+    setIsLongPress: (value: React.SetStateAction<boolean>) => void;
+    pressTimer: React.MutableRefObject<number | null>;
+    setShowDetails: (value: React.SetStateAction<boolean>) => void;
 }
 
 const RinkWithIconsLive = ({
@@ -23,12 +23,43 @@ const RinkWithIconsLive = ({
                                showDetails,
                                gameState,
                                handleClick,
-                               handleIconClick,
-                               handleMouseDown,
-                               handleMouseUp,
-                               handleTouchStart,
-                               handleTouchEnd
+                               setSelectedActionDetails,
+                               setIsModalOpen,
+                               setIsLongPress,
+                               pressTimer,
+                               setShowDetails
                            }: RinkWithIconsLiveProps) => {
+
+    const handleIconClick = (action: IGameAction, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setSelectedActionDetails(action);
+        setIsModalOpen(true);
+    };
+
+    const startPressTimer = () => {
+        setIsLongPress(false);
+        pressTimer.current = window.setTimeout(() => {
+            setIsLongPress(true);
+            setShowDetails(prev => !prev);
+        }, 500);
+    };
+
+    const clearPressTimer = () => {
+        if (pressTimer.current) {
+            clearTimeout(pressTimer.current);
+            pressTimer.current = null;
+        }
+    };
+
+    const handleMouseDown = () => startPressTimer();
+    const handleMouseUp = () => clearPressTimer();
+    const handleTouchStart = (e: React.TouchEvent) => {
+        e.preventDefault();
+        startPressTimer();
+    };
+    const handleTouchEnd = () => clearPressTimer();
+
+
     return (
         <div
             className={styles.container}
@@ -47,13 +78,13 @@ const RinkWithIconsLive = ({
                 onTouchCancel={handleTouchEnd}
             />
 
-            {showDetails && gameState.actions.map((action, index) => {
+            {showDetails && gameState.actions.map((action: IGameAction, index: React.Key | null | undefined) => {
                 const style = {
                     left: `${action.x * 100}%`,
                     top: `${action.y * 100}%`,
                     width: `30px`,
                     height: `30px`,
-                    fontSize: `18px`
+                    fontSize: `18px`,
                 };
 
                 return (
