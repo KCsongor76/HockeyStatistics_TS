@@ -5,10 +5,11 @@ import {IGameAction} from "../OOP/interfaces/IGameAction";
 import styles from "./RinkWithIconsLive.module.css"
 
 interface RinkWithIconsLiveProps {
-    ref: React.RefObject<HTMLImageElement>;
+    imageRef: React.RefObject<HTMLImageElement>;
     src: string;
     showDetails: boolean;
     gameState: GameState;
+    gameData: any;
     handleClick: (e: React.MouseEvent<HTMLDivElement>) => void;
     setSelectedActionDetails: (value: React.SetStateAction<IGameAction | null>) => void
     setIsModalOpen: (value: React.SetStateAction<boolean>) => void;
@@ -18,10 +19,11 @@ interface RinkWithIconsLiveProps {
 }
 
 const RinkWithIconsLive = ({
-                               ref,
+                               imageRef,
                                src,
                                showDetails,
                                gameState,
+                               gameData,
                                handleClick,
                                setSelectedActionDetails,
                                setIsModalOpen,
@@ -66,7 +68,7 @@ const RinkWithIconsLive = ({
             onClick={handleClick}
         >
             <img
-                ref={ref}
+                ref={imageRef}
                 src={src}
                 alt="gamePage"
                 className={styles.rinkImage}
@@ -79,13 +81,20 @@ const RinkWithIconsLive = ({
             />
 
             {showDetails && gameState.actions.map((action: IGameAction, index: React.Key | null | undefined) => {
+                const isHome = gameData.teams.home.id === action.team.id;
+                const primaryColor = isHome ? action.team.homeColor.primary : action.team.awayColor.primary;
+                const secondaryColor = isHome ? action.team.homeColor.secondary : action.team.awayColor.secondary;
+
                 const style = {
                     left: `${action.x * 100}%`,
                     top: `${action.y * 100}%`,
                     width: `30px`,
                     height: `30px`,
                     fontSize: `18px`,
+                    backgroundColor: primaryColor,
+                    color: secondaryColor,
                 };
+
 
                 return (
                     <div

@@ -263,6 +263,7 @@ const PreviousGameDetailPage = () => {
                     imageRef={fieldImageRef}
                     src={gameData.selectedImage}
                     filteredActions={filteredActions}
+                    gameData={gameData}
                     handleIconClick={handleIconClick}
                     iconSize={iconSize}
                 />

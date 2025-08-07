@@ -378,10 +378,11 @@ const GamePage = () => {
             {/* Rink with icons */}
             <div className={styles.rinkContainer}>
                 <RinkWithIconsLive
-                    ref={fieldImageRef}
+                    imageRef={fieldImageRef}
                     src={formData.selectedImage}
                     showDetails={showDetails}
                     gameState={gameState}
+                    gameData={gameData}
                     handleClick={handleClick}
                     setSelectedActionDetails={setSelectedActionDetails}
                     setIsModalOpen={setIsModalOpen}
@@ -435,6 +436,7 @@ const GamePage = () => {
                             imageRef={visualizationImageRef}
                             src={gameData.selectedImage}
                             filteredActions={filteredActions}
+                            gameData={gameData}
                             handleIconClick={handleIconClick}
                             iconSize={iconSize}
                         />

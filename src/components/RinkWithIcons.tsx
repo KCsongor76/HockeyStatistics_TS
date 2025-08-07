@@ -8,6 +8,7 @@ interface RinkWithIconsProps {
     imageRef: React.RefObject<HTMLImageElement>;
     src: string;
     filteredActions: IGameAction[];
+    gameData: any;
     handleIconClick: (action: IGameAction, e: React.MouseEvent) => void;
     iconSize?: number;
 }
@@ -16,6 +17,7 @@ const RinkWithIcons: React.FC<RinkWithIconsProps> = ({
                                                          imageRef,
                                                          src,
                                                          filteredActions,
+                                                         gameData,
                                                          handleIconClick,
                                                          iconSize = 30
                                                      }) => {
@@ -28,12 +30,18 @@ const RinkWithIcons: React.FC<RinkWithIconsProps> = ({
                 className={styles.rinkImage}
             />
             {filteredActions.map((action, index) => {
+                const isHome = gameData.teams.home.id === action.team.id;
+                const primaryColor = isHome ? action.team.homeColor.primary : action.team.awayColor.primary;
+                const secondaryColor = isHome ? action.team.homeColor.secondary : action.team.awayColor.secondary;
+
                 const style = {
                     left: `${action.x * 100}%`,
                     top: `${action.y * 100}%`,
                     width: `${iconSize}px`,
                     height: `${iconSize}px`,
-                    fontSize: `${iconSize * 0.6}px`
+                    fontSize: `${iconSize * 0.6}px`,
+                    backgroundColor: primaryColor,
+                    color: secondaryColor,
                 };
 
                 return (

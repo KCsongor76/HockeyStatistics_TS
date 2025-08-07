@@ -140,6 +140,16 @@ const HandlePlayerPage = () => {
         // Check if jersey number was changed
         if (jerseyNumber !== player.jerseyNumber) {
             try {
+                if (isNaN(jerseyNumber)) {
+                    setJerseyError(`Jersey number has to be a number.`);
+                    return;
+                }
+
+                if (jerseyNumber < 1 || jerseyNumber > 99) {
+                    setJerseyError(`Jersey number has to be between 1-99.`);
+                    return;
+                }
+
                 const isAvailable = await Player.isJerseyNumberAvailable(player.teamId, jerseyNumber);
                 if (!isAvailable) {
                     setJerseyError(`Jersey number #${jerseyNumber} is already taken by another player in this team.`);
