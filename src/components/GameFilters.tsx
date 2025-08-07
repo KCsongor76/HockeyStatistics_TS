@@ -87,7 +87,7 @@ const GameFilters: React.FC<GameFiltersProps> = ({
         <div className={styles.container}>
             <div>
                 <h3>Team View</h3>
-                <div className={styles.filterGroup}>
+                <div className={styles.filtersSection}>
                     <CustomButton
                         type="neutral"
                         onClick={() => setSelectedTeamView('all')}
@@ -114,7 +114,7 @@ const GameFilters: React.FC<GameFiltersProps> = ({
 
             <div>
                 <h3>Periods</h3>
-                <div className={styles.filterGroup}>
+                <div className={styles.filtersSection}>
                     {availablePeriods.map((period) => (
                         <CustomButton
                             key={period}
@@ -131,7 +131,7 @@ const GameFilters: React.FC<GameFiltersProps> = ({
 
             <div>
                 <h3>Action Types</h3>
-                <div className={styles.filterGroup}>
+                <div className={styles.filtersSection}>
                     {availableActionTypes.map((type) => (
                         <CustomButton
                             key={type}

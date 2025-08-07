@@ -35,6 +35,9 @@ const GameStatsLive = ({
             <div className={styles.gameInfo}>
                 <p>{gameData.season}</p>
                 <p className={styles.period}>Period: {gameState.periodLabel}</p>
+                <div className={styles.score}>
+                    Score: {gameState.homeScore.goals} - {gameState.awayScore.goals}
+                </div>
                 <p className={styles.time}>
                     {gameState.periodLabel === "SO"
                         ? "0:00"
@@ -48,8 +51,6 @@ const GameStatsLive = ({
                     submitGameHandler={submitGameHandler}
                 />
             </div>
-
-            <ScoreDisplay homeScore={gameState.homeScore.goals} awayScore={gameState.awayScore.goals}/>
 
             <div className={styles.teamStats}>
                 <TeamStats team={formData.awayTeam} stats={gameState.awayScore}/>

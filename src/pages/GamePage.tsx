@@ -29,14 +29,6 @@ import PlayerStatsSection from "../components/PlayerStatsSection";
 import RinkWithIconsLive from "../components/RinkWithIconsLive";
 import RinkWithIcons from "../components/RinkWithIcons";
 
-// todo: if a user presses the page reload button, make sure to save the latest data, because as of now, every new data is lost on page reloads
-//  (probably can't be done in the "declarative react" way, but only in the "imperative javascript" way)
-
-// todo: regular game type, 3rd period, 1-0 score, time runs out, Stop Time button still turns into
-//  Next Period button, but this button shouldn't appear in this case. (at least if I click on it, it disappears, and nothing else happens)
-
-// todo: showDetails: only hide icons on first rink image
-
 interface ITeamRoster extends ITeam {
     roster: IPlayer[];
 }
@@ -64,7 +56,6 @@ const GamePage = () => {
     const fieldImageRef = useRef<HTMLImageElement>(null);
     const visualizationImageRef = useRef<HTMLImageElement>(null);
     const [iconSize, setIconSize] = useState(30);
-    // const formData = savedGameState ? savedGameState.setup : location.state.setup as FormData;
     const [showDetails, setShowDetails] = useState(true);
     const pressTimer = useRef<number | null>(null);
     const [isLongPress, setIsLongPress] = useState(false);
