@@ -42,7 +42,7 @@ const GamePage = () => {
     const [selectedActionDetails, setSelectedActionDetails] = useState<IGameAction | null>(null);
     const [gameState, setGameState] = useState(new GameState({
         period: savedGameState?.period || 1,
-        time: savedGameState?.time || 5,
+        time: savedGameState?.time || 1200,
         isTimerRunning: false, // Force timer to be stopped on load
         homeScore: savedGameState?.homeScore || {goals: 0, shots: 0, turnovers: 0},
         awayScore: savedGameState?.awayScore || {goals: 0, shots: 0, turnovers: 0},
@@ -243,7 +243,7 @@ const GamePage = () => {
             if (newGameState.period === RegularPeriod.THIRD && isTied) {
                 newGameState.period = RegularPeriod.OT;
                 newGameState.periodLabel = "OT";
-                newGameState.time = 5;
+                newGameState.time = 300;
             } else if (newGameState.period === RegularPeriod.OT && isTied) {
                 newGameState.period = RegularPeriod.SO;
                 newGameState.periodLabel = "SO";
@@ -252,7 +252,7 @@ const GamePage = () => {
             } else if (newGameState.period < RegularPeriod.THIRD) {
                 newGameState.period += 1;
                 newGameState.periodLabel = GameUtils.getPeriodLabel(newGameState.period, gameData.type);
-                newGameState.time = 5;
+                newGameState.time = 1200;
             } else {
                 newGameState.isGameOver = true;
             }
@@ -260,17 +260,17 @@ const GamePage = () => {
             if (newGameState.period === PlayoffPeriod.THIRD && isTied) {
                 newGameState.period = PlayoffPeriod.OT1;
                 newGameState.periodLabel = "OT1";
-                newGameState.time = 5;
+                newGameState.time = 1200;
             } else if (newGameState.period >= PlayoffPeriod.OT1 && newGameState.period < PlayoffPeriod.OT5 && isTied) {
                 newGameState.period += 1;
                 newGameState.periodLabel = GameUtils.getPeriodLabel(newGameState.period, gameData.type);
-                newGameState.time = 5;
+                newGameState.time = 1200;
             } else if (newGameState.period === PlayoffPeriod.OT5 && isTied) {
                 newGameState.isGameOver = true;
             } else if (newGameState.period < PlayoffPeriod.THIRD) {
                 newGameState.period += 1;
                 newGameState.periodLabel = GameUtils.getPeriodLabel(newGameState.period, gameData.type);
-                newGameState.time = 5;
+                newGameState.time = 1200;
             } else {
                 newGameState.isGameOver = true;
             }
